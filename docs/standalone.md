@@ -86,9 +86,24 @@ Depuis *Réglages → Connecter un serveur* :
 5. Elle bascule en mode synchronisé : la file de mutations a désormais une
    destination.
 
-Sens unique assumé en v1 : **on n'adopte qu'un serveur neuf ou son propre foyer**.
-Fusionner deux foyers déjà peuplés demande de résoudre des conflits d'identité
-(deux « Marie », deux tâches « poubelles ») et ce n'est pas un sujet d'installation.
+## Rejoindre un foyer déjà installé, plus tard
+
+L'adoption ci-dessus suppose un serveur neuf. L'autre cas arrivera forcément :
+quelqu'un qui a utilisé l'app seul pendant des mois rejoint un foyer **déjà en
+place** — il emménage, ou il s'y met enfin. Ses données doivent être reprises là
+aussi.
+
+C'est prévu, mais **bien plus tard** : le foyer existe déjà, avec ses tâches et ses
+membres, et il faut donc décider quoi faire de deux tâches « poubelles » ou de deux
+historiques parallèles. Les limitations seront posées à ce moment-là plutôt que
+devinées maintenant. Piste probable : reprendre les tâches et compteurs qui
+n'existent pas déjà dans le foyer, et laisser l'historique personnel sur le
+téléphone.
+
+Ce qui compte aujourd'hui, c'est que **rien n'empêche** cette reprise plus tard : les
+identifiants sont générés par le client, les données locales ne sont jamais écrasées
+par une connexion à un serveur, et le mode local reste une base complète plutôt qu'un
+cache.
 
 Et l'inverse — **repasser en local** après une adoption — doit exister : si le
 serveur meurt, l'app garde tout en base locale, elle doit pouvoir continuer seule.
