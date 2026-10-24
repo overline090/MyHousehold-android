@@ -14,9 +14,29 @@ confirmation.
 
 ---
 
-## 1. Première ouverture — connexion au serveur
+## 1. Première ouverture
 
-Il n'y a pas de serveur par défaut : l'utilisateur saisit l'URL de **son** instance.
+Trois chemins, et le premier doit être le plus court :
+
+```
+┌──────────────────────────────────────────┐
+│  Commencer seul                          │  ← sans serveur, immédiat
+│  Rejoindre un foyer (code d'invitation)  │
+│  Connecter mon serveur                   │
+└──────────────────────────────────────────┘
+```
+
+**Commencer seul** crée un foyer local et ouvre l'app : aucune adresse à saisir,
+aucun compte à créer. C'est le chemin par défaut, parce qu'exiger un serveur avant de
+pouvoir essayer l'app condamne l'app. Voir [`standalone.md`](standalone.md).
+
+Un bandeau discret, non bloquant, rappelle ensuite que le foyer est local et qu'un
+serveur permettra de le partager.
+
+### Connexion à un serveur
+
+Il n'y a pas de serveur par défaut : l'utilisateur saisit l'URL de **son** instance,
+ou scanne le QR code affiché par l'assistant d'installation du serveur.
 
 - Champ URL, avec `https://` prérempli.
 - Bouton « Vérifier » → appelle `GET /health` et affiche la version du serveur. On
@@ -177,6 +197,12 @@ Réglages du foyer (`OWNER`) : nom, fuseau horaire, premier jour de la semaine.
   (sans jeton) pour un rapport de bug.
 - Appareils connectés, révocables.
 - Changer de foyer, se déconnecter.
+- **Mises à jour** (variante hors magasin) : version installée, version disponible,
+  notes de version, taille, puis *Télécharger* et *Installer*. Jamais d'installation
+  automatique : installer une application est le geste de l'utilisateur.
+- **Connecter un serveur** : adresse ou QR code, puis un récapitulatif de ce qui
+  sera envoyé et de ce qui restera local — on ne pousse pas des années d'historique
+  familial sans le dire.
 - **Supprimer mon compte.** Irréversible, donc : écran dédié et non une ligne de
   liste, mot de passe exigé, et une explication en clair de ce qui se passe —
   l'historique du foyer est conservé sous « Ancien membre », les agendas connectés

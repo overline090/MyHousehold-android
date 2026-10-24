@@ -9,6 +9,14 @@ temps, rendez-vous et synchronisation des agendas personnels.
 > hors-ligne. Les contributions sur la conception sont aussi bienvenues que celles
 > sur le code.
 
+## L'app marche sans serveur
+
+On l'installe, on s'en sert. Le serveur sert à **partager** un foyer, pas à
+l'utiliser : tâches, compteurs, rendez-vous et rappels fonctionnent sur le téléphone
+seul. Voir [`docs/standalone.md`](docs/standalone.md).
+
+Quand un serveur arrive, l'app lui transmet ce qu'elle a déjà — on ne ressaisit rien.
+
 ## Ce que l'app doit faire
 
 - Afficher **ce qui compte aujourd'hui** : mes tâches, les compteurs en retard, les
@@ -17,6 +25,9 @@ temps, rendez-vous et synchronisation des agendas personnels.
 - Remettre un compteur à zéro en un geste.
 - Montrer l'agenda du foyer, incluant les événements importés des agendas personnels.
 - **Fonctionner sans réseau** et se réconcilier ensuite.
+- **Fonctionner sans serveur du tout**, et en adopter un plus tard.
+- **Détecter ses propres mises à jour** et les télécharger, puisqu'elle est d'abord
+  distribuée hors magasin ([`docs/updates.md`](docs/updates.md)).
 
 ## Ce que l'app ne fait pas
 
@@ -41,6 +52,7 @@ temps, rendez-vous et synchronisation des agendas personnels.
 | Préférences | DataStore |
 | Push | FCM, et UnifiedPush pour la distribution hors Play Store |
 | Minimum | Android 8.0 (API 26) |
+| Récurrence | Moteur Kotlin, validé par les vecteurs de test partagés du serveur |
 
 Les raisons de ces choix sont dans
 [`docs/app-architecture.md`](docs/app-architecture.md).
@@ -51,6 +63,8 @@ Les raisons de ces choix sont dans
 |---|---|
 | [`docs/app-architecture.md`](docs/app-architecture.md) | Couches, hors-ligne d'abord, choix techniques |
 | [`docs/screens.md`](docs/screens.md) | Chaque écran, son rôle, ses interactions |
+| [`docs/standalone.md`](docs/standalone.md) | Usage sans serveur, et adoption d'un serveur |
+| [`docs/updates.md`](docs/updates.md) | Détection et téléchargement des mises à jour |
 | [API du serveur](https://github.com/overline090/MyHousehold/blob/main/docs/api.md) | Contrat REST |
 | [Protocole de synchro](https://github.com/overline090/MyHousehold/blob/main/docs/sync.md) | Delta, file de mutations, conflits |
 
