@@ -154,7 +154,12 @@ Supprimer un compte retire aussi ses événements importés, et le dit avant de 
 ## 7. Foyer
 
 Liste des membres avec leur rôle. Pour un `OWNER` : inviter (génère un code
-partageable), changer un rôle, exclure.
+partageable) et changer un rôle.
+
+**Pas de bouton « exclure ».** On ne peut pas sortir quelqu'un d'un foyer : l'écran
+ne doit pas laisser croire le contraire, ni par un bouton grisé, ni par une option
+cachée derrière un appui long. La seule sortie est la suppression de son propre
+compte, dans les réglages.
 
 Onglet « Contributions » : par membre, sur une période, le nombre de tâches faites et
 les points. **Pas de classement, pas de podium, pas de comparaison mise en avant.**
@@ -172,7 +177,17 @@ Réglages du foyer (`OWNER`) : nom, fuseau horaire, premier jour de la semaine.
   (sans jeton) pour un rapport de bug.
 - Appareils connectés, révocables.
 - Changer de foyer, se déconnecter.
+- **Supprimer mon compte.** Irréversible, donc : écran dédié et non une ligne de
+  liste, mot de passe exigé, et une explication en clair de ce qui se passe —
+  l'historique du foyer est conservé sous « Ancien membre », les agendas connectés
+  et les appareils sont effacés, et si l'on est le dernier propriétaire d'un foyer,
+  la propriété passe à quelqu'un d'autre (nommé à l'écran) ou le foyer est supprimé.
+  Nommer le successeur avant de confirmer évite la mauvaise surprise.
 - À propos : version, licence, lien vers les dépôts.
+
+Un compte administrateur de l'instance voit en plus la liste des comptes du serveur,
+avec la possibilité d'en supprimer un. C'est le seul moyen de retirer un compte dont
+le titulaire n'est plus joignable.
 
 ## Accessibilité
 

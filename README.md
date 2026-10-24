@@ -24,6 +24,8 @@ temps, rendez-vous et synchronisation des agendas personnels.
   l'URL.
 - Pas de télémétrie, pas d'analytics, aucun traqueur.
 - Pas de publicité, pas d'achat intégré, pas de version « pro ».
+- Pas de bouton pour exclure quelqu'un d'un foyer : cela n'existe pas dans le
+  modèle. Chacun peut supprimer son propre compte, c'est tout.
 
 ## Stack technique prévue
 
