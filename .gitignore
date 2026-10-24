@@ -1,0 +1,41 @@
+# Gradle
+.gradle/
+build/
+local.properties
+
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+release/
+captures/
+output.json
+
+# Signature — ne jamais committer
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# Services Google (contient la configuration du projet FCM)
+google-services.json
+
+# IDE
+.idea/*
+!.idea/codeStyles/
+*.iml
+.navigation/
+
+# Logs et NDK
+*.log
+.cxx/
+obj/
+
+# Tests
+lint-results*.html
+lint-results*.xml
+
+# OS
+.DS_Store
+Thumbs.db
