@@ -8,32 +8,24 @@
     </div>
   </header>
 
-  <div class="corps" style="gap:14px">
+  <div class="corps" style="gap:13px">
+    <!-- Le type d'abord : c'est lui qui décide de la suite du formulaire. -->
+    <div class="champ">
+      <label>Type</label>
+      <div class="segment">
+        <span class="actif">Récurrente</span><span>De fond</span><span>Ponctuelle</span>
+      </div>
+    </div>
+
     <div class="champ">
       <label>Titre</label>
       <div class="saisie">Sortir les poubelles</div>
     </div>
 
-    <div class="champ">
-      <label>Fréquence</label>
-      <div class="segment">
-        <span>Chaque jour</span><span class="actif">Jours choisis</span><span>Chaque mois</span>
-      </div>
-      <div class="ligne" style="gap:6px;margin-top:4px">
-        <span class="etiquette accent" style="padding:7px 11px">L</span>
-        <span class="etiquette neutre" style="padding:7px 11px">M</span>
-        <span class="etiquette neutre" style="padding:7px 11px">M</span>
-        <span class="etiquette neutre" style="padding:7px 11px">J</span>
-        <span class="etiquette neutre" style="padding:7px 11px">V</span>
-        <span class="etiquette neutre" style="padding:7px 11px">S</span>
-        <span class="etiquette neutre" style="padding:7px 11px">D</span>
-      </div>
-    </div>
-
     <div class="ligne" style="gap:12px;align-items:flex-end">
       <div class="champ" style="flex:1">
-        <label>Heure</label>
-        <div class="saisie">19:00</div>
+        <label>Groupe</label>
+        <div class="saisie"><span class="groupe"><i style="background:#0f766e"></i>Cuisine</span></div>
       </div>
       <div class="champ" style="flex:1">
         <label>Qui</label>
@@ -42,12 +34,31 @@
     </div>
 
     <div class="champ">
-      <label>Ordre du tour</label>
-      <div class="ligne" style="gap:8px">
-        <span class="etiquette accent" style="padding:8px 12px">1 · Marie</span>
-        <span class="etiquette accent" style="padding:8px 12px">2 · Paul</span>
-        <span class="etiquette neutre" style="padding:8px 12px">+ ajouter</span>
+      <label>Répétition</label>
+      <div class="segment" style="gap:6px">
+        <span style="font-size:13px">Jours</span><span class="actif" style="font-size:13px">Semaine</span><span style="font-size:13px">Mois</span><span style="font-size:13px">Année</span>
       </div>
+      <div class="ligne" style="gap:6px;margin-top:4px">
+        <span class="etiquette accent" style="padding:7px 11px">L</span>
+        <span class="etiquette neutre" style="padding:7px 11px">M</span>
+        <span class="etiquette neutre" style="padding:7px 11px">M</span>
+        <span class="etiquette accent" style="padding:7px 11px">J</span>
+        <span class="etiquette neutre" style="padding:7px 11px">V</span>
+        <span class="etiquette neutre" style="padding:7px 11px">S</span>
+        <span class="etiquette neutre" style="padding:7px 11px">D</span>
+        <span class="muet" style="margin-left:auto">19:00</span>
+      </div>
+    </div>
+
+    <!-- Sept crans, « Normale » au centre : les crans négatifs ne sont pas
+         des tâches sans importance, ce sont des tâches qui cèdent le pas. -->
+    <div class="champ">
+      <label>Priorité — Haute</label>
+      <div class="crans">
+        <span style="height:34px"></span><span style="height:29px"></span><span class="actif" style="height:24px"></span>
+        <span style="height:19px"></span><span style="height:16px"></span><span style="height:13px"></span><span style="height:10px"></span>
+      </div>
+      <div class="ligne" style="justify-content:space-between"><span class="muet">Urgente</span><span class="muet">Normale</span><span class="muet">En dernier</span></div>
     </div>
 
     <!-- L'aperçu rend la récurrence compréhensible : personne ne vérifie
@@ -55,12 +66,12 @@
     <div class="encadre accent">
       <p style="font-weight:600;margin-bottom:6px">Les trois prochaines fois</p>
       <p>lundi 27 oct. · 19 h — Marie</p>
-      <p>lundi 3 nov. · 19 h — Paul</p>
-      <p>lundi 10 nov. · 19 h — Marie</p>
+      <p>jeudi 30 oct. · 19 h — Paul</p>
+      <p>lundi 3 nov. · 19 h — Marie</p>
     </div>
 
     <div style="margin-top:auto" class="pile">
-      <div class="muet">Délai avant « manquée » : 24 h · 2 points</div>
+      <div class="muet">Délai avant « manquée » : 24 h</div>
       <div class="bouton primaire">Créer la tâche</div>
     </div>
   </div>

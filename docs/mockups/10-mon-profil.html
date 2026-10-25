@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Mon profil</title><link rel="stylesheet" href="app.css"></head>
+<body>
+  <header class="entete">
+    <div class="ligne">
+      <span style="font-size:20px;color:var(--gris)">←</span>
+      <h1 style="font-size:20px">Mon profil</h1>
+    </div>
+  </header>
+
+  <div class="corps" style="gap:14px">
+    <div class="pile" style="align-items:center;gap:8px">
+      <span class="photo grande" style="background:linear-gradient(135deg,#0f766e,#14b8a6)">MD</span>
+      <p class="muet">Changer la photo</p>
+    </div>
+
+    <div class="ligne" style="gap:12px;align-items:flex-end">
+      <div class="champ" style="flex:1">
+        <label>Prénom</label>
+        <div class="saisie">Marie</div>
+      </div>
+      <div class="champ" style="flex:1">
+        <label>Nom</label>
+        <div class="saisie">Dupont</div>
+      </div>
+    </div>
+
+    <div class="champ">
+      <label>Date de naissance</label>
+      <div class="saisie">12 mars 1986</div>
+    </div>
+
+    <!-- Le statut est affiché, pas modifiable : personne ne change son
+         propre statut, et les statuts se configurent au navigateur. -->
+    <div class="champ">
+      <label>Statut</label>
+      <div class="saisie" style="background:var(--surface-douce);color:var(--encre-douce);justify-content:space-between">
+        <span>Administratrice</span><span class="muet">non modifiable ici</span>
+      </div>
+      <p class="muet">Les statuts et leurs droits se configurent sur l'interface web du
+        serveur, par un compte qui en a le droit.</p>
+    </div>
+
+    <div class="champ">
+      <label>Langue</label>
+      <div class="saisie">Français</div>
+    </div>
+
+    <div class="pile" style="margin-top:auto">
+      <div class="muet">marie@exemple.fr — changer le mot de passe ›</div>
+      <div class="bouton primaire">Enregistrer</div>
+    </div>
+  </div>
+</body></html>

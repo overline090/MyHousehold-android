@@ -22,10 +22,16 @@ fs.mkdirSync(OUT, { recursive: true });
     await page.waitForLoadState('networkidle');
     try { await page.evaluate(() => document.fonts.ready); } catch {}
 
-    const debordement = await page.evaluate(() => ({
-      h: document.documentElement.scrollWidth > 390,
-      v: document.body.scrollHeight > 844,
-    }));
+    const debordement = await page.evaluate(() => {
+      // `body` est en `overflow: hidden` : c'est le conteneur défilant qui
+      // dit la vérité, sinon une maquette coupée passe pour correcte.
+      const corps = document.querySelector('.corps') ?? document.body;
+      return {
+        h: document.documentElement.scrollWidth > 390,
+        // 4 px de tolérance : en deçà, c'est l'arrondi des marges flex.
+        v: corps.scrollHeight > corps.clientHeight + 4,
+      };
+    });
 
     const sortie = path.join(OUT, fichier.replace('.html', '.png'));
     await page.screenshot({ path: sortie });

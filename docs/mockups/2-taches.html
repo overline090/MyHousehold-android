@@ -3,8 +3,12 @@
 <body>
   <header class="entete">
     <div class="ligne">
-      <div style="flex:1"><h1>Tâches</h1><p class="sous">7 actives</p></div>
+      <div style="flex:1"><h1>Tâches</h1></div>
       <span class="bouton primaire" style="min-height:44px;padding:0 16px">+ Nouvelle</span>
+    </div>
+    <!-- Un seul écran, un filtre : « tout est une tâche » doit se voir. -->
+    <div class="filtres" style="margin-top:12px">
+      <span class="actif">Tout</span><span>Récurrentes</span><span>De fond</span><span>Ponctuelles</span><span>Groupes</span>
     </div>
   </header>
 
@@ -13,13 +17,24 @@
       <div class="carte">
         <div class="ligne">
           <div style="flex:1;min-width:0">
-            <h3>Sortir les poubelles</h3>
-            <p class="muet">Chaque lundi à 19 h 00</p>
+            <h3>Changer le fusible du garage</h3>
+            <p class="muet">Une seule fois — avant le 15 novembre</p>
           </div>
-          <span class="etiquette accent">Tour de rôle</span>
+          <span class="etiquette urgente">Urgente</span>
+        </div>
+      </div>
+
+      <div class="carte">
+        <div class="ligne">
+          <div style="flex:1;min-width:0">
+            <h3>Sortir les poubelles</h3>
+            <p class="muet">Lundi et jeudi à 19 h 00 — tour de rôle</p>
+            <p class="groupe" style="margin-top:4px"><i style="background:#0f766e"></i>Cuisine</p>
+          </div>
+          <span class="etiquette haute">Haute</span>
         </div>
         <div class="ligne" style="margin-top:10px;gap:8px">
-          <span class="pastille" style="width:24px;height:24px;background:#0F766E;font-size:11px">M</span>
+          <span class="photo" style="width:24px;height:24px;font-size:11px;background:linear-gradient(135deg,#0f766e,#14b8a6)">MD</span>
           <p class="muet">Prochaine : lundi 27 — Marie</p>
         </div>
       </div>
@@ -27,26 +42,31 @@
       <div class="carte">
         <div class="ligne">
           <div style="flex:1;min-width:0">
-            <h3>Vider le lave-vaisselle</h3>
-            <p class="muet">Tous les jours à 9 h 00</p>
+            <h3>Changer les draps</h3>
+            <p class="muet">À refaire dans les 14 jours — il y a 23 jours</p>
           </div>
-          <span class="etiquette neutre">Ouverte à tous</span>
-        </div>
-        <div class="ligne" style="margin-top:10px;gap:8px">
-          <p class="muet">Prochaine : demain — le premier qui la fait</p>
+          <span class="etiquette alerte">En retard</span>
         </div>
       </div>
 
       <div class="carte">
         <div class="ligne">
           <div style="flex:1;min-width:0">
-            <h3>Arroser les plantes</h3>
-            <p class="muet">Tous les 3 jours</p>
+            <h3>Vider le lave-vaisselle</h3>
+            <p class="muet">Tous les jours à 9 h 00 — n'importe qui</p>
+            <p class="groupe" style="margin-top:4px"><i style="background:#0f766e"></i>Cuisine</p>
           </div>
-          <span class="etiquette accent">Lou</span>
         </div>
-        <div class="ligne" style="margin-top:10px;gap:8px">
-          <p class="muet">Prochaine : dimanche 26</p>
+      </div>
+
+      <div class="carte">
+        <div class="ligne">
+          <div style="flex:1;min-width:0">
+            <h3>Trier les cartons du grenier</h3>
+            <p class="muet">Une seule fois — sans date limite</p>
+            <p class="groupe" style="margin-top:4px"><i style="background:#7c3aed"></i>Avant les vacances</p>
+          </div>
+          <span class="etiquette basse">En dernier</span>
         </div>
       </div>
 
@@ -54,20 +74,18 @@
         <div class="ligne">
           <div style="flex:1;min-width:0">
             <h3>Nettoyer le barbecue</h3>
-            <p class="muet">Chaque samedi, d'avril à septembre</p>
+            <p class="muet">Chaque samedi — en pause</p>
           </div>
-          <span class="etiquette neutre">En pause</span>
         </div>
       </div>
     </div>
   </div>
 
-  <nav class="nav">
-  <div class="N1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>Aujourd'hui</div>
+<nav class="nav">
+  <div class="N1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>Accueil</div>
   <div class="N2 actif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Tâches</div>
-  <div class="N3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Compteurs</div>
-  <div class="N4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Agenda</div>
-  <div class="N5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="9" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 7a3 3 0 0 1 0 6M18 20a6 6 0 0 0-3-5.2"/></svg>Foyer</div>
+  <div class="N3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Agenda</div>
+  <div class="N4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="9" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 7a3 3 0 0 1 0 6M18 20a6 6 0 0 0-3-5.2"/></svg>Foyer</div>
+  <div class="N5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 14.5a1.6 1.6 0 0 0 .3 1.8l.1.1a1.8 1.8 0 1 1-2.5 2.5l-.1-.1a1.6 1.6 0 0 0-2.7 1.1v.3a1.8 1.8 0 1 1-3.6 0v-.2a1.6 1.6 0 0 0-2.7-1.2l-.1.1a1.8 1.8 0 1 1-2.5-2.5l.1-.1A1.6 1.6 0 0 0 4 14a1.8 1.8 0 0 1 0-3.6h.2A1.6 1.6 0 0 0 5.4 7.7l-.1-.1a1.8 1.8 0 1 1 2.5-2.5l.1.1a1.6 1.6 0 0 0 2.7-1.1V3.8a1.8 1.8 0 1 1 3.6 0V4a1.6 1.6 0 0 0 2.7 1.2l.1-.1a1.8 1.8 0 1 1 2.5 2.5l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.3a1.8 1.8 0 1 1 0 3.6h-.2a1.6 1.6 0 0 0-1.2 1z"/></svg>Réglages</div>
 </nav>
-
 </body></html>

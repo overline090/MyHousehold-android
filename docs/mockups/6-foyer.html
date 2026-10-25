@@ -1,63 +1,65 @@
 <!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><title>Foyer</title><link rel="stylesheet" href="app.css"></head>
 <body>
-  <header class="entete">
-    <h1>Maison des Dupont</h1>
-    <p class="sous">4 membres · Europe/Paris</p>
-  </header>
+  <!-- Pas de sous-titre : « 4 membres · Europe/Paris » disait ce que la
+       liste juste en dessous montre déjà. -->
+  <header class="entete"><h1>Maison des Dupont</h1></header>
 
   <div class="corps">
     <div class="section">
       <h2>Membres</h2>
       <div class="carte pile" style="gap:0">
-        <div class="ligne" style="padding:8px 0">
-          <span class="pastille" style="background:#0F766E">M</span>
-          <div style="flex:1"><h3 style="font-size:15px">Marie</h3><p class="muet">Propriétaire · administratrice du serveur</p></div>
+        <div class="ligne" style="padding:9px 0">
+          <span class="photo" style="background:linear-gradient(135deg,#0f766e,#14b8a6)">MD</span>
+          <div style="flex:1"><h3 style="font-size:15px">Marie Dupont</h3><p class="muet">Administratrice</p></div>
         </div>
-        <div class="ligne" style="padding:8px 0;border-top:1px solid var(--trait)">
-          <span class="pastille" style="background:#7C3AED">P</span>
-          <div style="flex:1"><h3 style="font-size:15px">Paul</h3><p class="muet">Adulte</p></div>
+        <div class="ligne" style="padding:9px 0;border-top:1px solid var(--trait)">
+          <span class="photo" style="background:linear-gradient(135deg,#6d28d9,#a78bfa)">PD</span>
+          <div style="flex:1"><h3 style="font-size:15px">Paul Dupont</h3><p class="muet">Adulte</p></div>
         </div>
-        <div class="ligne" style="padding:8px 0;border-top:1px solid var(--trait)">
-          <span class="pastille" style="background:#B45309">L</span>
-          <div style="flex:1"><h3 style="font-size:15px">Lou</h3><p class="muet">Enfant</p></div>
+        <div class="ligne" style="padding:9px 0;border-top:1px solid var(--trait)">
+          <span class="photo" style="background:linear-gradient(135deg,#b45309,#f59e0b)">LD</span>
+          <div style="flex:1"><h3 style="font-size:15px">Lou Dupont</h3><p class="muet">Enfant</p></div>
         </div>
-        <div class="ligne" style="padding:8px 0;border-top:1px solid var(--trait)">
-          <span class="pastille" style="background:#15803D">N</span>
-          <div style="flex:1"><h3 style="font-size:15px">Noé</h3><p class="muet">Enfant</p></div>
+        <div class="ligne" style="padding:9px 0;border-top:1px solid var(--trait)">
+          <span class="photo" style="background:linear-gradient(135deg,#15803d,#4ade80)">ND</span>
+          <div style="flex:1"><h3 style="font-size:15px">Noé Dupont</h3><p class="muet">Enfant</p></div>
         </div>
       </div>
       <div class="bouton" style="margin-top:4px">Inviter quelqu'un</div>
+      <!-- Le dire, plutôt que proposer un écran qui n'existera pas. -->
+      <p class="muet">Les statuts et leurs droits se configurent sur l'interface web du
+        serveur : <strong>myhousehold.local</strong>.</p>
     </div>
 
     <div class="section">
       <h2>Contributions · 30 derniers jours</h2>
       <!-- Des faits, pas un classement : un outil de foyer qui désigne un
-           mauvais élève crée des conflits au lieu d'en résoudre. -->
+           mauvais élève crée des conflits au lieu d'en résoudre. Et pas de
+           points : on compte des tâches faites. -->
       <div class="carte pile">
         <div class="ligne"><span style="flex:none;width:52px;font-size:14px">Marie</span>
-          <div class="barre" style="flex:1"><span style="width:68%;background:#0F766E"></span></div>
+          <div class="barre" style="flex:1"><span style="width:68%;background:#0f766e"></span></div>
           <span class="muet" style="width:60px;text-align:right">18 tâches</span></div>
         <div class="ligne"><span style="flex:none;width:52px;font-size:14px">Paul</span>
-          <div class="barre" style="flex:1"><span style="width:56%;background:#7C3AED"></span></div>
+          <div class="barre" style="flex:1"><span style="width:56%;background:#6d28d9"></span></div>
           <span class="muet" style="width:60px;text-align:right">15 tâches</span></div>
         <div class="ligne"><span style="flex:none;width:52px;font-size:14px">Lou</span>
-          <div class="barre" style="flex:1"><span style="width:30%;background:#B45309"></span></div>
+          <div class="barre" style="flex:1"><span style="width:30%;background:#b45309"></span></div>
           <span class="muet" style="width:60px;text-align:right">8 tâches</span></div>
         <div class="ligne"><span style="flex:none;width:52px;font-size:14px">Noé</span>
-          <div class="barre" style="flex:1"><span style="width:22%;background:#15803D"></span></div>
+          <div class="barre" style="flex:1"><span style="width:22%;background:#15803d"></span></div>
           <span class="muet" style="width:60px;text-align:right">6 tâches</span></div>
         <p class="muet" style="margin-top:4px">Sans classement : c'est un relevé, pas un palmarès.</p>
       </div>
     </div>
   </div>
 
-  <nav class="nav">
-  <div class="N1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>Aujourd'hui</div>
+<nav class="nav">
+  <div class="N1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>Accueil</div>
   <div class="N2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Tâches</div>
-  <div class="N3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Compteurs</div>
-  <div class="N4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Agenda</div>
-  <div class="N5 actif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="9" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 7a3 3 0 0 1 0 6M18 20a6 6 0 0 0-3-5.2"/></svg>Foyer</div>
+  <div class="N3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Agenda</div>
+  <div class="N4 actif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="9" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 7a3 3 0 0 1 0 6M18 20a6 6 0 0 0-3-5.2"/></svg>Foyer</div>
+  <div class="N5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 14.5a1.6 1.6 0 0 0 .3 1.8l.1.1a1.8 1.8 0 1 1-2.5 2.5l-.1-.1a1.6 1.6 0 0 0-2.7 1.1v.3a1.8 1.8 0 1 1-3.6 0v-.2a1.6 1.6 0 0 0-2.7-1.2l-.1.1a1.8 1.8 0 1 1-2.5-2.5l.1-.1A1.6 1.6 0 0 0 4 14a1.8 1.8 0 0 1 0-3.6h.2A1.6 1.6 0 0 0 5.4 7.7l-.1-.1a1.8 1.8 0 1 1 2.5-2.5l.1.1a1.6 1.6 0 0 0 2.7-1.1V3.8a1.8 1.8 0 1 1 3.6 0V4a1.6 1.6 0 0 0 2.7 1.2l.1-.1a1.8 1.8 0 1 1 2.5 2.5l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.3a1.8 1.8 0 1 1 0 3.6h-.2a1.6 1.6 0 0 0-1.2 1z"/></svg>Réglages</div>
 </nav>
-
 </body></html>

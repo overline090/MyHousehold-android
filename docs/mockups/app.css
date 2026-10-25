@@ -325,3 +325,90 @@ p {
   font-size: 13px;
   color: var(--gris);
 }
+
+/* ── Priorités ────────────────────────────────────────────────────────
+   Une priorité « normale » ne porte aucune étiquette : si tout est
+   étiqueté, plus rien ne ressort. */
+.etiquette.urgente { color: #fff; background: #b91c1c; }
+.etiquette.haute { color: #991b1b; background: #fee2e2; }
+.etiquette.basse { color: var(--gris); background: var(--surface-douce); border: 1px solid var(--trait); }
+
+/* Groupe de tâches : une couleur et un nom, en seconde ligne. */
+.groupe {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gris);
+}
+
+.groupe i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: block;
+}
+
+/* Photo de profil. Dans ces maquettes, un dégradé tient la place de la
+   photo : ce qui se décide ici, c'est la taille et la forme. */
+.photo {
+  flex: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 600;
+  width: 34px;
+  height: 34px;
+  font-size: 13px;
+}
+
+.photo.grande { width: 84px; height: 84px; font-size: 30px; }
+
+.filtres {
+  display: flex;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.filtres > span {
+  flex: none;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 999px;
+  padding: 7px 12px;
+  border: 1px solid var(--trait-net);
+  background: var(--surface);
+}
+
+.filtres > span.actif {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.jour {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gris);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.crans {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  height: 34px;
+}
+
+.crans > span {
+  flex: 1;
+  border-radius: 6px 6px 0 0;
+  background: var(--trait);
+}
+
+.crans > span.actif { background: var(--accent); }
