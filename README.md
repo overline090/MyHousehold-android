@@ -1,13 +1,14 @@
 # MyHousehold — Application Android
 
 Client Android de [MyHousehold](https://github.com/overline090/MyHousehold), un
-assistant de gestion du quotidien pour un foyer : tâches récurrentes, compteurs de
-temps, rendez-vous et synchronisation des agendas personnels.
+assistant de gestion du quotidien pour un foyer : tâches récurrentes, tâches de fond,
+rendez-vous et synchronisation des agendas personnels.
 
-> ⚠️ **Projet en phase de conception.** Aucun code n'est encore écrit. Ce dépôt
-> contient la spécification de l'application : architecture, écrans, stratégie
-> hors-ligne. Les contributions sur la conception sont aussi bienvenues que celles
-> sur le code.
+> ⚠️ **v0.1, utilisable seule.** On installe l'app, on crée son foyer, on ajoute des
+> tâches et on les coche — sans serveur. Restent à écrire : la connexion à un
+> serveur, la synchronisation, les agendas externes, les notifications et les mises
+> à jour hors magasin. Voir
+> [la feuille de route du serveur](https://github.com/overline090/MyHousehold/blob/main/docs/roadmap.md).
 
 ## L'app marche sans serveur
 
@@ -19,10 +20,10 @@ Quand un serveur arrive, l'app lui transmet ce qu'elle a déjà — on ne ressai
 
 ## Ce que l'app doit faire
 
-- Afficher **ce qui compte aujourd'hui** : mes tâches, les compteurs en retard, les
-  rendez-vous du jour.
+- Afficher **ce qui compte aujourd'hui** : mes tâches, ce qui est en retard, et les
+  rendez-vous **de la semaine**.
 - Cocher une tâche en deux tapes, depuis la liste, **sans ouvrir de détail**.
-- Remettre un compteur à zéro en un geste.
+- Refaire une tâche de fond en un geste, et voir le temps écoulé en gros.
 - Montrer l'agenda du foyer, incluant les événements importés des agendas personnels.
 - **Fonctionner sans réseau** et se réconcilier ensuite.
 - **Fonctionner sans serveur du tout**, et en adopter un plus tard.
@@ -46,16 +47,27 @@ Quand un serveur arrive, l'app lui transmet ce qu'elle a déjà — on ne ressai
 | Interface | Jetpack Compose + Material 3 |
 | Architecture | MVVM, une couche *repository* |
 | Base locale | Room (SQLite) |
-| Réseau | Retrofit + kotlinx.serialization |
-| Synchronisation | WorkManager |
-| Injection | Hilt |
+| Réseau | Ktor client + kotlinx.serialization *(à venir)* |
+| Synchronisation | WorkManager *(à venir)* |
+| Injection | Un conteneur assemblé à la main |
 | Préférences | DataStore |
 | Push | FCM, et UnifiedPush pour la distribution hors Play Store |
 | Minimum | Android 8.0 (API 26) |
-| Récurrence | Moteur Kotlin, validé par les vecteurs de test partagés du serveur |
+| Récurrence | Moteur Kotlin dans le module `core`, testé sans Android |
 
 Les raisons de ces choix sont dans
 [`docs/app-architecture.md`](docs/app-architecture.md).
+
+## Construire
+
+```bash
+./gradlew :core:test          # les règles du foyer, sans SDK Android
+./gradlew :app:assembleDebug  # l'APK, avec le SDK Android
+```
+
+Le module `core` se compile et se teste **partout** : c'est pour cela qu'il est
+séparé. L'APK, lui, demande le SDK Android ; là où il n'est pas installé,
+l'intégration continue s'en charge et publie l'APK en artefact de build.
 
 ## Documentation
 
