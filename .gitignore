@@ -39,3 +39,13 @@ lint-results*.xml
 # OS
 .DS_Store
 Thumbs.db
+
+# Gradle et Android
+.gradle/
+build/
+local.properties
+*.apk
+*.aab
+.idea/
+captures/
+.cxx/

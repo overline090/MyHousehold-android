@@ -1,0 +1,59 @@
+# Le SDK Android ne s'installe pas partout : cette intégration continue
+# est l'endroit où l'application est réellement construite, et où un
+# contributeur voit si sa modification tient debout.
+name: Android
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  construire:
+    name: Tests et APK de débogage
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # Le domaine d'abord : il ne demande pas le SDK Android, et c'est
+      # lui qui porte les règles du foyer. Un échec ici dit tout de suite
+      # que le problème n'est pas une histoire d'interface.
+      - name: Tests du domaine
+        run: ./gradlew :core:test
+
+      - name: Construire l'application
+        run: ./gradlew :app:assembleDebug
+
+      - name: Tests de l'application
+        run: ./gradlew :app:testDebugUnitTest
+
+      - name: Garder l'APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: myhousehold-debug
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+      - name: Garder les rapports de test en cas d'échec
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapports-de-test
+          path: |
+            core/build/reports/tests/
+            app/build/reports/
+          if-no-files-found: ignore
