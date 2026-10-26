@@ -33,6 +33,7 @@ import org.myhousehold.app.ui.commun.Pastille
 import org.myhousehold.app.ui.commun.TitreDeSection
 import org.myhousehold.app.ui.commun.couleurDe
 import org.myhousehold.app.ui.commun.enClair
+import org.myhousehold.app.ui.commun.heureEnClair
 import org.myhousehold.app.ui.commun.jourEnClair
 import org.myhousehold.app.ui.theme.couleurAlerte
 import org.myhousehold.app.ui.theme.couleurAlerteFond

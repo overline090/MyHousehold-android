@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -40,7 +41,7 @@ class ModeleTaches(private val depot: DepotFoyer) : ViewModel() {
     private val filtre = MutableStateFlow(FiltreTaches.TOUT)
 
     val etat: StateFlow<EtatTaches> = combine(
-        depot.taches(LocalDate.todayIn(TimeZone.currentSystemDefault())),
+        depot.taches(Clock.System.todayIn(TimeZone.currentSystemDefault())),
         depot.groupes,
         filtre,
     ) { taches, groupes, filtreCourant ->

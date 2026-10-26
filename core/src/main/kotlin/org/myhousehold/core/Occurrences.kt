@@ -169,7 +169,7 @@ internal fun rangDansLaSerie(
  * Sans heure, l'échéance est la **fin de la journée locale** et non
  * minuit : une tâche « du lundi » n'est pas en retard à 00 h 01 le lundi.
  */
-internal fun echeanceDe(jour: LocalDate, heure: LocalTime?, zone: TimeZone): Instant =
+fun echeanceDe(jour: LocalDate, heure: LocalTime?, zone: TimeZone): Instant =
     if (heure == null) {
         jour.atTime(23, 59, 59).toInstant(zone)
     } else {

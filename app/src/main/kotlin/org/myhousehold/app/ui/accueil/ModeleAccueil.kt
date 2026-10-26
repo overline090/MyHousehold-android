@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -47,7 +48,7 @@ data class EtatAccueil(
 
 class ModeleAccueil(private val depot: DepotFoyer) : ViewModel() {
 
-    private val aujourdHui: LocalDate = LocalDate.todayIn(TimeZone.currentSystemDefault())
+    private val aujourdHui: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
     private val finDeSemaine: LocalDate = aujourdHui.plus(DatePeriod(days = 7))
 
     val etat: StateFlow<EtatAccueil> = combine(

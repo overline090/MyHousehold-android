@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -93,7 +94,7 @@ data class EtatFormulaire(
     fun apercu(zone: TimeZone): List<OccurrenceGeneree> {
         if (sorte != SorteDeTache.RECURRENTE) return emptyList()
         val regle = repetition ?: return emptyList()
-        val aujourdHui = LocalDate.todayIn(zone)
+        val aujourdHui = Clock.System.todayIn(zone)
 
         return runCatching {
             genererOccurrences(
@@ -120,7 +121,7 @@ class ModeleFormulaireTache(
         viewModelScope.launch {
             val groupes = depot.groupes.first()
             val existante = tacheId?.let { id ->
-                depot.taches(LocalDate.todayIn(TimeZone.currentSystemDefault())).first()
+                depot.taches(Clock.System.todayIn(TimeZone.currentSystemDefault())).first()
                     .firstOrNull { it.tache.id == id }?.tache
             }
             _etat.value = existante?.versFormulaire(groupes) ?: _etat.value.copy(groupes = groupes)
@@ -146,7 +147,7 @@ class ModeleFormulaireTache(
             modeAssignation = ModeAssignation.QUICONQUE,
             repetition = if (etat.sorte == SorteDeTache.RECURRENTE) etat.repetition else null,
             heure = if (etat.sorte == SorteDeTache.RECURRENTE) etat.heure else null,
-            debutSerie = LocalDate.todayIn(TimeZone.currentSystemDefault()),
+            debutSerie = Clock.System.todayIn(TimeZone.currentSystemDefault()),
             delaiMaximum = if (etat.sorte == SorteDeTache.DE_FOND) etat.delai else null,
             dateLimite = if (etat.sorte == SorteDeTache.PONCTUELLE) etat.dateLimite else null,
         )

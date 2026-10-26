@@ -1,6 +1,7 @@
 package org.myhousehold.app.ui.commun
 
 import androidx.compose.ui.graphics.Color
+import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
@@ -47,7 +48,7 @@ private val MOIS = listOf(
 fun LocalTime.enClair(): String = "%d h %02d".format(hour, minute)
 
 /** « lundi 27 », ou « aujourd'hui » quand c'est aujourd'hui. */
-fun LocalDate.enClairCourt(aujourdHui: LocalDate = LocalDate.todayIn(TimeZone.currentSystemDefault())): String =
+fun LocalDate.enClairCourt(aujourdHui: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())): String =
     when (aujourdHui.daysUntil(this)) {
         0 -> "aujourd’hui"
         1 -> "demain"
@@ -107,7 +108,7 @@ fun OccurrenceAffichee.enClair(enRetard: Boolean): String {
         enRetard -> {
             val jour = occurrence.jour
             if (jour != null) {
-                val retard = jour.daysUntil(LocalDate.todayIn(TimeZone.currentSystemDefault()))
+                val retard = jour.daysUntil(Clock.System.todayIn(TimeZone.currentSystemDefault()))
                 morceaux += if (retard == 1) "en retard d’un jour" else "en retard de $retard jours"
             }
         }
