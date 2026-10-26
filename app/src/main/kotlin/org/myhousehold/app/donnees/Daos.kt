@@ -156,6 +156,22 @@ interface OccurrenceDao {
         """,
     )
     fun fluxDesProchainesEcheances(aPartirDe: String): Flow<List<ProchaineEcheance>>
+
+    /**
+     * Les contributions de chacun : un **nombre de tâches faites**, et
+     * rien d'autre. Pas de points, pas de classement — un outil de foyer
+     * qui désigne un mauvais élève crée des conflits au lieu d'en
+     * résoudre.
+     */
+    @Query(
+        """
+        SELECT faiteParId AS membreId, COUNT(*) AS combien
+          FROM occurrence
+         WHERE etat = 'FAITE' AND faiteParId IS NOT NULL AND faiteLe >= :depuis
+         GROUP BY faiteParId
+        """,
+    )
+    fun fluxDesContributions(depuis: Long): Flow<List<Contribution>>
 }
 
 /** La dernière fois qu'une tâche de fond a été faite. */
@@ -194,3 +210,6 @@ interface MutationDao {
     @Query("DELETE FROM mutation_en_attente")
     suspend fun viderTout()
 }
+
+/** Combien de tâches chacun a faites, sur une période. */
+data class Contribution(val membreId: String, val combien: Int)

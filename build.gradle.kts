@@ -1,10 +1,8 @@
-// La racine n'applique rien : elle déclare seulement les greffons
-// Kotlin une bonne fois, pour qu'ils ne soient pas chargés deux fois —
-// une fois par sous-projet — ce que Gradle signale à juste titre.
+// La racine ne déclare aucun greffon, et c'est voulu.
 //
-// Le greffon Android, lui, reste déclaré dans `app` : il vient du dépôt
-// de Google, et le module `core` doit pouvoir se construire sans.
-plugins {
-    alias(libs.plugins.kotlin.jvm) apply false
-    alias(libs.plugins.kotlin.android) apply false
-}
+// Déclarer ici les greffons Kotlin ferait taire l'avertissement « chargé
+// deux fois », mais exigerait aussi le greffon Android sur le chemin de
+// classe de la racine — donc le dépôt de Google pour *configurer* le
+// module `core`, qui n'en a pas besoin. Un avertissement vaut mieux
+// qu'un module qu'on ne peut plus construire là où Google n'est pas
+// joignable.
