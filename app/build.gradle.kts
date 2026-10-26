@@ -44,6 +44,9 @@ android {
 
     buildFeatures {
         compose = true
+        // Pour lire la version affichée dans « À propos » sans la
+        // recopier à la main dans le code.
+        buildConfig = true
     }
 
     // Room écrit le schéma de la base à chaque compilation : une

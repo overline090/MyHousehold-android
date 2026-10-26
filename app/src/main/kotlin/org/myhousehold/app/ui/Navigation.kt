@@ -34,9 +34,13 @@ import org.myhousehold.app.conteneur
 import org.myhousehold.app.ui.accueil.EcranAccueil
 import org.myhousehold.app.ui.accueil.ModeleAccueil
 import org.myhousehold.app.ui.agenda.EcranAgenda
+import org.myhousehold.app.ui.agenda.ModeleAgenda
 import org.myhousehold.app.ui.demarrage.EcranPremiereOuverture
 import org.myhousehold.app.ui.foyer.EcranFoyer
+import org.myhousehold.app.ui.foyer.ModeleFoyer
+import org.myhousehold.app.ui.reglages.EcranProfil
 import org.myhousehold.app.ui.reglages.EcranReglages
+import org.myhousehold.app.ui.reglages.ModeleReglages
 import org.myhousehold.app.ui.taches.EcranFormulaireTache
 import org.myhousehold.app.ui.taches.EcranTaches
 import org.myhousehold.app.ui.taches.ModeleFormulaireTache
@@ -63,6 +67,7 @@ enum class Destination(
 }
 
 private const val ROUTE_FORMULAIRE = "tache"
+private const val ROUTE_PROFIL = "profil"
 
 @Composable
 fun AppMyHousehold() {
@@ -88,7 +93,8 @@ fun AppMyHousehold() {
 @Composable
 private fun FoyerInstalle() {
     val contexte = LocalContext.current
-    val depot = contexte.conteneur.depot
+    val conteneur = contexte.conteneur
+    val depot = conteneur.depot
     val navigation = rememberNavController()
     val entree by navigation.currentBackStackEntryAsState()
     val destinationCourante = entree?.destination
@@ -163,9 +169,31 @@ private fun FoyerInstalle() {
                 EcranFormulaireTache(modele = modele, onFerme = { navigation.popBackStack() })
             }
 
-            composable(Destination.AGENDA.route) { EcranAgenda() }
-            composable(Destination.FOYER.route) { EcranFoyer() }
-            composable(Destination.REGLAGES.route) { EcranReglages() }
+            composable(Destination.AGENDA.route) {
+                val modele: ModeleAgenda = viewModel(factory = ModeleAgenda.fabrique(depot))
+                EcranAgenda(modele = modele)
+            }
+
+            composable(Destination.FOYER.route) {
+                val modele: ModeleFoyer =
+                    viewModel(factory = ModeleFoyer.fabrique(depot, conteneur.base))
+                EcranFoyer(modele = modele)
+            }
+
+            composable(Destination.REGLAGES.route) {
+                val modele: ModeleReglages =
+                    viewModel(factory = ModeleReglages.fabrique(depot, conteneur.base))
+                EcranReglages(
+                    modele = modele,
+                    onOuvrirProfil = { navigation.navigate(ROUTE_PROFIL) },
+                )
+            }
+
+            composable(ROUTE_PROFIL) {
+                val modele: ModeleReglages =
+                    viewModel(factory = ModeleReglages.fabrique(depot, conteneur.base))
+                EcranProfil(modele = modele, onFerme = { navigation.popBackStack() })
+            }
         }
     }
 }
