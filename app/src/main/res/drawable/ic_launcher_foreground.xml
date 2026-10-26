@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Une maison, dessinée au trait : c'est ce que l'app est, et un
+     dégradé compliqué ne survivrait pas à une icône de 48 dp. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,28 L78,48 L78,50 L72,50 L72,74 L60,74 L60,60 L48,60 L48,74 L36,74 L36,50 L30,50 L30,48 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,22 L84,46 L80,51 L54,30 L28,51 L24,46 Z" />
+</vector>
