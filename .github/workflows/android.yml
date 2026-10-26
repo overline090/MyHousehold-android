@@ -35,8 +35,19 @@ jobs:
       - name: Tests du domaine
         run: ./gradlew :core:test
 
+      # La sortie de Gradle est longue, et l'essentiel — les lignes
+      # « e: » — se perd au milieu. On la garde, puis on la résume : un
+      # échec se lit alors en dix lignes au lieu de six cents.
       - name: Construire l'application
-        run: ./gradlew :app:assembleDebug
+        run: |
+          set -o pipefail
+          ./gradlew :app:assembleDebug 2>&1 | tee construction.log
+
+      - name: Résumé des erreurs
+        if: failure()
+        run: |
+          echo "— Erreurs de compilation —"
+          grep -E '^e: ' construction.log | sed 's|file:///home/runner/work/MyHousehold-android/MyHousehold-android/||' | head -40 || true
 
       - name: Tests de l'application
         run: ./gradlew :app:testDebugUnitTest
