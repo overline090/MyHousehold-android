@@ -3,9 +3,17 @@
 
     <!-- Le réseau sert à parler au serveur du foyer, quand il y en a un.
          L'app s'utilise sans, et ne demande rien d'autre : pas de
-         contacts, pas de localisation, pas d'agenda du téléphone. -->
+         contacts, pas de localisation. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Trouver le serveur sur le Wi-Fi de la maison : l'écoute des
+         annonces (mDNS) demande de recevoir le multicast. -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <!-- Scanner le QR code du serveur. Demandée au moment du scan, et
+         facultative : l'adresse se saisit aussi à la main. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
 
     <application
         android:name=".MyHouseholdApp"

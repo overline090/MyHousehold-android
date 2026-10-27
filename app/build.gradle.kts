@@ -92,6 +92,9 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
 
+    implementation(libs.okhttp)
+    implementation(libs.zxing.android.embedded)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(kotlin("test"))

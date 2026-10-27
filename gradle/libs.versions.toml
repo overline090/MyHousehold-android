@@ -16,6 +16,8 @@ ktor = "3.1.2"
 coroutines = "1.10.1"
 work = "2.10.0"
 kotlinxDatetime = "0.6.2"
+okhttp = "4.12.0"
+zxingEmbedded = "4.3.0"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -39,6 +41,10 @@ androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+# Lecteur de QR code libre, sans les services Google : il fonctionne sur
+# tous les téléphones, et garde l'app publiable ailleurs que sur le Play Store.
+zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingEmbedded" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
