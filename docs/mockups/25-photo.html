@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Changer la photo</title><link rel="stylesheet" href="app.css"></head>
+<body style="position:relative">
+  <header class="entete">
+    <div class="ligne">
+      <span style="font-size:20px;color:var(--gris)">←</span>
+      <h1 style="font-size:20px">Mon profil</h1>
+    </div>
+  </header>
+
+  <div class="corps" style="gap:14px">
+    <div class="pile" style="align-items:center;gap:8px">
+      <!-- Un appui sur la photo propose : prendre une photo, choisir dans la
+           galerie, ou la retirer (les initiales reviennent). -->
+      <span style="position:relative">
+        <span class="photo grande" style="background:linear-gradient(135deg,#0f766e,#14b8a6)">MD</span>
+        <span style="position:absolute;right:-2px;bottom:-2px;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;border:3px solid var(--fond);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
+      </span>
+      <p style="font-size:14px;font-weight:600;color:var(--accent)">Changer la photo</p>
+    </div>
+
+    <div class="ligne" style="gap:12px;align-items:flex-end">
+      <div class="champ" style="flex:1">
+        <label>Prénom</label>
+        <div class="saisie">Marie</div>
+      </div>
+      <div class="champ" style="flex:1">
+        <label>Nom</label>
+        <div class="saisie">Dupont</div>
+      </div>
+    </div>
+
+    <div class="champ">
+      <label>Date de naissance</label>
+      <div class="saisie">12 mars 1986</div>
+    </div>
+
+    <!-- Le statut est affiché, pas modifiable : personne ne change son
+         propre statut, et les statuts se configurent au navigateur. -->
+    <div class="champ">
+      <label>Statut</label>
+      <div class="saisie" style="background:var(--surface-douce);color:var(--encre-douce);justify-content:space-between">
+        <span>Administratrice</span><span class="muet">non modifiable ici</span>
+      </div>
+      <p class="muet">Les statuts et leurs droits se configurent sur l'interface web du
+        serveur, par un compte qui en a le droit.</p>
+    </div>
+
+    <div class="champ">
+      <label>Langue</label>
+      <div class="saisie">Français</div>
+    </div>
+
+    <div class="pile" style="margin-top:auto">
+      <div class="muet">Identifiant : marie — changer le mot de passe ›</div>
+      <div class="bouton primaire">Enregistrer</div>
+    </div>
+  </div>
+
+<div style="position:absolute;inset:0;background:rgba(16,23,21,.45)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:22px 22px 0 0;padding:10px 12px 24px">
+  <div style="width:36px;height:4px;border-radius:2px;background:var(--trait-net);margin:0 auto 14px"></div>
+  <div class="reglage" style="padding:15px 10px">Prendre une photo</div>
+  <div class="reglage" style="padding:15px 10px">Choisir dans la galerie</div>
+  <div class="reglage" style="padding:15px 10px;color:#b91c1c">Retirer la photo</div>
+</div>
+</body></html>

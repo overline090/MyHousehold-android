@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><title>Accueil</title><link rel="stylesheet" href="app.css"></head>
-<body>
+<body style="position:relative">
   <!-- Pas de sous-titre : « samedi 25 octobre · Maison des Dupont » répétait
        ce que la barre d'état et l'écran Foyer disent déjà. -->
   <header class="entete">
@@ -93,6 +93,8 @@
     </div>
   </div>
 
+<!-- Bouton d'ajout : toujours au même endroit, au-dessus de la barre. -->
+<div style="position:absolute;right:20px;bottom:84px;width:58px;height:58px;border-radius:18px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(15,118,110,.35)"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
 <nav class="nav">
   <div class="N1 actif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>Accueil</div>
   <div class="N2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Tâches</div>

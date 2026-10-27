@@ -37,6 +37,10 @@ coupée passerait sinon pour correcte.
 | `20-se-connecter.html` | Se connecter à un compte existant |
 | `21-reprise.html` | Reprendre le foyer du téléphone sur un serveur neuf : ce qui sera envoyé |
 | `22-reprise-envoyee.html` | Foyer envoyé : la suite se fait sur la page web, puis par le QR code suivant |
+| `23-ajout-rapide.html` | Ajout rapide depuis l'accueil : tâche, rendez-vous ou tâche de fond, en deux champs |
+| `24-nouveau-rdv.html` | Nouveau rendez-vous, depuis le bouton d'ajout de l'agenda |
+| `25-photo.html` | Changer sa photo de profil : prendre, choisir, retirer |
+| `26-commencer-seul.html` | Commencer sans serveur : photo et date de naissance facultatives |
 
 ## Ce que ces maquettes décident
 
