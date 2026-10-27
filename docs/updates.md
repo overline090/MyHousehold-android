@@ -88,3 +88,34 @@ qu'elle parle.
 Le serveur s'engage à garder ses migrations rétrocompatibles d'une version majeure à
 la précédente, précisément pour que les téléphones du foyer ne soient pas tous à
 mettre à jour le même soir.
+
+## Publier une version
+
+1. Monter `versionCode` et `versionName` dans `app/build.gradle.kts`.
+2. Poser l'étiquette correspondante sur `main` : `git tag v0.2.0 && git push origin v0.2.0`.
+3. Le flux `.github/workflows/publication.yml` construit l'APK, le signe, et crée la
+   publication GitHub avec l'APK et sa somme (`sha256: …` dans les notes) — le format
+   que lit le serveur du foyer.
+
+La clé de signature n'est **jamais** dans le dépôt. L'intégration continue la reçoit
+par quatre secrets du dépôt (*Settings → Secrets and variables → Actions*) :
+
+| Secret | Contenu |
+|---|---|
+| `MH_KEYSTORE_BASE64` | Le fichier `.jks`, encodé en base64 sur une ligne |
+| `MH_KEYSTORE_PASSWORD` | Mot de passe du fichier |
+| `MH_KEY_ALIAS` | `myhousehold` |
+| `MH_KEY_PASSWORD` | Mot de passe de la clé (le même) |
+
+Empreinte SHA-256 du certificat de signature, pour vérifier un APK téléchargé
+(`apksigner verify --print-certs`) :
+
+```
+FE:10:4D:2C:C6:85:1C:18:77:E3:8A:AE:A0:7B:A4:DD:1F:03:7A:1D:5E:29:A0:B3:4F:F8:F3:76:3A:EE:DA:40
+```
+
+**Perdre la clé casse la mise à jour de tous les APK déjà installés** : elle se
+sauvegarde hors de GitHub, avec son mot de passe, en deux endroits.
+
+L'APK de débogage de l'intégration continue (`org.myhousehold.app.debug`) est une
+autre application : il s'installe à côté de la version publiée, sans la remplacer.

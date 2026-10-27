@@ -16,15 +16,37 @@ android {
         // de date qu'on utilise sans acrobaties.
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
+    }
+
+    // Une seule clé pour toute la vie de l'app : Android refuse une mise
+    // à jour signée par une autre. Elle n'est jamais dans le dépôt —
+    // l'intégration continue la reçoit par ses secrets, au moment de
+    // publier (voir docs/updates.md).
+    signingConfigs {
+        create("publication") {
+            val coffre = System.getenv("MH_KEYSTORE_FILE")
+            if (coffre != null) {
+                storeFile = file(coffre)
+                storePassword = System.getenv("MH_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("MH_KEY_ALIAS")
+                keyPassword = System.getenv("MH_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // Pas de réduction de code tant qu'aucune version de
+            // publication n'a été essayée sur un téléphone : R8 casse
+            // volontiers ce qui passe par réflexion, et cela ne se voit
+            // qu'à l'exécution.
+            isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (System.getenv("MH_KEYSTORE_FILE") != null) {
+                signingConfig = signingConfigs.getByName("publication")
+            }
         }
         debug {
             applicationIdSuffix = ".debug"

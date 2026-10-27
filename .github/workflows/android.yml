@@ -52,6 +52,12 @@ jobs:
       - name: Tests de l'application
         run: ./gradlew :app:testDebugUnitTest
 
+      # La version de publication se construit autrement (ressources,
+      # signature) : mieux vaut l'apprendre ici que le jour d'une
+      # publication. Non signée ici — la clé ne sert qu'à publier.
+      - name: Construire la version de publication
+        run: ./gradlew :app:assembleRelease
+
       - name: Garder l'APK
         uses: actions/upload-artifact@v4
         with:
