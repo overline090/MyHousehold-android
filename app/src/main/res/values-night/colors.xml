@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Le fond de la fenêtre au lancement, avant Compose : clair sur un
+         téléphone en thème sombre, il éblouissait le temps d'un éclair. -->
+    <color name="fond">#101715</color>
+    <color name="surface">#18211F</color>
+    <color name="accent">#2DD4BF</color>
+</resources>
