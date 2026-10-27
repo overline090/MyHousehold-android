@@ -182,7 +182,9 @@ private fun FoyerInstalle() {
 
             composable(Destination.REGLAGES.route) {
                 val modele: ModeleReglages =
-                    viewModel(factory = ModeleReglages.fabrique(depot, conteneur.base))
+                    viewModel(
+                        factory = ModeleReglages.fabrique(depot, conteneur.base, conteneur.preferences),
+                    )
                 EcranReglages(
                     modele = modele,
                     onOuvrirProfil = { navigation.navigate(ROUTE_PROFIL) },
@@ -191,7 +193,9 @@ private fun FoyerInstalle() {
 
             composable(ROUTE_PROFIL) {
                 val modele: ModeleReglages =
-                    viewModel(factory = ModeleReglages.fabrique(depot, conteneur.base))
+                    viewModel(
+                        factory = ModeleReglages.fabrique(depot, conteneur.base, conteneur.preferences),
+                    )
                 EcranProfil(modele = modele, onFerme = { navigation.popBackStack() })
             }
         }

@@ -3,6 +3,7 @@ package org.myhousehold.app
 import android.content.Context
 import org.myhousehold.app.donnees.BaseLocale
 import org.myhousehold.app.donnees.DepotFoyer
+import org.myhousehold.app.donnees.PreferencesApp
 
 /**
  * Les dépendances de l'app, assemblées à la main.
@@ -15,6 +16,7 @@ import org.myhousehold.app.donnees.DepotFoyer
 class Conteneur(contexte: Context) {
     val base: BaseLocale = BaseLocale.obtenir(contexte)
     val depot: DepotFoyer = DepotFoyer(base)
+    val preferences: PreferencesApp = PreferencesApp(contexte)
 }
 
 /** Le conteneur, depuis n'importe quel écran. */

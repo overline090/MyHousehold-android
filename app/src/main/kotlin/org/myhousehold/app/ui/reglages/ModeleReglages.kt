@@ -11,9 +11,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import org.myhousehold.app.donnees.Apparence
 import org.myhousehold.app.donnees.BaseLocale
 import org.myhousehold.app.donnees.DepotFoyer
 import org.myhousehold.app.donnees.MembreEntite
+import org.myhousehold.app.donnees.PreferencesApp
 import org.myhousehold.core.Foyer
 import org.myhousehold.core.Membre
 
@@ -27,7 +29,12 @@ data class EtatReglages(
 class ModeleReglages(
     private val depot: DepotFoyer,
     private val base: BaseLocale,
+    private val preferences: PreferencesApp,
 ) : ViewModel() {
+
+    val apparence: StateFlow<Apparence> = preferences.apparence
+
+    fun choisirApparence(apparence: Apparence) = preferences.choisirApparence(apparence)
 
     val etat: StateFlow<EtatReglages> = combine(
         depot.moi,
@@ -70,8 +77,12 @@ class ModeleReglages(
     }
 
     companion object {
-        fun fabrique(depot: DepotFoyer, base: BaseLocale): ViewModelProvider.Factory =
-            viewModelFactory { initializer { ModeleReglages(depot, base) } }
+        fun fabrique(
+            depot: DepotFoyer,
+            base: BaseLocale,
+            preferences: PreferencesApp,
+        ): ViewModelProvider.Factory =
+            viewModelFactory { initializer { ModeleReglages(depot, base, preferences) } }
     }
 }
 

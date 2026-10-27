@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -24,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.myhousehold.app.BuildConfig
+import org.myhousehold.app.donnees.Apparence
 import org.myhousehold.app.ui.commun.CarteFoyer
 import org.myhousehold.app.ui.commun.EnTete
 import org.myhousehold.app.ui.commun.Pastille
@@ -37,6 +41,7 @@ fun EcranReglages(
     modifier: Modifier = Modifier,
 ) {
     val etat by modele.etat.collectAsStateWithLifecycle()
+    val apparence by modele.apparence.collectAsStateWithLifecycle()
     var confirmationEffacement by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -65,6 +70,21 @@ fun EcranReglages(
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.primary,
                             )
+                        }
+                    }
+                }
+            }
+
+            item { TitreDeSection("Apparence") }
+            item {
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    APPARENCES.forEachIndexed { index, (choix, libelle) ->
+                        SegmentedButton(
+                            selected = apparence == choix,
+                            onClick = { modele.choisirApparence(choix) },
+                            shape = SegmentedButtonDefaults.itemShape(index, APPARENCES.size),
+                        ) {
+                            Text(libelle)
                         }
                     }
                 }
@@ -185,3 +205,9 @@ private fun Ligne(libelle: String, valeur: String) {
         )
     }
 }
+
+private val APPARENCES = listOf(
+    Apparence.AUTOMATIQUE to "Automatique",
+    Apparence.CLAIR to "Clair",
+    Apparence.SOMBRE to "Sombre",
+)

@@ -7,7 +7,9 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -116,16 +118,24 @@ fun ThemeMyHousehold(
         }
     }
 
-    MaterialTheme(colorScheme = palette, typography = typographie, content = contenu)
+    CompositionLocalProvider(LocalSombre provides sombre) {
+        MaterialTheme(colorScheme = palette, typography = typographie, content = contenu)
+    }
 }
+
+/**
+ * Le thème réellement affiché. Le réglage du téléphone ne suffit plus
+ * depuis qu'on peut forcer clair ou sombre dans Réglages.
+ */
+private val LocalSombre = staticCompositionLocalOf { false }
 
 /** Couleurs qui ne tiennent pas dans une palette Material : états. */
 @Composable
-fun couleurAlerte(): Color = if (isSystemInDarkTheme()) Color(0xFFFBBF24) else Jetons.alerte
+fun couleurAlerte(): Color = if (LocalSombre.current) Color(0xFFFBBF24) else Jetons.alerte
 
 @Composable
 fun couleurAlerteFond(): Color =
-    if (isSystemInDarkTheme()) Color(0xFF2C2112) else Jetons.alerteFond
+    if (LocalSombre.current) Color(0xFF2C2112) else Jetons.alerteFond
 
 @Composable
-fun couleurSucces(): Color = if (isSystemInDarkTheme()) Color(0xFF4ADE80) else Jetons.succes
+fun couleurSucces(): Color = if (LocalSombre.current) Color(0xFF4ADE80) else Jetons.succes
