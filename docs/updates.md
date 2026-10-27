@@ -4,7 +4,9 @@ L'app doit détecter les mises à jour et les télécharger, parce qu'elle sera 
 distribuée hors magasin : un APK attaché à une publication GitHub ne se met pas à
 jour tout seul.
 
-> ⚠️ **Spécification.** Rien n'est encore écrit.
+> **État** : la variante directe (APK) détecte, télécharge et vérifie ses mises à jour
+> depuis la 0.4.0 — `app/.../reseau/MisesAJour.kt`. Les variantes F-Droid et Play Store
+> restent à faire.
 
 ## Trois canaux, trois comportements
 

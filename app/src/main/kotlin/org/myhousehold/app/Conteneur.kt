@@ -5,6 +5,7 @@ import org.myhousehold.app.donnees.BaseLocale
 import org.myhousehold.app.donnees.DepotFoyer
 import org.myhousehold.app.donnees.LiaisonServeur
 import org.myhousehold.app.donnees.PreferencesApp
+import org.myhousehold.app.reseau.MisesAJour
 
 /**
  * Les dépendances de l'app, assemblées à la main.
@@ -19,6 +20,7 @@ class Conteneur(contexte: Context) {
     val depot: DepotFoyer = DepotFoyer(base)
     val preferences: PreferencesApp = PreferencesApp(contexte)
     val liaison: LiaisonServeur = LiaisonServeur(contexte, base)
+    val misesAJour: MisesAJour = MisesAJour(contexte, liaison)
 }
 
 /** Le conteneur, depuis n'importe quel écran. */

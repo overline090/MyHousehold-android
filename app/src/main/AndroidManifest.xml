@@ -14,6 +14,9 @@
          facultative : l'adresse se saisit aussi à la main. -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
+    <!-- Proposer l'installation d'une mise à jour téléchargée et vérifiée :
+         Android demande toujours la confirmation de l'utilisateur. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:name=".MyHouseholdApp"
@@ -33,5 +36,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Donne à l'installeur d'Android l'accès à l'APK téléchargé, et à
+             rien d'autre. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fichiers"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/fichiers_partages" />
+        </provider>
     </application>
 </manifest>

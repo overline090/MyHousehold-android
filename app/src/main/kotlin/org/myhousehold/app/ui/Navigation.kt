@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -47,6 +48,7 @@ import org.myhousehold.app.ui.demarrage.ParcoursConnexion
 import org.myhousehold.app.ui.foyer.EcranFoyer
 import org.myhousehold.app.ui.foyer.ModeleFoyer
 import org.myhousehold.app.ui.reglages.EcranAPropos
+import org.myhousehold.app.ui.reglages.EcranMiseAJour
 import org.myhousehold.app.ui.reglages.EcranProfil
 import org.myhousehold.app.ui.reglages.EcranReglages
 import org.myhousehold.app.ui.reglages.ModeleReglages
@@ -78,6 +80,7 @@ enum class Destination(
 private const val ROUTE_FORMULAIRE = "tache"
 private const val ROUTE_FORMULAIRE_COMPLETE = "$ROUTE_FORMULAIRE?id={id}&titre={titre}&sorte={sorte}"
 private const val ROUTE_RENDEZ_VOUS = "rendez-vous"
+private const val ROUTE_MISE_A_JOUR = "mise-a-jour"
 private const val ROUTE_RENDEZ_VOUS_COMPLETE = "$ROUTE_RENDEZ_VOUS?id={id}&titre={titre}&jour={jour}"
 
 /** Un paramètre de route facultatif, de type texte. */
@@ -96,6 +99,9 @@ fun AppMyHousehold() {
     // Tant qu'aucun foyer n'existe, il n'y a rien à montrer : c'est la
     // première ouverture, et elle n'a pas de barre de navigation.
     val foyerConnu by depot.foyer.map { it != null }.collectAsStateWithLifecycle(initialValue = null)
+
+    // À l'ouverture : au plus une vérification par demi-journée.
+    LaunchedEffect(Unit) { contexte.conteneur.misesAJour.verifier() }
 
     when (foyerConnu) {
         null -> Unit // Le temps d'une lecture en base : pas d'écran qui clignote.
@@ -196,6 +202,7 @@ private fun FoyerInstalle() {
                             modele = modele,
                             onOuvrirTache = { id -> navigation.navigate("$ROUTE_FORMULAIRE?id=$id") },
                             onVoirAgenda = { navigation.navigate(Destination.AGENDA.route) },
+                            onMiseAJour = { navigation.navigate(ROUTE_MISE_A_JOUR) },
                             onPlusDOptions = { type, titre, jour ->
                                 val texte = Uri.encode(titre)
                                 navigation.navigate(
@@ -277,6 +284,7 @@ private fun FoyerInstalle() {
                         EcranReglages(
                             modele = modele,
                             onOuvrirProfil = { navigation.navigate(EntreeDuVolet.PROFIL.route) },
+                            onMiseAJour = { navigation.navigate(ROUTE_MISE_A_JOUR) },
                         )
                     }
 
@@ -301,6 +309,10 @@ private fun FoyerInstalle() {
                             onTermine = { navigation.popBackStack() },
                             onQuitter = { navigation.popBackStack() },
                         )
+                    }
+
+                    composable(ROUTE_MISE_A_JOUR) {
+                        EcranMiseAJour(onFerme = { navigation.popBackStack() })
                     }
 
                     composable(EntreeDuVolet.A_PROPOS.route) {

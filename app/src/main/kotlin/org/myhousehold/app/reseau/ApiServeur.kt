@@ -96,6 +96,13 @@ class ApiServeur(
         }
     }
 
+    /**
+     * La version d'app que ce serveur attend : c'est lui qui décide, pour
+     * ne pas pousser un téléphone vers une app qui parlerait une API qu'il
+     * ne connaît pas.
+     */
+    suspend fun versionAttendue(): JSONObject = obtenir("/app-release")
+
     suspend fun reprendre(code: String, foyer: JSONObject) {
         envoyer("/setup/import", JSONObject(foyer.toString()).put("code", code))
     }

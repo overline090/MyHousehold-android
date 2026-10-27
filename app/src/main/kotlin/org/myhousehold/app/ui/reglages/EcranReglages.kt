@@ -23,8 +23,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.myhousehold.app.conteneur
 import org.myhousehold.app.donnees.Apparence
 import org.myhousehold.app.ui.commun.CarteFoyer
 import org.myhousehold.app.ui.commun.EnTete
@@ -35,10 +37,12 @@ import org.myhousehold.app.ui.commun.TitreDeSection
 fun EcranReglages(
     modele: ModeleReglages,
     onOuvrirProfil: () -> Unit,
+    onMiseAJour: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val etat by modele.etat.collectAsStateWithLifecycle()
     val apparence by modele.apparence.collectAsStateWithLifecycle()
+    val miseAJour by LocalContext.current.conteneur.misesAJour.etat.collectAsStateWithLifecycle()
     var confirmationEffacement by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -83,6 +87,24 @@ fun EcranReglages(
                         ) {
                             Text(libelle)
                         }
+                    }
+                }
+            }
+
+            item { TitreDeSection("Application") }
+            item {
+                CarteFoyer(modifier = Modifier.clickable(onClick = onMiseAJour)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Mise à jour", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                        Text(
+                            miseAJour.enClair(),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (miseAJour.versionProposee != null) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                        )
                     }
                 }
             }

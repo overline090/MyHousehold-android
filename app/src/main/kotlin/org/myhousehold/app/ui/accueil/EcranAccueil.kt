@@ -13,7 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,10 +27,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.LocalDate
+import org.myhousehold.app.conteneur
 import org.myhousehold.app.donnees.OccurrenceAffichee
 import org.myhousehold.app.donnees.TacheAffichee
 import org.myhousehold.app.ui.commun.BoutonAjout
@@ -40,6 +45,7 @@ import org.myhousehold.app.ui.commun.TitreDeSection
 import org.myhousehold.app.ui.commun.enClair
 import org.myhousehold.app.ui.commun.heureEnClair
 import org.myhousehold.app.ui.commun.jourEnClair
+import org.myhousehold.app.ui.reglages.versionProposee
 import org.myhousehold.app.ui.theme.couleurAlerte
 import org.myhousehold.app.ui.theme.couleurAlerteFond
 import org.myhousehold.core.EtatOccurrence
@@ -58,16 +64,24 @@ fun EcranAccueil(
     modele: ModeleAccueil,
     onOuvrirTache: (String) -> Unit,
     onVoirAgenda: () -> Unit,
+    onMiseAJour: () -> Unit,
     onPlusDOptions: (type: TypeAjout, titre: String, jour: LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val etat by modele.etat.collectAsStateWithLifecycle()
     var ajoutOuvert by rememberSaveable { mutableStateOf(false) }
+    val miseAJour by LocalContext.current.conteneur.misesAJour.etat.collectAsStateWithLifecycle()
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Pas de photo ici : le volet la montre déjà.
             EnTete(titre = "Accueil")
+
+            // Une version plus récente existe : un bandeau, pas une fenêtre
+            // qui interrompt.
+            miseAJour.versionProposee?.let { version ->
+                BandeauMiseAJour(version = version.version, onClick = onMiseAJour)
+            }
 
             if (!etat.chargement && etat.toutEstFait && etat.rendezVousDeLaSemaine.isEmpty()) {
                 EtatVide(
@@ -292,6 +306,37 @@ private fun LigneRendezVous(rendezVous: RendezVous) {
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun BandeauMiseAJour(version: String, onClick: () -> Unit) {
+    CarteFoyer(
+        modifier = Modifier
+            .padding(start = 20.dp, end = 20.dp, top = 12.dp)
+            .clickable(onClick = onClick),
+        couleurBordure = MaterialTheme.colorScheme.primary,
+        couleurFond = MaterialTheme.colorScheme.primaryContainer,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                Icons.Outlined.Download,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.width(12.dp))
+            Text(
+                "Version $version disponible",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                "Mettre à jour",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }
