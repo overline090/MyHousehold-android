@@ -18,6 +18,9 @@ interface FoyerDao {
 
     @Upsert
     suspend fun enregistrer(foyer: FoyerEntite)
+
+    @Query("DELETE FROM foyer")
+    suspend fun vider()
 }
 
 @Dao
@@ -30,6 +33,9 @@ interface MembreDao {
 
     @Query("SELECT * FROM membre WHERE moi = 1 LIMIT 1")
     suspend fun monCompte(): MembreEntite?
+
+    @Query("DELETE FROM membre WHERE id = :id")
+    suspend fun supprimer(id: String)
 
     @Upsert
     suspend fun enregistrer(membre: MembreEntite)
@@ -48,6 +54,9 @@ interface GroupeDao {
 
     @Query("DELETE FROM groupe WHERE id = :id")
     suspend fun supprimer(id: String)
+
+    @Query("SELECT * FROM groupe ORDER BY position, nom")
+    suspend fun tous(): List<GroupeEntite>
 }
 
 @Dao
@@ -76,6 +85,10 @@ interface TacheDao {
 
     @Query("UPDATE tache SET groupeId = NULL WHERE groupeId = :groupeId")
     suspend fun detacherDuGroupe(groupeId: String)
+
+    /** Un membre change d'identifiant : celui du serveur remplace celui du téléphone. */
+    @Query("UPDATE tache SET participants = REPLACE(participants, :ancien, :nouveau)")
+    suspend fun renommerParticipant(ancien: String, nouveau: String)
 }
 
 @Dao
@@ -137,6 +150,12 @@ interface OccurrenceDao {
     @Query("DELETE FROM occurrence WHERE id = :id")
     suspend fun supprimer(id: String)
 
+    @Query("UPDATE occurrence SET faiteParId = :nouveau WHERE faiteParId = :ancien")
+    suspend fun renommerAuteur(ancien: String, nouveau: String)
+
+    @Query("UPDATE occurrence SET assigneId = :nouveau WHERE assigneId = :ancien")
+    suspend fun renommerAssigne(ancien: String, nouveau: String)
+
     /**
      * La première échéance encore à faire de chaque tâche, et son
      * assigné. Les dates sont en `AAAA-MM-JJ`, qui se trie comme il
@@ -190,6 +209,9 @@ interface RendezVousDao {
 
     @Query("DELETE FROM rendez_vous WHERE id = :id")
     suspend fun supprimer(id: String)
+
+    @Query("SELECT * FROM rendez_vous ORDER BY debut")
+    suspend fun tous(): List<RendezVousEntite>
 }
 
 @Dao

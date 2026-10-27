@@ -15,7 +15,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.rememberDrawerState
@@ -39,12 +38,7 @@ import org.myhousehold.app.ui.accueil.EcranAccueil
 import org.myhousehold.app.ui.accueil.ModeleAccueil
 import org.myhousehold.app.ui.agenda.EcranAgenda
 import org.myhousehold.app.ui.agenda.ModeleAgenda
-import org.myhousehold.app.ui.demarrage.EcranAdresse
-import org.myhousehold.app.ui.demarrage.EcranCommencerSeul
-import org.myhousehold.app.ui.demarrage.EcranDepart
-import org.myhousehold.app.ui.demarrage.EcranScanner
-import org.myhousehold.app.ui.demarrage.EcranVerifierServeur
-import org.myhousehold.app.ui.demarrage.ModeleConnexion
+import org.myhousehold.app.ui.demarrage.ParcoursConnexion
 import org.myhousehold.app.ui.foyer.EcranFoyer
 import org.myhousehold.app.ui.foyer.ModeleFoyer
 import org.myhousehold.app.ui.reglages.EcranAPropos
@@ -90,83 +84,18 @@ fun AppMyHousehold() {
 
     when (foyerConnu) {
         null -> Unit // Le temps d'une lecture en base : pas d'écran qui clignote.
-        false -> Demarrage(
+        // Une fois le compte ouvert, le foyer existe : l'app passe d'elle-même au foyer.
+        false -> ParcoursConnexion(
             onCommencerSeul = { nomDuFoyer, prenom, nom ->
                 portee.launch { depot.commencerSeul(nomDuFoyer, prenom, nom) }
             },
+            onTermine = {},
         )
         true -> FoyerInstalle()
     }
 }
 
-/**
- * La première ouverture : rejoindre le foyer par son serveur (trouvé
- * sur le Wi-Fi, scanné, ou saisi), ou commencer sans serveur.
- */
-@Composable
-private fun Demarrage(onCommencerSeul: (nomDuFoyer: String, prenom: String, nom: String) -> Unit) {
-    val navigation = rememberNavController()
-    val modele: ModeleConnexion = viewModel()
-    val etat by modele.etat.collectAsStateWithLifecycle()
-
-    // Un serveur à vérifier ouvre l'écran de l'empreinte ; un serveur
-    // vérifié ramène au départ, qui l'affiche.
-    LaunchedEffect(etat.aVerifier) {
-        if (etat.aVerifier != null) navigation.navigate(ROUTE_VERIFIER) { launchSingleTop = true }
-    }
-    LaunchedEffect(etat.verifie) {
-        if (etat.verifie != null) navigation.popBackStack(ROUTE_DEPART, inclusive = false)
-    }
-
-    NavHost(navController = navigation, startDestination = ROUTE_DEPART) {
-        composable(ROUTE_DEPART) {
-            EcranDepart(
-                modele = modele,
-                onScanner = { navigation.navigate(ROUTE_SCANNER) },
-                onSaisirAdresse = { navigation.navigate(ROUTE_ADRESSE) },
-                onCommencerSeul = { navigation.navigate(ROUTE_SEUL) },
-            )
-        }
-        composable(ROUTE_SCANNER) {
-            EcranScanner(
-                onLu = { texte ->
-                    modele.qrCodeLu(texte).also { lu ->
-                        if (lu) navigation.popBackStack(ROUTE_DEPART, inclusive = false)
-                    }
-                },
-                onSaisirAdresse = {
-                    navigation.navigate(ROUTE_ADRESSE) { popUpTo(ROUTE_DEPART) }
-                },
-                onRetour = { navigation.popBackStack() },
-            )
-        }
-        composable(ROUTE_ADRESSE) {
-            EcranAdresse(modele = modele, onRetour = { navigation.popBackStack() })
-        }
-        composable(ROUTE_VERIFIER) {
-            val aVerifier = etat.aVerifier
-            if (aVerifier != null) {
-                EcranVerifierServeur(
-                    sondage = aVerifier,
-                    onConfirmer = modele::empreinteConfirmee,
-                    onRefuser = {
-                        modele.empreinteRefusee()
-                        navigation.popBackStack()
-                    },
-                )
-            }
-        }
-        composable(ROUTE_SEUL) {
-            EcranCommencerSeul(onCommencer = onCommencerSeul, onRetour = { navigation.popBackStack() })
-        }
-    }
-}
-
-private const val ROUTE_DEPART = "depart"
-private const val ROUTE_SCANNER = "scanner"
-private const val ROUTE_ADRESSE = "adresse"
-private const val ROUTE_VERIFIER = "verifier"
-private const val ROUTE_SEUL = "seul"
+private const val ROUTE_CONNEXION = "connexion-serveur"
 
 @Composable
 private fun FoyerInstalle() {
@@ -196,7 +125,8 @@ private fun FoyerInstalle() {
 
     // La barre disparaît sur le formulaire : ce n'est pas un endroit où
     // l'on change d'onglet par inadvertance.
-    val barreVisible = destinationCourante != null && !estSur(ROUTE_FORMULAIRE_COMPLETE)
+    val barreVisible = destinationCourante != null &&
+        !estSur(ROUTE_FORMULAIRE_COMPLETE) && !estSur(ROUTE_CONNEXION)
 
     ModalNavigationDrawer(
         drawerState = volet,
@@ -301,7 +231,18 @@ private fun FoyerInstalle() {
                     composable(EntreeDuVolet.SERVEUR.route) {
                         val modele: ModeleReglages =
                             viewModel(factory = fabriqueReglages)
-                        EcranServeur(modele = modele)
+                        EcranServeur(
+                            modele = modele,
+                            onConnecter = { navigation.navigate(ROUTE_CONNEXION) },
+                        )
+                    }
+
+                    composable(ROUTE_CONNEXION) {
+                        ParcoursConnexion(
+                            onCommencerSeul = null,
+                            onTermine = { navigation.popBackStack() },
+                            onQuitter = { navigation.popBackStack() },
+                        )
                     }
 
                     composable(EntreeDuVolet.A_PROPOS.route) {

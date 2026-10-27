@@ -98,14 +98,21 @@ fun EcranDepart(
     modele: ModeleConnexion,
     onScanner: () -> Unit,
     onSaisirAdresse: () -> Unit,
-    onCommencerSeul: () -> Unit,
+    /** Absent quand un foyer existe déjà : on vient le relier à un serveur. */
+    onCommencerSeul: (() -> Unit)?,
+    onRetour: (() -> Unit)? = null,
 ) {
     val detection by modele.detection.collectAsStateWithLifecycle()
     val etat by modele.etat.collectAsStateWithLifecycle()
 
-    PageDeDepart {
-        Spacer(Modifier.padding(top = 8.dp))
-        Text("Bienvenue", style = MaterialTheme.typography.headlineLarge.copy(fontSize = 28.sp))
+    PageDeDepart(
+        titre = if (onCommencerSeul == null) "Connecter un serveur" else null,
+        onRetour = onRetour,
+    ) {
+        if (onCommencerSeul != null) {
+            Spacer(Modifier.padding(top = 8.dp))
+            Text("Bienvenue", style = MaterialTheme.typography.headlineLarge.copy(fontSize = 28.sp))
+        }
 
         TitreDeSection("Rejoindre le foyer")
         CarteDetection(
@@ -116,10 +123,11 @@ fun EcranDepart(
 
         if (etat.enCours) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         etat.erreur?.let { Encadre(it) }
-        etat.verifie?.let { ServeurVerifie(it) }
 
         BoutonLarge(Icons.Outlined.QrCodeScanner, "Scanner le QR code du serveur", onScanner)
         BoutonLarge(Icons.Outlined.Keyboard, "Saisir l’adresse du serveur", onSaisirAdresse)
+
+        if (onCommencerSeul == null) return@PageDeDepart
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             HorizontalDivider(modifier = Modifier.weight(1f))
@@ -211,23 +219,6 @@ private fun CarteDetection(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun ServeurVerifie(sondage: Sondage) {
-    CarteFoyer(couleurBordure = MaterialTheme.colorScheme.primary) {
-        Text(
-            "Serveur vérifié" + (sondage.nomDuFoyer?.let { " : $it" } ?: ""),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        // On ne promet pas ce qui n'existe pas encore.
-        Texte(
-            "La création de votre compte sur ce serveur arrive dans une prochaine version " +
-                "de l’app.",
-            modifier = Modifier.padding(top = 4.dp),
-        )
     }
 }
 

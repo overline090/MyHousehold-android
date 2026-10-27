@@ -4,14 +4,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.myhousehold.app.conteneur
 import org.myhousehold.app.ui.commun.CarteFoyer
 import org.myhousehold.app.ui.commun.EnTete
 import org.myhousehold.app.ui.reglages.ModeleReglages
@@ -19,13 +24,18 @@ import org.myhousehold.app.ui.reglages.ModeleReglages
 /**
  * Le serveur du foyer : lié ou non, et ce qui attend d'être envoyé.
  *
- * La connexion elle-même (détection sur le Wi-Fi, scan, saisie de
- * l'adresse) arrive à l'étape suivante ; cet écran ne promet rien de
- * plus que ce qui existe.
+ * Un foyer commencé seul s'y relie à un serveur : par le même parcours
+ * qu'à la première ouverture.
  */
 @Composable
-fun EcranServeur(modele: ModeleReglages, modifier: Modifier = Modifier) {
+fun EcranServeur(
+    modele: ModeleReglages,
+    onConnecter: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val etat by modele.etat.collectAsStateWithLifecycle()
+    val liaison = LocalContext.current.conteneur.liaison
+    val serveur by liaison.serveur.collectAsStateWithLifecycle()
 
     Column(modifier = modifier.fillMaxSize()) {
         EnTete(titre = "Serveur")
@@ -39,13 +49,31 @@ fun EcranServeur(modele: ModeleReglages, modifier: Modifier = Modifier) {
                     if (etat.foyer?.local != false) {
                         Text("Aucun serveur lié", style = MaterialTheme.typography.titleMedium)
                         Text(
-                            "Tout reste sur ce téléphone. Le serveur de votre foyer permettra de " +
-                                "le partager — et reprendra ce qui a été fait d’ici là.",
+                            if (liaison.repriseEnvoyeeA != null) {
+                                "Ce foyer a été envoyé au serveur. Pour terminer, scannez le QR code " +
+                                    "de l’étape Premier compte de sa page web."
+                            } else {
+                                "Tout reste sur ce téléphone. Le serveur de votre foyer permettra de " +
+                                    "le partager — et reprendra ce qui a été fait d’ici là."
+                            },
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        Button(
+                            onClick = onConnecter,
+                            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                        ) {
+                            Text("Connecter ce foyer à un serveur")
+                        }
                     } else {
                         Text("Serveur lié", style = MaterialTheme.typography.titleMedium)
+                        serveur?.let { lie ->
+                            Text(
+                                "${lie.adresse.hote} — connecté en tant que ${lie.identifiant}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                         Text(
                             if (etat.mutationsEnAttente == 0) {
                                 "À jour."

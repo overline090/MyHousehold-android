@@ -124,6 +124,8 @@ class DepotFoyer(private val base: BaseLocale) {
 
     val mutationsEnAttente: Flow<Int> = base.mutations().combien()
 
+    suspend fun monCompte(): Membre? = base.membres().monCompte()?.versDomaine()
+
     // ── Première ouverture ─────────────────────────────────────────────
 
     /**
