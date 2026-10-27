@@ -40,7 +40,9 @@ import java.text.Normalizer
 import org.myhousehold.app.donnees.ResumeDeReprise
 import org.myhousehold.app.reseau.NouveauCompte
 import org.myhousehold.app.reseau.Sondage
+import kotlinx.datetime.LocalDate
 import org.myhousehold.app.ui.commun.CarteFoyer
+import org.myhousehold.app.ui.commun.ChampDate
 import org.myhousehold.app.ui.commun.TitreDeSection
 
 private val MOTIF_IDENTIFIANT = Regex("^[a-z0-9][a-z0-9._-]{2,31}$")
@@ -134,9 +136,8 @@ fun EcranCreerCompte(
     var identifiantTouche by rememberSaveable { mutableStateOf(false) }
     var motDePasse by rememberSaveable { mutableStateOf("") }
 
-    val naissanceValide = naissance.isBlank() || naissance.matches(Regex("^\\d{4}-\\d{2}-\\d{2}$"))
     val pret = prenom.isNotBlank() && nom.isNotBlank() &&
-        identifiant.matches(MOTIF_IDENTIFIANT) && motDePasse.length >= 10 && naissanceValide &&
+        identifiant.matches(MOTIF_IDENTIFIANT) && motDePasse.length >= 10 &&
         (premierCompte || invitation.isNotBlank()) && !etat.enCours
 
     PageDeDepart(
@@ -176,12 +177,11 @@ fun EcranCreerCompte(
             )
             Champ(valeur = nom, onChange = { nom = it }, libelle = "Nom", modifier = Modifier.weight(1f))
         }
-        Champ(
-            valeur = naissance,
-            onChange = { naissance = it },
+        ChampDate(
             libelle = "Date de naissance",
-            exemple = "Facultative — 1986-03-12",
-            erreur = !naissanceValide,
+            valeur = naissance.ifBlank { null }?.let(LocalDate::parse),
+            onChange = { naissance = it?.toString().orEmpty() },
+            facultative = true,
         )
         Champ(
             valeur = identifiant,

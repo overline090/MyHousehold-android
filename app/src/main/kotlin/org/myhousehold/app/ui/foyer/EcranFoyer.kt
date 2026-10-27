@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.myhousehold.app.ui.commun.CarteFoyer
 import org.myhousehold.app.ui.commun.EnTete
-import org.myhousehold.app.ui.commun.Pastille
+import org.myhousehold.app.ui.commun.PastilleDe
 import org.myhousehold.app.ui.commun.TitreDeSection
 import org.myhousehold.app.ui.commun.couleurDe
 
@@ -55,7 +55,7 @@ fun EcranFoyer(modele: ModeleFoyer, modifier: Modifier = Modifier) {
             items(etat.membres, key = { it.id }) { membre ->
                 CarteFoyer {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Pastille(membre.initiales, couleurDe(membre.couleur))
+                        PastilleDe(membre)
                         Spacer(Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(membre.nomComplet, style = MaterialTheme.typography.titleMedium)

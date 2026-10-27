@@ -1,5 +1,8 @@
 package org.myhousehold.app.ui.reglages
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,9 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -30,19 +30,24 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.myhousehold.app.ui.BoutonVolet
 import org.myhousehold.app.ui.commun.CarteFoyer
-import org.myhousehold.app.ui.commun.Pastille
+import org.myhousehold.app.ui.commun.ChampDate
+import org.myhousehold.app.ui.commun.ChoixDePhoto
 import org.myhousehold.app.ui.commun.TitreDeSection
 import org.myhousehold.app.ui.commun.couleurDe
+import org.myhousehold.app.ui.commun.enregistrerPhoto
 
 private val COULEURS = listOf(
     "#0F766E", "#6D28D9", "#B45309", "#15803D", "#BE185D", "#1D4ED8", "#9A3412",
@@ -68,7 +73,9 @@ fun EcranProfil(
 
     var prenom by remember { mutableStateOf("") }
     var nom by remember { mutableStateOf("") }
-    var dateDeNaissance by remember { mutableStateOf("") }
+    var dateDeNaissance by remember { mutableStateOf<LocalDate?>(null) }
+    val contexte = LocalContext.current
+    val portee = rememberCoroutineScope()
     var couleur by remember { mutableStateOf(COULEURS.first()) }
     var charge by remember { mutableStateOf(false) }
 
@@ -77,7 +84,7 @@ fun EcranProfil(
         if (charge) return@LaunchedEffect
         prenom = membre.prenom
         nom = membre.nom
-        dateDeNaissance = membre.dateDeNaissance?.toString() ?: ""
+        dateDeNaissance = membre.dateDeNaissance
         couleur = membre.couleur
         charge = true
     }
@@ -100,13 +107,18 @@ fun EcranProfil(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Pastille(
-                    initiales = (prenom.take(1) + nom.take(1)).uppercase().ifBlank { "?" },
-                    couleur = couleurDe(couleur),
-                    taille = 84,
-                )
-            }
+            // La photo s'enregistre dès qu'elle est choisie : la perdre
+            // en oubliant « Enregistrer » serait frustrant.
+            ChoixDePhoto(
+                photo = moi?.photo,
+                initiales = (prenom.take(1) + nom.take(1)).uppercase(),
+                couleur = couleurDe(couleur),
+                libelle = "Changer la photo",
+                onImage = { image ->
+                    portee.launch { modele.changerPhoto(enregistrerPhoto(contexte, image)) }
+                },
+                onRetirer = { modele.changerPhoto(null) },
+            )
 
             OutlinedTextField(
                 value = prenom,
@@ -124,15 +136,12 @@ fun EcranProfil(
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            OutlinedTextField(
-                value = dateDeNaissance,
-                onValueChange = { dateDeNaissance = it },
-                label = { Text("Date de naissance") },
-                placeholder = { Text("1986-03-12") },
-                supportingText = { Text("Facultative : personne n’est obligé de la déclarer.") },
-                singleLine = true,
-                isError = dateDeNaissance.isNotBlank() && dateDeNaissance.enDate() == null,
-                modifier = Modifier.fillMaxWidth(),
+            ChampDate(
+                libelle = "Date de naissance",
+                valeur = dateDeNaissance,
+                onChange = { dateDeNaissance = it },
+                facultative = true,
+                aide = "Facultative : personne n’est obligé de la déclarer.",
             )
 
             TitreDeSection("Couleur")
@@ -186,17 +195,13 @@ fun EcranProfil(
 
         Button(
             onClick = {
-                modele.enregistrerProfil(prenom, nom, dateDeNaissance.enDate(), couleur)
+                modele.enregistrerProfil(prenom, nom, dateDeNaissance, couleur)
                 onFerme()
             },
-            enabled = prenom.isNotBlank() &&
-                (dateDeNaissance.isBlank() || dateDeNaissance.enDate() != null),
+            enabled = prenom.isNotBlank(),
             modifier = Modifier.fillMaxWidth().padding(20.dp),
         ) {
             Text("Enregistrer")
         }
     }
 }
-
-private fun String.enDate(): LocalDate? =
-    if (isBlank()) null else runCatching { LocalDate.parse(trim()) }.getOrNull()

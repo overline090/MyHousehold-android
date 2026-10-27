@@ -25,6 +25,7 @@ import org.myhousehold.core.EtatOccurrence
 import org.myhousehold.core.Membre
 import org.myhousehold.core.RendezVous
 import org.myhousehold.core.SorteDeTache
+import org.myhousehold.core.Tache
 
 /**
  * Ce que l'accueil affiche, dans l'ordre où il l'affiche : d'abord ce
@@ -96,6 +97,18 @@ class ModeleAccueil(private val depot: DepotFoyer) : ViewModel() {
 
     fun faireTacheDeFond(tacheId: String) {
         viewModelScope.launch { depot.faireTacheDeFond(tacheId) }
+    }
+
+    fun ajouterTache(tache: Tache) {
+        viewModelScope.launch { depot.enregistrer(tache) }
+    }
+
+    /** Un rendez-vous ajouté depuis l'accueil concerne d'abord celui qui l'ajoute. */
+    fun ajouterRendezVous(rendezVous: RendezVous) {
+        viewModelScope.launch {
+            val moi = depot.monCompte()
+            depot.enregistrerRendezVous(rendezVous.copy(participants = listOfNotNull(moi?.id)))
+        }
     }
 
     companion object {

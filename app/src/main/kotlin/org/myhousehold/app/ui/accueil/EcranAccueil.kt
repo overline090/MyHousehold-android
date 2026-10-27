@@ -2,6 +2,7 @@ package org.myhousehold.app.ui.accueil
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,20 +19,24 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.datetime.LocalDate
 import org.myhousehold.app.donnees.OccurrenceAffichee
 import org.myhousehold.app.donnees.TacheAffichee
+import org.myhousehold.app.ui.commun.BoutonAjout
 import org.myhousehold.app.ui.commun.CarteFoyer
 import org.myhousehold.app.ui.commun.EnTete
 import org.myhousehold.app.ui.commun.EtatVide
 import org.myhousehold.app.ui.commun.EtiquettePriorite
-import org.myhousehold.app.ui.commun.Pastille
+import org.myhousehold.app.ui.commun.PastilleDe
 import org.myhousehold.app.ui.commun.TitreDeSection
-import org.myhousehold.app.ui.commun.couleurDe
 import org.myhousehold.app.ui.commun.enClair
 import org.myhousehold.app.ui.commun.heureEnClair
 import org.myhousehold.app.ui.commun.jourEnClair
@@ -53,107 +58,127 @@ fun EcranAccueil(
     modele: ModeleAccueil,
     onOuvrirTache: (String) -> Unit,
     onVoirAgenda: () -> Unit,
+    onPlusDOptions: (type: TypeAjout, titre: String, jour: LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val etat by modele.etat.collectAsStateWithLifecycle()
+    var ajoutOuvert by rememberSaveable { mutableStateOf(false) }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        EnTete(titre = "Accueil") {
-            etat.moi?.let { moi ->
-                Pastille(initiales = moi.initiales, couleur = couleurDe(moi.couleur))
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Pas de photo ici : le volet la montre déjà.
+            EnTete(titre = "Accueil")
+
+            if (!etat.chargement && etat.toutEstFait && etat.rendezVousDeLaSemaine.isEmpty()) {
+                EtatVide(
+                    titre = "Tout est fait",
+                    explication = "Rien ne vous attend aujourd’hui. Les rendez-vous de la semaine " +
+                        "s’afficheront ici dès qu’il y en aura.",
+                )
+                return@Column
             }
-        }
 
-        if (!etat.chargement && etat.toutEstFait && etat.rendezVousDeLaSemaine.isEmpty()) {
-            EtatVide(
-                titre = "Tout est fait",
-                explication = "Rien ne vous attend aujourd’hui. Les rendez-vous de la semaine " +
-                    "s’afficheront ici dès qu’il y en aura.",
-            )
-            return@Column
-        }
+            LazyColumn(
+                // En bas, la place du bouton d'ajout : la dernière ligne ne passe pas dessous.
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 96.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                if (etat.enRetard.isNotEmpty() || etat.tachesDeFondEnRetard.isNotEmpty()) {
+                    item { TitreDeSection("En retard") }
 
-        LazyColumn(
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            if (etat.enRetard.isNotEmpty() || etat.tachesDeFondEnRetard.isNotEmpty()) {
-                item { TitreDeSection("En retard") }
+                    items(etat.enRetard, key = { it.occurrence.id }) { ligne ->
+                        LigneOccurrence(
+                            ligne = ligne,
+                            enRetard = true,
+                            onCocher = { modele.cocher(ligne.occurrence.id) },
+                            onDecocher = { modele.decocher(ligne.occurrence.id) },
+                            onOuvrir = { onOuvrirTache(ligne.tache.id) },
+                        )
+                    }
 
-                items(etat.enRetard, key = { it.occurrence.id }) { ligne ->
+                    items(etat.tachesDeFondEnRetard, key = { "fond-" + it.tache.id }) { ligne ->
+                        LigneTacheDeFond(
+                            ligne = ligne,
+                            onFaite = { modele.faireTacheDeFond(ligne.tache.id) },
+                            onOuvrir = { onOuvrirTache(ligne.tache.id) },
+                        )
+                    }
+                }
+
+                item { TitreDeSection("Mes tâches du jour") }
+                if (etat.mesTachesDuJour.isEmpty()) {
+                    item {
+                        Text(
+                            "Rien pour vous aujourd’hui.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                items(etat.mesTachesDuJour, key = { it.occurrence.id }) { ligne ->
                     LigneOccurrence(
                         ligne = ligne,
-                        enRetard = true,
+                        enRetard = false,
                         onCocher = { modele.cocher(ligne.occurrence.id) },
                         onDecocher = { modele.decocher(ligne.occurrence.id) },
                         onOuvrir = { onOuvrirTache(ligne.tache.id) },
                     )
                 }
 
-                items(etat.tachesDeFondEnRetard, key = { "fond-" + it.tache.id }) { ligne ->
-                    LigneTacheDeFond(
-                        ligne = ligne,
-                        onFaite = { modele.faireTacheDeFond(ligne.tache.id) },
-                        onOuvrir = { onOuvrirTache(ligne.tache.id) },
-                    )
+                if (etat.rendezVousDeLaSemaine.isNotEmpty()) {
+                    item { TitreDeSection("Rendez-vous de la semaine") }
+                    items(etat.rendezVousDeLaSemaine, key = { it.id }) { rendezVous ->
+                        LigneRendezVous(rendezVous)
+                    }
+                    item {
+                        TextButton(onClick = onVoirAgenda) { Text("Voir tout l’agenda") }
+                    }
                 }
-            }
 
-            item { TitreDeSection("Mes tâches du jour") }
-            if (etat.mesTachesDuJour.isEmpty()) {
-                item {
-                    Text(
-                        "Rien pour vous aujourd’hui.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                if (etat.aSurveiller.isNotEmpty()) {
+                    item { TitreDeSection("À surveiller") }
+                    items(etat.aSurveiller, key = { "surveiller-" + it.tache.id }) { ligne ->
+                        LigneTacheDeFond(
+                            ligne = ligne,
+                            onFaite = { modele.faireTacheDeFond(ligne.tache.id) },
+                            onOuvrir = { onOuvrirTache(ligne.tache.id) },
+                        )
+                    }
                 }
-            }
-            items(etat.mesTachesDuJour, key = { it.occurrence.id }) { ligne ->
-                LigneOccurrence(
-                    ligne = ligne,
-                    enRetard = false,
-                    onCocher = { modele.cocher(ligne.occurrence.id) },
-                    onDecocher = { modele.decocher(ligne.occurrence.id) },
-                    onOuvrir = { onOuvrirTache(ligne.tache.id) },
-                )
-            }
 
-            if (etat.rendezVousDeLaSemaine.isNotEmpty()) {
-                item { TitreDeSection("Rendez-vous de la semaine") }
-                items(etat.rendezVousDeLaSemaine, key = { it.id }) { rendezVous ->
-                    LigneRendezVous(rendezVous)
-                }
-                item {
-                    TextButton(onClick = onVoirAgenda) { Text("Voir tout l’agenda") }
-                }
-            }
-
-            if (etat.aSurveiller.isNotEmpty()) {
-                item { TitreDeSection("À surveiller") }
-                items(etat.aSurveiller, key = { "surveiller-" + it.tache.id }) { ligne ->
-                    LigneTacheDeFond(
-                        ligne = ligne,
-                        onFaite = { modele.faireTacheDeFond(ligne.tache.id) },
-                        onOuvrir = { onOuvrirTache(ligne.tache.id) },
-                    )
-                }
-            }
-
-            if (etat.pourLesAutres.isNotEmpty()) {
-                item { TitreDeSection("À faire par les autres") }
-                items(etat.pourLesAutres, key = { "autres-" + it.occurrence.id }) { ligne ->
-                    LigneOccurrence(
-                        ligne = ligne,
-                        enRetard = false,
-                        cochable = false,
-                        onCocher = {},
-                        onDecocher = {},
-                        onOuvrir = { onOuvrirTache(ligne.tache.id) },
-                    )
+                if (etat.pourLesAutres.isNotEmpty()) {
+                    item { TitreDeSection("À faire par les autres") }
+                    items(etat.pourLesAutres, key = { "autres-" + it.occurrence.id }) { ligne ->
+                        LigneOccurrence(
+                            ligne = ligne,
+                            enRetard = false,
+                            cochable = false,
+                            onCocher = {},
+                            onDecocher = {},
+                            onOuvrir = { onOuvrirTache(ligne.tache.id) },
+                        )
+                    }
                 }
             }
         }
+
+        BoutonAjout(
+            description = "Ajouter",
+            onClick = { ajoutOuvert = true },
+            modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
+        )
+    }
+
+    if (ajoutOuvert) {
+        FeuilleAjoutRapide(
+            onFermer = { ajoutOuvert = false },
+            onAjouterTache = modele::ajouterTache,
+            onAjouterRendezVous = modele::ajouterRendezVous,
+            onPlusDOptions = { type, titre, jour ->
+                ajoutOuvert = false
+                onPlusDOptions(type, titre, jour)
+            },
+        )
     }
 }
 
@@ -186,7 +211,7 @@ private fun LigneOccurrence(
                 )
             } else {
                 ligne.assigne?.let {
-                    Pastille(it.initiales, couleurDe(it.couleur), taille = 26)
+                    PastilleDe(it, taille = 26)
                     Spacer(Modifier.width(10.dp))
                 }
             }

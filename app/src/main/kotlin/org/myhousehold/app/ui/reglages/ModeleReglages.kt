@@ -15,6 +15,7 @@ import org.myhousehold.app.donnees.Apparence
 import org.myhousehold.app.donnees.BaseLocale
 import org.myhousehold.app.donnees.DepotFoyer
 import org.myhousehold.app.donnees.MembreEntite
+import org.myhousehold.app.ui.commun.oublierPhoto
 import org.myhousehold.app.donnees.PreferencesApp
 import org.myhousehold.core.Foyer
 import org.myhousehold.core.Membre
@@ -62,6 +63,11 @@ class ModeleReglages(
                 ),
             )
         }
+    }
+
+    /** La nouvelle photo remplace l'ancienne, qui quitte les fichiers de l'app. */
+    fun changerPhoto(photo: String?) {
+        viewModelScope.launch { oublierPhoto(depot.changerMaPhoto(photo)) }
     }
 
     /**

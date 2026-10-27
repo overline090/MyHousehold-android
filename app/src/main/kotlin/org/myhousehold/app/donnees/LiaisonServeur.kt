@@ -182,6 +182,9 @@ class LiaisonServeur(
                     statutNom = session.statutNom,
                     droits = session.droits.mapNotNull(::droitDuServeur).joinToString(",") { it.name },
                     couleur = ancienMoi?.couleur ?: "#0F766E",
+                    // La photo reste sur le téléphone : son envoi au serveur
+                    // viendra avec la synchronisation.
+                    photo = ancienMoi?.photo,
                     moi = true,
                 ),
             )

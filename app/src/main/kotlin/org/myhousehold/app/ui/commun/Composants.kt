@@ -1,5 +1,7 @@
 package org.myhousehold.app.ui.commun
 
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,22 +13,30 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.myhousehold.app.ui.BoutonVolet
 import org.myhousehold.app.ui.LocalOuvrirVolet
+import org.myhousehold.core.Membre
 import org.myhousehold.core.Priorite
 
 /**
@@ -131,14 +141,18 @@ fun Etiquette(
     }
 }
 
-/** La pastille d'un membre : ses initiales, faute de photo. */
+/** La pastille d'un membre : sa photo, ou ses initiales faute de photo. */
 @Composable
 fun Pastille(
     initiales: String,
     couleur: Color,
     modifier: Modifier = Modifier,
     taille: Int = 34,
+    photo: String? = null,
 ) {
+    val image = remember(photo) {
+        photo?.let { runCatching { BitmapFactory.decodeFile(it)?.asImageBitmap() }.getOrNull() }
+    }
     Box(
         modifier = modifier
             .size(taille.dp)
@@ -146,14 +160,28 @@ fun Pastille(
             .background(couleur),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = initiales,
-            color = Color.White,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = (taille / 2.6).sp,
-        )
+        if (image != null) {
+            Image(
+                bitmap = image,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else {
+            Text(
+                text = initiales,
+                color = Color.White,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = (taille / 2.6).sp,
+            )
+        }
     }
 }
+
+/** La pastille d'un membre, photo comprise. */
+@Composable
+fun PastilleDe(membre: Membre, modifier: Modifier = Modifier, taille: Int = 34) =
+    Pastille(membre.initiales, couleurDe(membre.couleur), modifier, taille, membre.photo)
 
 /**
  * Ce qui s'affiche quand il n'y a rien : une phrase qui dit quoi faire
@@ -187,3 +215,19 @@ fun EtatVide(
 
 /** Marges communes au corps des écrans. */
 val MargesDuCorps = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
+
+/** Le bouton d'ajout, en bas à droite : toujours au même endroit. */
+@Composable
+fun BoutonAjout(description: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    FloatingActionButton(
+        onClick = onClick,
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        modifier = modifier,
+    ) {
+        Icon(
+            Icons.Filled.Add,
+            contentDescription = description,
+        )
+    }
+}

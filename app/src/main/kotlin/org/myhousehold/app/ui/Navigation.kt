@@ -1,5 +1,6 @@
 package org.myhousehold.app.ui
 
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -13,11 +14,11 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -33,11 +34,15 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import org.myhousehold.app.conteneur
 import org.myhousehold.app.ui.accueil.EcranAccueil
 import org.myhousehold.app.ui.accueil.ModeleAccueil
+import org.myhousehold.app.ui.accueil.TypeAjout
 import org.myhousehold.app.ui.agenda.EcranAgenda
+import org.myhousehold.app.ui.agenda.EcranRendezVous
 import org.myhousehold.app.ui.agenda.ModeleAgenda
+import org.myhousehold.app.ui.agenda.ModeleRendezVous
 import org.myhousehold.app.ui.demarrage.ParcoursConnexion
 import org.myhousehold.app.ui.foyer.EcranFoyer
 import org.myhousehold.app.ui.foyer.ModeleFoyer
@@ -50,6 +55,7 @@ import org.myhousehold.app.ui.taches.EcranFormulaireTache
 import org.myhousehold.app.ui.taches.EcranTaches
 import org.myhousehold.app.ui.taches.ModeleFormulaireTache
 import org.myhousehold.app.ui.taches.ModeleTaches
+import org.myhousehold.core.SorteDeTache
 
 /**
  * Trois onglets : Accueil, Tâches, Agenda — ce qu'on ouvre tous les
@@ -70,7 +76,16 @@ enum class Destination(
 }
 
 private const val ROUTE_FORMULAIRE = "tache"
-private const val ROUTE_FORMULAIRE_COMPLETE = "$ROUTE_FORMULAIRE?id={id}"
+private const val ROUTE_FORMULAIRE_COMPLETE = "$ROUTE_FORMULAIRE?id={id}&titre={titre}&sorte={sorte}"
+private const val ROUTE_RENDEZ_VOUS = "rendez-vous"
+private const val ROUTE_RENDEZ_VOUS_COMPLETE = "$ROUTE_RENDEZ_VOUS?id={id}&titre={titre}&jour={jour}"
+
+/** Un paramètre de route facultatif, de type texte. */
+private fun facultatif(nom: String) = navArgument(nom) {
+    type = NavType.StringType
+    nullable = true
+    defaultValue = null
+}
 
 @Composable
 fun AppMyHousehold() {
@@ -86,8 +101,16 @@ fun AppMyHousehold() {
         null -> Unit // Le temps d'une lecture en base : pas d'écran qui clignote.
         // Une fois le compte ouvert, le foyer existe : l'app passe d'elle-même au foyer.
         false -> ParcoursConnexion(
-            onCommencerSeul = { nomDuFoyer, prenom, nom ->
-                portee.launch { depot.commencerSeul(nomDuFoyer, prenom, nom) }
+            onCommencerSeul = { profil ->
+                portee.launch {
+                    depot.commencerSeul(
+                        nomDuFoyer = profil.nomDuFoyer,
+                        prenom = profil.prenom,
+                        nom = profil.nom,
+                        dateDeNaissance = profil.dateDeNaissance,
+                        photo = profil.photo,
+                    )
+                }
             },
             onTermine = {},
         )
@@ -126,7 +149,8 @@ private fun FoyerInstalle() {
     // La barre disparaît sur le formulaire : ce n'est pas un endroit où
     // l'on change d'onglet par inadvertance.
     val barreVisible = destinationCourante != null &&
-        !estSur(ROUTE_FORMULAIRE_COMPLETE) && !estSur(ROUTE_CONNEXION)
+        !estSur(ROUTE_FORMULAIRE_COMPLETE) && !estSur(ROUTE_RENDEZ_VOUS_COMPLETE) &&
+        !estSur(ROUTE_CONNEXION)
 
     ModalNavigationDrawer(
         drawerState = volet,
@@ -172,6 +196,16 @@ private fun FoyerInstalle() {
                             modele = modele,
                             onOuvrirTache = { id -> navigation.navigate("$ROUTE_FORMULAIRE?id=$id") },
                             onVoirAgenda = { navigation.navigate(Destination.AGENDA.route) },
+                            onPlusDOptions = { type, titre, jour ->
+                                val texte = Uri.encode(titre)
+                                navigation.navigate(
+                                    when (type) {
+                                        TypeAjout.TACHE -> "$ROUTE_FORMULAIRE?titre=$texte&sorte=${SorteDeTache.PONCTUELLE}"
+                                        TypeAjout.DE_FOND -> "$ROUTE_FORMULAIRE?titre=$texte&sorte=${SorteDeTache.DE_FOND}"
+                                        TypeAjout.RENDEZ_VOUS -> "$ROUTE_RENDEZ_VOUS?titre=$texte&jour=$jour"
+                                    },
+                                )
+                            },
                         )
                     }
 
@@ -186,25 +220,49 @@ private fun FoyerInstalle() {
 
                     composable(
                         route = ROUTE_FORMULAIRE_COMPLETE,
-                        arguments = listOf(
-                            navArgument("id") {
-                                type = NavType.StringType
-                                nullable = true
-                                defaultValue = null
-                            },
-                        ),
+                        arguments = listOf(facultatif("id"), facultatif("titre"), facultatif("sorte")),
                     ) { entreeFormulaire ->
-                        val id = entreeFormulaire.arguments?.getString("id")
+                        val arguments = entreeFormulaire.arguments
+                        val id = arguments?.getString("id")
                         val modele: ModeleFormulaireTache = viewModel(
                             key = "formulaire-${id ?: "nouvelle"}",
-                            factory = ModeleFormulaireTache.fabrique(depot, id),
+                            factory = ModeleFormulaireTache.fabrique(
+                                depot = depot,
+                                tacheId = id,
+                                titre = arguments?.getString("titre"),
+                                sorte = arguments?.getString("sorte")
+                                    ?.let { runCatching { SorteDeTache.valueOf(it) }.getOrNull() },
+                            ),
                         )
                         EcranFormulaireTache(modele = modele, onFerme = { navigation.popBackStack() })
                     }
 
                     composable(Destination.AGENDA.route) {
                         val modele: ModeleAgenda = viewModel(factory = ModeleAgenda.fabrique(depot))
-                        EcranAgenda(modele = modele)
+                        EcranAgenda(
+                            modele = modele,
+                            onNouveauRendezVous = { jour -> navigation.navigate("$ROUTE_RENDEZ_VOUS?jour=$jour") },
+                            onOuvrirRendezVous = { id -> navigation.navigate("$ROUTE_RENDEZ_VOUS?id=$id") },
+                        )
+                    }
+
+                    composable(
+                        route = ROUTE_RENDEZ_VOUS_COMPLETE,
+                        arguments = listOf(facultatif("id"), facultatif("titre"), facultatif("jour")),
+                    ) { entree ->
+                        val arguments = entree.arguments
+                        val id = arguments?.getString("id")
+                        val modele: ModeleRendezVous = viewModel(
+                            key = "rendez-vous-${id ?: "nouveau"}",
+                            factory = ModeleRendezVous.fabrique(
+                                depot = depot,
+                                id = id,
+                                titre = arguments?.getString("titre"),
+                                jour = arguments?.getString("jour")
+                                    ?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
+                            ),
+                        )
+                        EcranRendezVous(modele = modele, onFerme = { navigation.popBackStack() })
                     }
 
                     composable(EntreeDuVolet.FOYER.route) {

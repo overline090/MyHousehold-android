@@ -212,6 +212,9 @@ interface RendezVousDao {
 
     @Query("SELECT * FROM rendez_vous ORDER BY debut")
     suspend fun tous(): List<RendezVousEntite>
+
+    @Query("SELECT * FROM rendez_vous WHERE id = :id")
+    suspend fun parId(id: String): RendezVousEntite?
 }
 
 @Dao

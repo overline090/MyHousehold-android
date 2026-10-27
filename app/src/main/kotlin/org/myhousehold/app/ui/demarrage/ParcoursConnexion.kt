@@ -31,7 +31,7 @@ private const val REPRISE_ENVOYEE = "reprise-envoyee"
  */
 @Composable
 fun ParcoursConnexion(
-    onCommencerSeul: ((nomDuFoyer: String, prenom: String, nom: String) -> Unit)?,
+    onCommencerSeul: ((ProfilDeDepart) -> Unit)?,
     onTermine: () -> Unit,
     onQuitter: (() -> Unit)? = null,
 ) {

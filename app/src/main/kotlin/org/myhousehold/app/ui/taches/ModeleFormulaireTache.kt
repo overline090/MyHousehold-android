@@ -112,9 +112,14 @@ data class EtatFormulaire(
 class ModeleFormulaireTache(
     private val depot: DepotFoyer,
     private val tacheId: String?,
+    /** Venu de l'ajout rapide : ce qui a déjà été saisi n'est pas à retaper. */
+    titre: String? = null,
+    sorte: SorteDeTache? = null,
 ) : ViewModel() {
 
-    private val _etat = MutableStateFlow(EtatFormulaire())
+    private val _etat = MutableStateFlow(
+        EtatFormulaire(titre = titre.orEmpty(), sorte = sorte ?: SorteDeTache.RECURRENTE),
+    )
     val etat: StateFlow<EtatFormulaire> = _etat.asStateFlow()
 
     init {
@@ -159,8 +164,13 @@ class ModeleFormulaireTache(
     }
 
     companion object {
-        fun fabrique(depot: DepotFoyer, tacheId: String?): ViewModelProvider.Factory =
-            viewModelFactory { initializer { ModeleFormulaireTache(depot, tacheId) } }
+        fun fabrique(
+            depot: DepotFoyer,
+            tacheId: String?,
+            titre: String? = null,
+            sorte: SorteDeTache? = null,
+        ): ViewModelProvider.Factory =
+            viewModelFactory { initializer { ModeleFormulaireTache(depot, tacheId, titre, sorte) } }
     }
 }
 

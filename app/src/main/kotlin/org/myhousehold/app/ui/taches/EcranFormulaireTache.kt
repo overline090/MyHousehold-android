@@ -34,6 +34,7 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.TimeZone
 import org.myhousehold.app.ui.BoutonVolet
 import org.myhousehold.app.ui.commun.CarteFoyer
+import org.myhousehold.app.ui.commun.ChampDate
 import org.myhousehold.app.ui.commun.TitreDeSection
 import org.myhousehold.app.ui.commun.enClair
 import org.myhousehold.app.ui.commun.enClairCourt
@@ -153,7 +154,7 @@ fun EcranFormulaireTache(
             when (etat.sorte) {
                 SorteDeTache.RECURRENTE -> ChampsRepetition(etat, modele)
                 SorteDeTache.DE_FOND -> ChampsDeFond(etat, modele)
-                SorteDeTache.PONCTUELLE -> ChampsPonctuelle(etat)
+                SorteDeTache.PONCTUELLE -> ChampsPonctuelle(etat, modele)
             }
 
             val apercu = etat.apercu(zone)
@@ -300,11 +301,12 @@ private fun ChampsDeFond(etat: EtatFormulaire, modele: ModeleFormulaireTache) {
 }
 
 @Composable
-private fun ChampsPonctuelle(etat: EtatFormulaire) {
-    TitreDeSection("Date limite")
-    Text(
-        text = etat.dateLimite?.enClairCourt() ?: "Sans date limite",
-        style = MaterialTheme.typography.bodyLarge,
+private fun ChampsPonctuelle(etat: EtatFormulaire, modele: ModeleFormulaireTache) {
+    ChampDate(
+        libelle = "Date limite",
+        valeur = etat.dateLimite,
+        onChange = { date -> modele.modifier { it.copy(dateLimite = date) } },
+        facultative = true,
     )
     Text(
         "« Sans date limite » est un choix normal : la tâche attend dans la liste.",

@@ -28,9 +28,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.myhousehold.app.donnees.Apparence
 import org.myhousehold.app.ui.commun.CarteFoyer
 import org.myhousehold.app.ui.commun.EnTete
-import org.myhousehold.app.ui.commun.Pastille
+import org.myhousehold.app.ui.commun.PastilleDe
 import org.myhousehold.app.ui.commun.TitreDeSection
-import org.myhousehold.app.ui.commun.couleurDe
 
 @Composable
 fun EcranReglages(
@@ -53,7 +52,7 @@ fun EcranReglages(
                 CarteFoyer(modifier = Modifier.clickable(onClick = onOuvrirProfil)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         etat.moi?.let { moi ->
-                            Pastille(moi.initiales, couleurDe(moi.couleur), taille = 44)
+                            PastilleDe(moi, taille = 44)
                             Spacer(Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(moi.nomComplet, style = MaterialTheme.typography.titleMedium)

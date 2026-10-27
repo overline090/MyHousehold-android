@@ -133,7 +133,13 @@ class DepotFoyer(private val base: BaseLocale) {
      * tient le téléphone. Aucune adresse à saisir, aucun compte à créer
      * — exiger un serveur avant de pouvoir essayer l'app condamne l'app.
      */
-    suspend fun commencerSeul(nomDuFoyer: String, prenom: String, nom: String) {
+    suspend fun commencerSeul(
+        nomDuFoyer: String,
+        prenom: String,
+        nom: String,
+        dateDeNaissance: LocalDate? = null,
+        photo: String? = null,
+    ) {
         val maintenant = maintenant().toEpochMilliseconds()
 
         base.foyers().enregistrer(
@@ -151,6 +157,8 @@ class DepotFoyer(private val base: BaseLocale) {
                 id = nouvelId(),
                 prenom = prenom.trim().ifBlank { "Moi" },
                 nom = nom.trim(),
+                dateDeNaissance = dateDeNaissance?.toString(),
+                photo = photo,
                 statutId = "local-administrateur",
                 statutNom = "Administrateur",
                 // Seul chez soi, on a tous les droits. Ils reprendront
@@ -164,6 +172,27 @@ class DepotFoyer(private val base: BaseLocale) {
         // Rien d'autre : pas de tâches d'exemple. Un foyer qui s'ouvre
         // sur les corvées de quelqu'un d'autre commence mal.
         materialiser(maintenant)
+    }
+
+    // ── Profil ─────────────────────────────────────────────────────────
+
+    /** Rend l'ancienne photo, que l'écran efface des fichiers. */
+    suspend fun changerMaPhoto(photo: String?): String? {
+        val moi = base.membres().monCompte() ?: return null
+        base.membres().enregistrer(moi.copy(photo = photo))
+        return moi.photo
+    }
+
+    // ── Rendez-vous ────────────────────────────────────────────────────
+
+    suspend fun rendezVousParId(id: String): RendezVous? = base.rendezVous().parId(id)?.versDomaine()
+
+    suspend fun enregistrerRendezVous(rendezVous: RendezVous) {
+        base.rendezVous().enregistrer(rendezVous.versEntite(maintenant().toEpochMilliseconds()))
+    }
+
+    suspend fun supprimerRendezVous(id: String) {
+        base.rendezVous().supprimer(id)
     }
 
     // ── Tâches ─────────────────────────────────────────────────────────

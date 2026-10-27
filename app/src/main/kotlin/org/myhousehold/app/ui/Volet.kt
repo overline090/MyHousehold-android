@@ -25,8 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import org.myhousehold.app.ui.commun.Etiquette
-import org.myhousehold.app.ui.commun.Pastille
-import org.myhousehold.app.ui.commun.couleurDe
+import org.myhousehold.app.ui.commun.PastilleDe
 import org.myhousehold.core.Foyer
 import org.myhousehold.core.Membre
 
@@ -73,7 +72,7 @@ fun ContenuDuVolet(
         Column(modifier = Modifier.fillMaxHeight().padding(horizontal = 12.dp, vertical = 20.dp)) {
             Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 18.dp)) {
                 if (moi != null) {
-                    Pastille(moi.initiales, couleurDe(moi.couleur), taille = 56)
+                    PastilleDe(moi, taille = 56)
                     Spacer(Modifier.height(12.dp))
                     Text(moi.nomComplet, style = MaterialTheme.typography.titleMedium)
                 }

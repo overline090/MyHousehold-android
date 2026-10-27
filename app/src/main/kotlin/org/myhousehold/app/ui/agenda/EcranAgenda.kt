@@ -40,6 +40,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
+import org.myhousehold.app.ui.commun.BoutonAjout
 import org.myhousehold.app.ui.commun.CarteFoyer
 import org.myhousehold.app.ui.commun.EnTete
 import org.myhousehold.app.ui.commun.couleurDe
@@ -59,129 +60,144 @@ private val LETTRES = listOf("L", "M", "M", "J", "V", "S", "D")
  * l'accueil donne déjà la semaine : elle peut attendre.
  */
 @Composable
-fun EcranAgenda(modele: ModeleAgenda, modifier: Modifier = Modifier) {
+fun EcranAgenda(
+    modele: ModeleAgenda,
+    onNouveauRendezVous: (jour: LocalDate) -> Unit,
+    onOuvrirRendezVous: (id: String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val etat by modele.etat.collectAsStateWithLifecycle()
     val aujourdHui = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
-    Column(modifier = modifier.fillMaxSize()) {
-        EnTete(titre = "${MOIS[etat.mois.monthNumber - 1]} ${etat.mois.year}") {
-            Row {
-                IconButton(onClick = { modele.moisPrecedent() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Mois précédent")
-                }
-                IconButton(onClick = { modele.moisSuivant() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Mois suivant")
-                }
-            }
-        }
-
-        LazyColumn(
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            item {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    LETTRES.forEach { lettre ->
-                        Text(
-                            text = lettre,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f),
-                        )
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            EnTete(titre = "${MOIS[etat.mois.monthNumber - 1]} ${etat.mois.year}") {
+                Row {
+                    IconButton(onClick = { modele.moisPrecedent() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Mois précédent")
+                    }
+                    IconButton(onClick = { modele.moisSuivant() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Mois suivant")
                     }
                 }
             }
 
-            items(semainesDu(etat.mois)) { semaine ->
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    semaine.forEach { jour ->
-                        CelluleDeJour(
-                            jour = jour,
-                            duMois = jour.monthNumber == etat.mois.monthNumber,
-                            aujourdHui = jour == aujourdHui,
-                            choisi = jour == etat.jourChoisi,
-                            occupe = jour in etat.joursOccupes,
-                            onChoisir = { modele.choisir(jour) },
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                }
-            }
-
-            item {
-                Spacer(Modifier.size(6.dp))
-                Text(
-                    text = "${etat.jourChoisi.dayOfMonth} ${MOIS[etat.jourChoisi.monthNumber - 1].lowercase()}",
-                    style = MaterialTheme.typography.titleLarge,
-                )
-            }
-
-            if (etat.duJour.isEmpty()) {
+            LazyColumn(
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 96.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
                 item {
-                    Text(
-                        "Rien ce jour-là.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-
-            items(etat.duJour, key = { entree ->
-                when (entree) {
-                    is EntreeAgenda.Tache -> "t-" + entree.occurrence.occurrence.id
-                    is EntreeAgenda.Rendez -> "r-" + entree.rendezVous.id
-                }
-            }) { entree ->
-                when (entree) {
-                    is EntreeAgenda.Tache -> CarteFoyer {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(width = 4.dp, height = 36.dp)
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .background(
-                                        entree.occurrence.groupe?.couleur?.let { couleurDe(it) }
-                                            ?: MaterialTheme.colorScheme.onSurfaceVariant,
-                                    ),
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        LETTRES.forEach { lettre ->
+                            Text(
+                                text = lettre,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.weight(1f),
                             )
-                            Spacer(Modifier.size(10.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    entree.occurrence.tache.titre,
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
-                                Text(
-                                    text = entree.occurrence.enClair(
-                                        enRetard = entree.occurrence.occurrence.etat ==
-                                            EtatOccurrence.A_FAIRE &&
-                                            entree.occurrence.occurrence.jour!! < aujourdHui,
-                                    ),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
                         }
                     }
+                }
 
-                    is EntreeAgenda.Rendez -> CarteFoyer {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                entree.rendezVous.heureEnClair(),
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(end = 12.dp),
+                items(semainesDu(etat.mois)) { semaine ->
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        semaine.forEach { jour ->
+                            CelluleDeJour(
+                                jour = jour,
+                                duMois = jour.monthNumber == etat.mois.monthNumber,
+                                aujourdHui = jour == aujourdHui,
+                                choisi = jour == etat.jourChoisi,
+                                occupe = jour in etat.joursOccupes,
+                                onChoisir = { modele.choisir(jour) },
+                                modifier = Modifier.weight(1f),
                             )
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    entree.rendezVous.titre,
-                                    style = MaterialTheme.typography.titleMedium,
+                        }
+                    }
+                }
+
+                item {
+                    Spacer(Modifier.size(6.dp))
+                    Text(
+                        text = "${etat.jourChoisi.dayOfMonth} ${MOIS[etat.jourChoisi.monthNumber - 1].lowercase()}",
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                }
+
+                if (etat.duJour.isEmpty()) {
+                    item {
+                        Text(
+                            "Rien ce jour-là.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
+                items(etat.duJour, key = { entree ->
+                    when (entree) {
+                        is EntreeAgenda.Tache -> "t-" + entree.occurrence.occurrence.id
+                        is EntreeAgenda.Rendez -> "r-" + entree.rendezVous.id
+                    }
+                }) { entree ->
+                    when (entree) {
+                        is EntreeAgenda.Tache -> CarteFoyer {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(width = 4.dp, height = 36.dp)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(
+                                            entree.occurrence.groupe?.couleur?.let { couleurDe(it) }
+                                                ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                                        ),
                                 )
-                                entree.rendezVous.lieu?.let {
+                                Spacer(Modifier.size(10.dp))
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        it,
+                                        entree.occurrence.tache.titre,
+                                        style = MaterialTheme.typography.titleMedium,
+                                    )
+                                    Text(
+                                        text = entree.occurrence.enClair(
+                                            enRetard = entree.occurrence.occurrence.etat ==
+                                                EtatOccurrence.A_FAIRE &&
+                                                entree.occurrence.occurrence.jour!! < aujourdHui,
+                                        ),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
+                                }
+                            }
+                        }
+
+                        // Un rendez-vous venu d'un agenda externe se lit, il ne
+                        // se modifie pas ici.
+                        is EntreeAgenda.Rendez -> CarteFoyer(
+                            modifier = if (entree.rendezVous.importe) {
+                                Modifier
+                            } else {
+                                Modifier.clickable { onOuvrirRendezVous(entree.rendezVous.id) }
+                            },
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    entree.rendezVous.heureEnClair(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(end = 12.dp),
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        entree.rendezVous.titre,
+                                        style = MaterialTheme.typography.titleMedium,
+                                    )
+                                    entree.rendezVous.lieu?.let {
+                                        Text(
+                                            it,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -189,6 +205,12 @@ fun EcranAgenda(modele: ModeleAgenda, modifier: Modifier = Modifier) {
                 }
             }
         }
+
+        BoutonAjout(
+            description = "Nouveau rendez-vous",
+            onClick = { onNouveauRendezVous(etat.jourChoisi) },
+            modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
+        )
     }
 }
 
