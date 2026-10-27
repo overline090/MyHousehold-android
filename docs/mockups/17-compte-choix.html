@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Votre compte</title><link rel="stylesheet" href="app.css"></head>
+<body>
+  <header class="entete">
+    <div class="ligne">
+      <span style="font-size:20px;color:var(--gris)">←</span>
+      <h1 style="font-size:20px">Votre compte</h1>
+    </div>
+  </header>
+
+  <div class="corps" style="gap:16px">
+    <div class="carte" style="border-color:var(--accent-trait)">
+      <div class="ligne">
+        <div style="flex:1;min-width:0">
+          <h3>Maison des Dupont</h3>
+          <p class="muet">192.168.1.20</p>
+        </div>
+        <span class="etiquette accent" style="display:inline-flex;gap:4px;align-items:center"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m5 12 5 5 9-10"/></svg>Vérifié</span>
+      </div>
+    </div>
+
+    <!-- Le serveur sert un seul foyer : il n'y a rien à choisir d'autre
+         qu'entre « j'ai un compte » et « je n'en ai pas ». -->
+    <div class="carte">
+      <h3>Je n'ai pas encore de compte</h3>
+      <p class="muet" style="margin:4px 0 12px">Avec le code d'invitation donné par un membre du foyer.</p>
+      <div class="bouton primaire">Créer mon compte</div>
+    </div>
+    <div class="carte">
+      <h3>J'ai déjà un compte</h3>
+      <p class="muet" style="margin:4px 0 12px">Sur un autre téléphone, ou sur la page web du serveur.</p>
+      <div class="bouton">Me connecter</div>
+    </div>
+  </div>
+</body></html>

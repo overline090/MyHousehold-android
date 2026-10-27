@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Compte administrateur</title><link rel="stylesheet" href="app.css"></head>
+<body>
+  <header class="entete">
+    <div class="ligne">
+      <span style="font-size:20px;color:var(--gris)">←</span>
+      <h1 style="font-size:20px">Compte administrateur</h1>
+    </div>
+  </header>
+
+  <div class="corps" style="gap:13px">
+    <!-- Arrivé ici par le QR code de l'étape « Premier compte » de
+         l'assistant : le code d'appariement est déjà connu. -->
+    <div class="encadre accent">Premier compte de ce serveur : vous en serez <b>l'administrateur</b>. C'est le seul compte qui pourra supprimer celui d'un membre qui n'est plus joignable.</div>
+    <div class="ligne" style="gap:10px;align-items:flex-start">
+      <div class="champ" style="flex:1"><label>Prénom</label><div class="saisie">Marie</div></div>
+      <div class="champ" style="flex:1"><label>Nom</label><div class="saisie">Dupont</div></div>
+    </div>
+    <div class="champ">
+      <label>Date de naissance</label>
+      <div class="saisie" style="color:var(--gris)">Facultative</div>
+    </div>
+    <div class="champ">
+      <label>Adresse e-mail</label>
+      <div class="saisie">marie.dupont@exemple.fr</div>
+    </div>
+    <div class="champ">
+      <label>Mot de passe</label>
+      <div class="saisie">••••••••••••</div><p class="muet">10 caractères au moins.</p>
+    </div>
+
+    <div class="bouton primaire">Créer le compte administrateur</div>
+    <p class="muet">Prénom et nom sont repris du profil de ce téléphone.</p>
+  </div>
+</body></html>

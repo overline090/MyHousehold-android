@@ -24,14 +24,19 @@ coupée passerait sinon pour correcte.
 | `6-foyer.html` | Membres, statuts, contributions |
 | `7-reglages.html` | Profil, synchronisation, mises à jour |
 | `8-supprimer-compte.html` | Supprimer son compte — la seule sortie du foyer |
-| `9-connecter-serveur.html` | Adopter un serveur : ce qui part, ce qui reste |
 | `10-mon-profil.html` | Photo, prénom, nom, date de naissance, statut |
 | `11-volet.html` | Le volet de navigation, ouvert par-dessus l'accueil |
 | `12-depart.html` | Première ouverture : serveur trouvé sur le Wi-Fi, scan, adresse, ou sans serveur |
 | `13-depart-hors-wifi.html` | La même, hors Wi-Fi : la détection le dit, les autres chemins restent |
 | `14-scanner.html` | Scanner le QR code affiché par la page web du serveur |
 | `15-adresse.html` | Saisir l'adresse du serveur à la main |
-| `16-verifier-serveur.html` | Comparer l'empreinte du serveur — seulement pour une adresse saisie |
+| `16-verifier-serveur.html` | Comparer l'empreinte du serveur — sauf QR code, qui la porte |
+| `17-compte-choix.html` | Serveur vérifié : créer son compte ou se connecter |
+| `18-creer-compte.html` | Créer son compte avec un code d'invitation |
+| `19-premier-compte.html` | Le premier compte du serveur, administrateur (QR code de l'assistant) |
+| `20-se-connecter.html` | Se connecter à un compte existant |
+| `21-reprise.html` | Reprendre le foyer du téléphone sur un serveur neuf : ce qui sera envoyé |
+| `22-reprise-envoyee.html` | Foyer envoyé : la suite se fait sur la page web, puis par le QR code suivant |
 
 ## Ce que ces maquettes décident
 
