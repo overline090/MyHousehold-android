@@ -1,4 +1,6 @@
-# Publier une version : poser une étiquette « v0.2.0 » sur main suffit.
+# Publier une version : poser une étiquette « v0.2.0 » sur main, ou
+# lancer ce flux à la main depuis l'onglet Actions — il crée alors
+# l'étiquette lui-même, d'après versionName.
 # L'APK est signé avec la clé du projet, reçue par les secrets du dépôt,
 # et sa somme SHA-256 est écrite dans les notes de la publication — le
 # serveur du foyer la lit, et l'app la vérifie avant d'installer.
@@ -7,6 +9,7 @@ name: Publication
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -29,12 +32,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: L'étiquette correspond à la version de l'app
+        id: version
         run: |
           version="$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)"
-          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "v$version" != "$GITHUB_REF_NAME" ]; then
             echo "L'étiquette $GITHUB_REF_NAME ne correspond pas à versionName ($version)."
             exit 1
           fi
+          echo "etiquette=v$version" >> "$GITHUB_OUTPUT"
 
       - name: Clé de signature
         env:
@@ -60,12 +65,12 @@ jobs:
       - name: Nommer l'APK et calculer sa somme
         id: apk
         run: |
-          nom="myhousehold-${GITHUB_REF_NAME}.apk"
+          nom="myhousehold-${{ steps.version.outputs.etiquette }}.apk"
           cp app/build/outputs/apk/release/app-release.apk "$nom"
           somme="$(sha256sum "$nom" | cut -d' ' -f1)"
           echo "nom=$nom" >> "$GITHUB_OUTPUT"
           {
-            echo "MyHousehold ${GITHUB_REF_NAME}"
+            echo "MyHousehold ${{ steps.version.outputs.etiquette }}"
             echo
             echo "sha256: $somme"
           } > notes.md
@@ -73,7 +78,9 @@ jobs:
       - name: Publier
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ github.ref_name }}
+          tag_name: ${{ steps.version.outputs.etiquette }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ steps.version.outputs.etiquette }}
           body_path: notes.md
           files: ${{ steps.apk.outputs.nom }}
           fail_on_unmatched_files: true
