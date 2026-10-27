@@ -27,6 +27,11 @@ coupée passerait sinon pour correcte.
 | `9-connecter-serveur.html` | Adopter un serveur : ce qui part, ce qui reste |
 | `10-mon-profil.html` | Photo, prénom, nom, date de naissance, statut |
 | `11-volet.html` | Le volet de navigation, ouvert par-dessus l'accueil |
+| `12-depart.html` | Première ouverture : serveur trouvé sur le Wi-Fi, scan, adresse, ou sans serveur |
+| `13-depart-hors-wifi.html` | La même, hors Wi-Fi : la détection le dit, les autres chemins restent |
+| `14-scanner.html` | Scanner le QR code affiché par la page web du serveur |
+| `15-adresse.html` | Saisir l'adresse du serveur à la main |
+| `16-verifier-serveur.html` | Comparer l'empreinte du serveur — seulement pour une adresse saisie |
 
 ## Ce que ces maquettes décident
 

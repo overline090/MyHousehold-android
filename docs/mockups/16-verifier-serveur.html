@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Vérifier le serveur</title><link rel="stylesheet" href="app.css"></head>
+<body>
+  <header class="entete">
+    <div class="ligne">
+      <span style="font-size:20px;color:var(--gris)">←</span>
+      <h1 style="font-size:20px">Vérifier le serveur</h1>
+    </div>
+  </header>
+
+  <div class="corps" style="gap:16px">
+    <!-- Avec le QR code, cette vérification est automatique : l'empreinte y
+         est déjà. Elle n'apparaît que pour une adresse saisie à la main. -->
+    <p style="font-size:15px">Assurez-vous de parler à <b>votre</b> serveur : l'empreinte ci-dessous doit être identique à celle affichée sur sa page web.</p>
+    <div class="carte" style="text-align:center">
+      <p class="muet">maison.mondomaine.fr</p>
+      <p style="font-family:ui-monospace,monospace;font-size:20px;font-weight:700;letter-spacing:.06em;margin-top:8px;line-height:1.6">7F3A 91C2 0B5E<br>D4A8 6E17 C93F</p>
+    </div>
+    <div class="bouton primaire">C'est la même</div>
+    <div class="bouton">Elle est différente</div>
+    <p class="muet">Différente : ne vous connectez pas, quelqu'un pourrait se faire passer pour votre serveur.</p>
+  </div>
+</body></html>
