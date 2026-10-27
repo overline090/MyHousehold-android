@@ -41,6 +41,9 @@ coupée passerait sinon pour correcte.
 | `24-nouveau-rdv.html` | Nouveau rendez-vous, depuis le bouton d'ajout de l'agenda |
 | `25-photo.html` | Changer sa photo de profil : prendre, choisir, retirer |
 | `26-commencer-seul.html` | Commencer sans serveur : photo et date de naissance facultatives |
+| `27-maj-bandeau.html` | Une version plus récente existe : bandeau sur l'accueil |
+| `28-maj-telecharger.html` | Mise à jour : ce qui change, d'où elle vient, télécharger |
+| `29-maj-installer.html` | Téléchargée et vérifiée : installer, Android confirme |
 
 ## Ce que ces maquettes décident
 
