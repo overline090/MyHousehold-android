@@ -25,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.myhousehold.app.ui.BoutonVolet
+import org.myhousehold.app.ui.LocalOuvrirVolet
 import org.myhousehold.core.Priorite
 
 /**
@@ -41,10 +43,19 @@ fun EnTete(
     action: @Composable (() -> Unit)? = null,
 ) {
     Surface(color = MaterialTheme.colorScheme.surface, modifier = modifier.fillMaxWidth()) {
+        // Avec le bouton ☰, c'est lui qui porte la marge de gauche : le
+        // titre reste aligné avec le contenu de l'écran à 20 dp.
+        val avecVolet = LocalOuvrirVolet.current != null
         Row(
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 12.dp),
+            modifier = Modifier.padding(
+                start = if (avecVolet) 8.dp else 20.dp,
+                end = 20.dp,
+                top = 20.dp,
+                bottom = 12.dp,
+            ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            BoutonVolet()
             Text(
                 text = titre,
                 style = MaterialTheme.typography.headlineLarge,

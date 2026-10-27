@@ -26,12 +26,15 @@ coupée passerait sinon pour correcte.
 | `8-supprimer-compte.html` | Supprimer son compte — la seule sortie du foyer |
 | `9-connecter-serveur.html` | Adopter un serveur : ce qui part, ce qui reste |
 | `10-mon-profil.html` | Photo, prénom, nom, date de naissance, statut |
+| `11-volet.html` | Le volet de navigation, ouvert par-dessus l'accueil |
 
 ## Ce que ces maquettes décident
 
-- **Quatre destinations de contenu plus les réglages** : Accueil, Tâches, Agenda,
-  Foyer, Réglages. Les anciennes « compteurs » n'ont plus de destination à elles :
-  ce sont des tâches, atteintes par un filtre de l'écran Tâches.
+- **Trois onglets** : Accueil, Tâches, Agenda — ce qu'on ouvre tous les jours. Foyer,
+  Mon profil, Serveur, Réglages et À propos vivent dans un **volet de navigation**,
+  ouvert par le bouton ☰ de **n'importe quel écran**. Les anciens « compteurs » n'ont
+  pas de destination à eux : ce sont des tâches, atteintes par un filtre de l'écran
+  Tâches.
 - **L'accueil montre la semaine qui vient**, pas le seul jour courant : un rendez-vous
   de mercredi découvert mercredi matin est découvert trop tard.
 - **Aucun sous-titre sous un titre d'écran.** Ni « 4 membres · Europe/Paris », ni

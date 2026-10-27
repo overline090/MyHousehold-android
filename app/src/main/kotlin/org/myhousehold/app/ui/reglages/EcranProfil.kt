@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.LocalDate
+import org.myhousehold.app.ui.BoutonVolet
 import org.myhousehold.app.ui.commun.CarteFoyer
 import org.myhousehold.app.ui.commun.Pastille
 import org.myhousehold.app.ui.commun.TitreDeSection
@@ -89,6 +90,7 @@ fun EcranProfil(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
                 }
             },
+            actions = { BoutonVolet() },
         )
 
         Column(

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
@@ -26,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.myhousehold.app.BuildConfig
 import org.myhousehold.app.donnees.Apparence
 import org.myhousehold.app.ui.commun.CarteFoyer
 import org.myhousehold.app.ui.commun.EnTete
@@ -90,47 +88,6 @@ fun EcranReglages(
                 }
             }
 
-            item { TitreDeSection("Synchronisation") }
-            item {
-                CarteFoyer {
-                    if (etat.foyer?.local == true) {
-                        Text("Foyer local", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            "Tout reste sur ce téléphone. Un serveur permettra de partager ce " +
-                                "foyer — et reprendra ce qui a été fait d’ici là.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    } else {
-                        Text("Serveur lié", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            if (etat.mutationsEnAttente == 0) {
-                                "À jour."
-                            } else {
-                                "${etat.mutationsEnAttente} action(s) en attente d’envoi."
-                            },
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
-
-            item { TitreDeSection("À propos") }
-            item {
-                CarteFoyer {
-                    Ligne("Version", BuildConfig.VERSION_NAME)
-                    Ligne("Licence", "PolyForm Noncommercial 1.0.0")
-                    Text(
-                        "Projet communautaire : libre d’usage et de modification, sans en tirer " +
-                            "de profit.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 6.dp),
-                    )
-                }
-            }
-
             item { TitreDeSection("Ce foyer") }
             item {
                 CarteFoyer {
@@ -187,21 +144,6 @@ fun EcranReglages(
             dismissButton = {
                 TextButton(onClick = { confirmationEffacement = false }) { Text("Annuler") }
             },
-        )
-    }
-}
-
-@Composable
-private fun Ligne(libelle: String, valeur: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(libelle, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        Text(
-            valeur,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

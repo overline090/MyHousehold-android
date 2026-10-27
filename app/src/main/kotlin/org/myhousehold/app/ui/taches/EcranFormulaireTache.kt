@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.TimeZone
+import org.myhousehold.app.ui.BoutonVolet
 import org.myhousehold.app.ui.commun.CarteFoyer
 import org.myhousehold.app.ui.commun.TitreDeSection
 import org.myhousehold.app.ui.commun.enClair
@@ -79,6 +80,7 @@ fun EcranFormulaireTache(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
                 }
             },
+            actions = { BoutonVolet() },
         )
 
         Column(
