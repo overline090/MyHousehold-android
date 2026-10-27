@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Volet de navigation</title><link rel="stylesheet" href="app.css"></head>
+<body style="position:relative">
+  <!-- Pas de sous-titre : « samedi 25 octobre · Maison des Dupont » répétait
+       ce que la barre d'état et l'écran Foyer disent déjà. -->
+  <header class="entete">
+    <!-- Le volet de navigation s'ouvre ici (ou en glissant depuis le bord
+         gauche) : Foyer, Réglages et le reste y vivent. -->
+    <div class="ligne">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <div style="flex:1"><h1>Accueil</h1></div>
+    </div>
+  </header>
+
+  <div class="corps" style="gap:16px">
+    <div class="section">
+      <h2>En retard</h2>
+      <div class="carte" style="border-color:var(--alerte-trait);background:var(--alerte-fond)">
+        <div class="ligne">
+          <div class="case"></div>
+          <div style="flex:1;min-width:0">
+            <h3>Changer les draps</h3>
+            <p class="muet" style="color:var(--alerte-encre)">Il y a 23 jours — à refaire dans les 14 jours</p>
+          </div>
+          <span class="etiquette alerte">De fond</span>
+        </div>
+      </div>
+      <div class="carte" style="border-color:var(--alerte-trait)">
+        <div class="ligne">
+          <div class="case"></div>
+          <div style="flex:1;min-width:0">
+            <h3>Changer le fusible</h3>
+            <p class="muet" style="color:var(--alerte-encre)">Date limite dépassée de 2 jours</p>
+          </div>
+          <span class="etiquette urgente">Urgente</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Mes tâches du jour</h2>
+      <div class="carte">
+        <div class="ligne">
+          <div class="case"></div>
+          <div style="flex:1;min-width:0">
+            <h3>Sortir les poubelles</h3>
+            <p class="groupe" style="margin-top:2px"><i style="background:#0f766e"></i>Cuisine · 19 h 00</p>
+          </div>
+          <span class="etiquette haute">Haute</span>
+        </div>
+      </div>
+      <div class="carte">
+        <div class="ligne">
+          <div class="case cochee">✓</div>
+          <div style="flex:1;min-width:0">
+            <h3 style="text-decoration:line-through;color:var(--gris)">Vider le lave-vaisselle</h3>
+            <p class="muet">Fait à 8 h 12</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- La semaine, pas le seul jour : un rendez-vous de mercredi découvert
+         mercredi matin est découvert trop tard. -->
+    <div class="section">
+      <h2>Rendez-vous de la semaine</h2>
+      <div class="carte pile" style="gap:0">
+        <p class="jour">Aujourd'hui</p>
+        <div class="ligne" style="padding:8px 0">
+          <div style="flex:none;width:46px;text-align:center"><p style="font-weight:700">15:30</p></div>
+          <div style="flex:1;min-width:0;border-left:3px solid var(--accent);padding-left:10px">
+            <h3 style="font-size:15px">Dentiste — Lou</h3>
+            <p class="muet">Cabinet Martin</p>
+          </div>
+        </div>
+        <p class="jour" style="margin-top:6px">Lundi 27</p>
+        <div class="ligne" style="padding:8px 0">
+          <div style="flex:none;width:46px;text-align:center"><p style="font-weight:700">18:00</p></div>
+          <div style="flex:1;min-width:0;border-left:3px solid #7c3aed;padding-left:10px">
+            <h3 style="font-size:15px">Réunion parents</h3>
+            <p class="muet">École — Marie, Paul</p>
+          </div>
+        </div>
+        <p class="muet" style="padding-top:8px;border-top:1px solid var(--trait);margin-top:4px">Voir tout l'agenda ›</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="ligne" style="justify-content:space-between">
+        <h2>À faire par les autres</h2>
+        <span class="muet">3 ▾</span>
+      </div>
+    </div>
+  </div>
+
+<nav class="nav">
+  <div class="N1 actif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>Accueil</div>
+  <div class="N2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Tâches</div>
+  <div class="N3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Agenda</div>
+</nav>
+
+<style>
+  .voile { position:absolute; inset:0; background:rgba(16,23,21,.45); }
+  .volet { position:absolute; top:0; bottom:0; left:0; width:304px; background:var(--surface);
+           border-radius:0 18px 18px 0; display:flex; flex-direction:column; padding:20px 12px; gap:4px; }
+  .volet .moi { padding:8px 12px 18px; border-bottom:1px solid var(--trait); margin-bottom:10px; }
+  .volet .entree { display:flex; align-items:center; gap:14px; min-height:52px; padding:0 14px;
+                    border-radius:999px; font-size:15px; font-weight:500; color:var(--encre-douce); }
+  .volet .entree.actif { background:var(--accent-doux); color:var(--accent); font-weight:600; }
+  .volet .bas { margin-top:auto; border-top:1px solid var(--trait); padding-top:10px; }
+</style>
+<div class="voile"></div>
+<aside class="volet">
+  <div class="moi">
+    <span class="photo grande" style="width:56px;height:56px;font-size:20px;background:linear-gradient(135deg,#0f766e,#14b8a6)">MD</span>
+    <h3 style="margin-top:12px">Marie Dupont</h3>
+    <p class="muet">Maison des Dupont</p>
+  </div>
+  <div class="entree"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="9" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 7a3 3 0 0 1 0 6M18 20a6 6 0 0 0-3-5.2"/></svg>Foyer</div>
+  <div class="entree"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Mon profil</div>
+  <div class="entree"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>Serveur<span class="etiquette neutre" style="margin-left:auto">Non lié</span></div>
+  <div class="entree"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Réglages</div>
+  <div class="bas">
+    <div class="entree"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>À propos</div>
+  </div>
+</aside>
+</body></html>
