@@ -44,6 +44,8 @@ coupée passerait sinon pour correcte.
 | `27-maj-bandeau.html` | Une version plus récente existe : bandeau sur l'accueil |
 | `28-maj-telecharger.html` | Mise à jour : ce qui change, d'où elle vient, télécharger |
 | `29-maj-installer.html` | Téléchargée et vérifiée : installer, Android confirme |
+| `30-stock.html` | Plugin **Gestion de stock** : les tableaux et leurs articles, quantités à portée de pouce |
+| `31-stock-sortie.html` | Déclarer une sortie : un ou plusieurs articles d'un coup |
 
 ## Ce que ces maquettes décident
 
