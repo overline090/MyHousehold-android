@@ -33,6 +33,24 @@ class OccurrencesTest {
     }
 
     @Test
+    fun `tous les 3 jours à partir d'un premier jour dans le futur`() {
+        val occurrences = genererOccurrences(
+            repetition = Repetition.ChaqueJour(3),
+            debutSerie = d("2026-11-03"),
+            fenetreDebut = d("2026-10-31"),
+            fenetreFin = d("2026-11-12"),
+            zone = paris,
+        )
+
+        // Rien avant le premier jour, puis un jour sur trois depuis lui.
+        assertEquals(
+            listOf("2026-11-03", "2026-11-06", "2026-11-09", "2026-11-12"),
+            occurrences.map { it.jour.toString() },
+        )
+        assertEquals(listOf(0, 1, 2, 3), occurrences.map { it.rang })
+    }
+
+    @Test
     fun `le rang reprend au bon endroit quand la fenêtre commence plus tard`() {
         val toute = genererOccurrences(
             repetition = Repetition.JoursDeLaSemaine(setOf(DayOfWeek.MONDAY, DayOfWeek.THURSDAY)),

@@ -39,6 +39,9 @@ val DELAIS_COURANTS: List<Pair<String, Duration>> = listOf(
     "1 an" to 365.days,
 )
 
+/** « Tous les N jours » va jusqu'à un an. */
+const val MAX_JOURS = 365
+
 /** La forme de répétition en cours d'édition, avant traduction. */
 enum class FormeRepetition(val libelle: String) {
     JOURS("Jours"),
@@ -64,6 +67,8 @@ data class EtatFormulaire(
     val uniteN: Repetition.ToutesLesN.Unite = Repetition.ToutesLesN.Unite.SEMAINE,
     val n: Int = 2,
     val heure: LocalTime? = null,
+    /** Le jour où la série commence : elle compte à partir de lui, et il peut être dans le futur. */
+    val premierJour: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
 
     val delai: Duration? = 14.days,
     val dateLimite: LocalDate? = null,
@@ -84,7 +89,7 @@ data class EtatFormulaire(
 
     val enregistrable: Boolean
         get() = titre.isNotBlank() &&
-            (sorte != SorteDeTache.RECURRENTE || repetition != null)
+            (sorte != SorteDeTache.RECURRENTE || (repetition != null && tousLesNJours in 1..MAX_JOURS))
 
     /**
      * Les trois prochaines fois. C'est ce qui rend une répétition
@@ -95,13 +100,15 @@ data class EtatFormulaire(
         if (sorte != SorteDeTache.RECURRENTE) return emptyList()
         val regle = repetition ?: return emptyList()
         val aujourdHui = Clock.System.todayIn(zone)
+        // Une série qui commence plus tard se montre depuis son premier jour.
+        val depuis = maxOf(aujourdHui, premierJour)
 
         return runCatching {
             genererOccurrences(
                 repetition = regle,
-                debutSerie = aujourdHui,
-                fenetreDebut = aujourdHui,
-                fenetreFin = LocalDate(aujourdHui.year + 2, aujourdHui.monthNumber, aujourdHui.dayOfMonth),
+                debutSerie = premierJour,
+                fenetreDebut = depuis,
+                fenetreFin = LocalDate(depuis.year + 2, depuis.monthNumber, 1),
                 heure = heure,
                 zone = zone,
             ).take(3)
@@ -152,7 +159,7 @@ class ModeleFormulaireTache(
             modeAssignation = ModeAssignation.QUICONQUE,
             repetition = if (etat.sorte == SorteDeTache.RECURRENTE) etat.repetition else null,
             heure = if (etat.sorte == SorteDeTache.RECURRENTE) etat.heure else null,
-            debutSerie = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+            debutSerie = if (etat.sorte == SorteDeTache.RECURRENTE) etat.premierJour else null,
             delaiMaximum = if (etat.sorte == SorteDeTache.DE_FOND) etat.delai else null,
             dateLimite = if (etat.sorte == SorteDeTache.PONCTUELLE) etat.dateLimite else null,
         )
@@ -183,6 +190,7 @@ private fun Tache.versFormulaire(groupes: List<GroupeDeTaches>): EtatFormulaire 
         priorite = priorite,
         groupes = groupes,
         heure = heure,
+        premierJour = debutSerie ?: Clock.System.todayIn(TimeZone.currentSystemDefault()),
         delai = delaiMaximum,
         dateLimite = dateLimite,
     )

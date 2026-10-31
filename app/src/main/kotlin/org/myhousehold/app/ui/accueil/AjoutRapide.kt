@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -26,7 +28,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
@@ -57,7 +61,7 @@ enum class TypeAjout(val libelle: String) {
 private enum class Quand(val libelle: String) {
     UNE_FOIS("Une fois"),
     AVANT_UNE_DATE("Avant une date"),
-    CHAQUE_SEMAINE("Chaque semaine"),
+    REPETER("Répéter"),
 }
 
 private val DELAIS_RAPIDES: List<Pair<String, Duration>> = listOf(
@@ -88,8 +92,13 @@ fun FeuilleAjoutRapide(
     var jour by rememberSaveable { mutableStateOf(maintenant.date.toString()) }
     var heure by rememberSaveable { mutableStateOf(LocalTime((maintenant.hour + 1).coerceAtMost(22), 0).toString()) }
     var delai by rememberSaveable { mutableStateOf(1) }
+    // « Tous les 7 jours à partir d'aujourd'hui » : ce que « chaque semaine »
+    // veut dire le plus souvent, et il suffit de changer le chiffre.
+    var tousLes by rememberSaveable { mutableStateOf("7") }
+    var premier by rememberSaveable { mutableStateOf(maintenant.date.toString()) }
 
     val leJour = LocalDate.parse(jour)
+    val nombreDeJours = tousLes.toIntOrNull()?.takeIf { it in 1..365 }
     val lHeure = LocalTime.parse(heure)
 
     ModalBottomSheet(onDismissRequest = onFermer, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
@@ -138,6 +147,29 @@ fun FeuilleAjoutRapide(
                     if (quand == Quand.AVANT_UNE_DATE) {
                         ChampDate(libelle = "Date limite", valeur = leJour, onChange = { it?.let { j -> jour = j.toString() } })
                     }
+                    if (quand == Quand.REPETER) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            Text("Tous les", style = MaterialTheme.typography.bodyLarge)
+                            OutlinedTextField(
+                                value = tousLes,
+                                onValueChange = { saisi -> tousLes = saisi.filter { it.isDigit() }.take(3) },
+                                label = { Text("N") },
+                                singleLine = true,
+                                isError = nombreDeJours == null,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.width(96.dp),
+                            )
+                            Text(if ((nombreDeJours ?: 2) > 1) "jours" else "jour", style = MaterialTheme.typography.bodyLarge)
+                        }
+                        ChampDate(
+                            libelle = "Premier jour",
+                            valeur = LocalDate.parse(premier),
+                            onChange = { it?.let { j -> premier = j.toString() } },
+                        )
+                    }
                 }
                 TypeAjout.RENDEZ_VOUS -> Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     ChampDate(
@@ -175,7 +207,7 @@ fun FeuilleAjoutRapide(
                     Text("Plus d’options")
                 }
                 Button(
-                    enabled = titre.isNotBlank(),
+                    enabled = titre.isNotBlank() && (type != TypeAjout.TACHE || quand != Quand.REPETER || nombreDeJours != null),
                     onClick = {
                         val id = DepotFoyer.nouvelId()
                         when (type) {
@@ -188,13 +220,12 @@ fun FeuilleAjoutRapide(
                                         sorte = SorteDeTache.PONCTUELLE,
                                         dateLimite = leJour,
                                     )
-                                    // Le jour d'aujourd'hui : « chaque semaine » se dit
-                                    // le plus souvent le jour où l'on y pense.
-                                    Quand.CHAQUE_SEMAINE -> Tache(
+                                    Quand.REPETER -> Tache(
                                         id,
                                         titre.trim(),
                                         sorte = SorteDeTache.RECURRENTE,
-                                        repetition = Repetition.JoursDeLaSemaine(setOf(maintenant.dayOfWeek)),
+                                        repetition = Repetition.ChaqueJour(nombreDeJours ?: 7),
+                                        debutSerie = LocalDate.parse(premier),
                                     )
                                 },
                             )

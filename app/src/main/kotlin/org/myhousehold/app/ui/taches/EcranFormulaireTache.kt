@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -26,8 +28,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.DayOfWeek
@@ -203,11 +209,27 @@ private fun ChampsRepetition(etat: EtatFormulaire, modele: ModeleFormulaireTache
     }
 
     when (etat.forme) {
-        FormeRepetition.JOURS -> ChampNombre(
-            libelle = "Tous les N jours",
-            valeur = etat.tousLesNJours,
-            onChange = { n -> modele.modifier { it.copy(tousLesNJours = n) } },
-        )
+        FormeRepetition.JOURS -> Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text("Tous les", style = MaterialTheme.typography.bodyLarge)
+                ChampNombre(
+                    libelle = "N",
+                    valeur = etat.tousLesNJours,
+                    maximum = MAX_JOURS,
+                    onChange = { n -> modele.modifier { it.copy(tousLesNJours = n) } },
+                    modifier = Modifier.width(96.dp),
+                )
+                Text(if (etat.tousLesNJours > 1) "jours" else "jour", style = MaterialTheme.typography.bodyLarge)
+            }
+            Text(
+                "1 = chaque jour, 2 = un jour sur deux… jusqu’à 365.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         FormeRepetition.SEMAINE -> Row(
             modifier = Modifier.fillMaxWidth(),
@@ -270,6 +292,13 @@ private fun ChampsRepetition(etat: EtatFormulaire, modele: ModeleFormulaireTache
             )
         }
     }
+
+    ChampDate(
+        libelle = "Premier jour",
+        valeur = etat.premierJour,
+        onChange = { date -> date?.let { jour -> modele.modifier { it.copy(premierJour = jour) } } },
+        aide = "La série compte à partir de ce jour-là — il peut être dans le futur.",
+    )
 }
 
 @Composable
@@ -315,6 +344,10 @@ private fun ChampsPonctuelle(etat: EtatFormulaire, modele: ModeleFormulaireTache
     )
 }
 
+/**
+ * Un nombre saisi au clavier. Le champ peut être vidé le temps de taper
+ * le suivant ; ce qui dépasse les bornes s'y arrête.
+ */
 @Composable
 private fun ChampNombre(
     libelle: String,
@@ -322,14 +355,20 @@ private fun ChampNombre(
     onChange: (Int) -> Unit,
     minimum: Int = 1,
     maximum: Int = 31,
+    modifier: Modifier = Modifier.fillMaxWidth(),
 ) {
+    var texte by remember(valeur) { mutableStateOf(valeur.toString()) }
     OutlinedTextField(
-        value = valeur.toString(),
-        onValueChange = { texte ->
-            texte.toIntOrNull()?.coerceIn(minimum, maximum)?.let(onChange)
+        value = texte,
+        onValueChange = { saisi ->
+            val chiffres = saisi.filter { it.isDigit() }.take(4)
+            texte = chiffres
+            chiffres.toIntOrNull()?.coerceIn(minimum, maximum)?.let(onChange)
         },
         label = { Text(libelle) },
         singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
+        isError = texte.isEmpty(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        modifier = modifier,
     )
 }
