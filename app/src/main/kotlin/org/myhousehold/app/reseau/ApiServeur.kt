@@ -46,6 +46,17 @@ data class NouveauCompte(
 
 enum class UsageDuCode { REPRENDRE, PREMIER_COMPTE }
 
+/** Une réponse telle quelle : la synchronisation décide elle-même quoi faire d'un refus. */
+data class ReponseBrute(val statut: Int, val texte: String) {
+    val reussie: Boolean get() = statut in 200..299
+    fun objet(): JSONObject = runCatching { JSONObject(texte) }.getOrDefault(JSONObject())
+    fun liste(): JSONArray = runCatching { JSONArray(texte) }.getOrDefault(JSONArray())
+    val code: String? get() = objet().optJSONObject("error")?.optString("code")?.ifBlank { null }
+}
+
+/** Les jetons rendus par le renouvellement : le jeton de renouvellement tourne à chaque fois. */
+data class Jetons(val acces: String, val renouvellement: String, val expireDansSecondes: Long)
+
 /**
  * L'API du serveur, une fois son empreinte vérifiée.
  *
@@ -113,16 +124,57 @@ class ApiServeur(
     suspend fun creerCompte(codeDInvitation: String, compte: NouveauCompte): SessionServeur =
         session(envoyer("/api/v1/auth/register", compte.versJson().put("inviteCode", codeDInvitation)))
 
-    suspend fun seConnecter(identifiant: String, motDePasse: String, appareil: String): SessionServeur =
+    suspend fun seConnecter(
+        identifiant: String,
+        motDePasse: String,
+        appareil: String,
+        versionDeLApp: String? = null,
+    ): SessionServeur =
         session(
             envoyer(
                 "/api/v1/auth/login",
                 JSONObject()
                     .put("username", identifiant.trim().lowercase())
                     .put("password", motDePasse)
-                    .put("deviceName", appareil.take(80)),
+                    .put("deviceName", appareil.take(80))
+                    // Le serveur montre dans « Mes appareils » quelle version tourne où.
+                    .apply { versionDeLApp?.let { put("appVersion", it.take(40)) } },
             ),
         )
+
+    /** Échanger le jeton de renouvellement contre un jeton d'accès (et un nouveau jeton de renouvellement). */
+    suspend fun renouveler(jetonDeRenouvellement: String): Jetons {
+        val json = envoyer("/api/v1/auth/refresh", JSONObject().put("refreshToken", jetonDeRenouvellement))
+        return Jetons(
+            acces = json.getString("accessToken"),
+            renouvellement = json.getString("refreshToken"),
+            expireDansSecondes = json.optLong("expiresIn", 900),
+        )
+    }
+
+    /**
+     * Un appel authentifié à l'API (`/api/v1` + chemin), sans lever
+     * d'exception sur un refus : c'est l'appelant qui décide. Une coupure
+     * réseau, elle, lève une `IOException`.
+     */
+    suspend fun appel(methode: String, chemin: String, corps: String?, jeton: String): ReponseBrute =
+        withContext(Dispatchers.IO) {
+            val requete = Request.Builder()
+                .url(adresse.url + "/api/v1" + chemin)
+                .header("Authorization", "Bearer $jeton")
+                .method(
+                    methode,
+                    when {
+                        corps != null -> corps.toRequestBody("application/json".toMediaType())
+                        methode == "GET" || methode == "DELETE" -> null
+                        else -> "{}".toRequestBody("application/json".toMediaType())
+                    },
+                )
+                .build()
+            client.newCall(requete).execute().use { reponse ->
+                ReponseBrute(reponse.code, reponse.body?.string().orEmpty())
+            }
+        }
 
     private suspend fun obtenir(chemin: String): JSONObject =
         appeler(Request.Builder().url(adresse.url + chemin).get().build())

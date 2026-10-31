@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import org.json.JSONArray
 import org.json.JSONObject
+import org.myhousehold.app.reseau.ApiServeur
 import org.myhousehold.app.reseau.SessionServeur
 import org.myhousehold.core.AdresseServeur
 import org.myhousehold.core.Droit
@@ -56,6 +57,20 @@ class LiaisonServeur(
 
     /** Reprise envoyée à ce serveur, compte pas encore créé : l'installation continue sur la page web. */
     val repriseEnvoyeeA: String? get() = stockage.getString(CLE_REPRISE, null)
+
+    /** Le jeton de renouvellement : il tourne à chaque échange, on garde toujours le dernier. */
+    var jetonDeRenouvellement: String?
+        get() = stockage.getString(CLE_RENOUVELLEMENT, null)
+        set(valeur) {
+            stockage.edit().putString(CLE_RENOUVELLEMENT, valeur).commit()
+        }
+
+    /** Le jeton d'accès de la session ouverte à l'instant : la première synchronisation s'en sert. */
+    @Volatile
+    var jetonDAccesInitial: String? = null
+
+    /** L'API du serveur lié, avec son certificat vérifié. */
+    fun api(): ApiServeur? = _serveur.value?.let { ApiServeur(it.adresse, it.empreinte, it.reconnuParLeSysteme) }
 
     fun repriseEnvoyee(adresse: AdresseServeur) {
         stockage.edit().putString(CLE_REPRISE, adresse.url).apply()
@@ -148,7 +163,10 @@ class LiaisonServeur(
         val ancienFoyer = base.foyers().courant()
         val ancienMoi = base.membres().monCompte()
 
-        if (!repris && ancienFoyer != null) {
+        // Se reconnecter au même foyer (session expirée) ne met rien de côté :
+        // c'est le même foyer, et la file des gestes doit partir.
+        val memeFoyer = ancienFoyer != null && !ancienFoyer.local && ancienFoyer.id == session.foyerId
+        if (!repris && ancienFoyer != null && !memeFoyer) {
             mettreDeCote()
             withContext(Dispatchers.IO) { base.clearAllTables() }
         }
@@ -201,6 +219,7 @@ class LiaisonServeur(
             .putString(CLE_RENOUVELLEMENT, session.jetonDeRenouvellement)
             .remove(CLE_REPRISE)
             .apply()
+        jetonDAccesInitial = session.jetonDAcces
         _serveur.value = lire()
     }
 

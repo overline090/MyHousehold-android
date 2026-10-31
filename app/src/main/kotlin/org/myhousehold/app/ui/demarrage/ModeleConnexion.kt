@@ -130,7 +130,7 @@ class ModeleConnexion(application: Application) : AndroidViewModel(application) 
 
     fun ouvrirUnCompte(identifiant: String, motDePasse: String) = avecLeServeur { api, sondage, _ ->
         val appareil = listOf(Build.MANUFACTURER, Build.MODEL).joinToString(" ").trim()
-        lier(api.seConnecter(identifiant, motDePasse, appareil), sondage)
+        lier(api.seConnecter(identifiant, motDePasse, appareil, org.myhousehold.app.BuildConfig.VERSION_NAME), sondage)
     }
 
     private suspend fun lier(session: SessionServeur, sondage: Sondage) {

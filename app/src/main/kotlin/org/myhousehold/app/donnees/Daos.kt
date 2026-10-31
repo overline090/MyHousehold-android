@@ -278,3 +278,52 @@ interface StockDao {
     @Query("UPDATE stock_article SET quantite = MAX(0, quantite + :delta), modifieLe = :quand WHERE id = :id")
     suspend fun ajuster(id: String, delta: Int, quand: Long)
 }
+
+/** Ce que la synchronisation remplace d'un bloc par l'état du serveur. */
+@Dao
+interface SynchroDao {
+    @Query("DELETE FROM membre")
+    suspend fun viderMembres()
+
+    @Query("DELETE FROM groupe")
+    suspend fun viderGroupes()
+
+    @Query("DELETE FROM occurrence")
+    suspend fun viderOccurrences()
+
+    @Query("DELETE FROM tache")
+    suspend fun viderTaches()
+
+    @Query("DELETE FROM rendez_vous")
+    suspend fun viderRendezVous()
+
+    @Query("DELETE FROM stock_article")
+    suspend fun viderArticles()
+
+    @Query("DELETE FROM stock_tableau")
+    suspend fun viderTableaux()
+
+    @Upsert
+    suspend fun groupes(groupes: List<GroupeEntite>)
+
+    @Upsert
+    suspend fun taches(taches: List<TacheEntite>)
+
+    @Upsert
+    suspend fun occurrences(occurrences: List<OccurrenceEntite>)
+
+    @Upsert
+    suspend fun rendezVous(rendezVous: List<RendezVousEntite>)
+
+    @Upsert
+    suspend fun tableaux(tableaux: List<StockTableauEntite>)
+
+    @Upsert
+    suspend fun articles(articles: List<StockArticleEntite>)
+
+    @Query("SELECT * FROM mutation_en_attente ORDER BY creeeLe LIMIT 1")
+    suspend fun premiere(): MutationEnAttenteEntite?
+
+    @Query("UPDATE mutation_en_attente SET tentatives = tentatives + 1, derniereErreur = :erreur WHERE id = :id")
+    suspend fun echec(id: String, erreur: String)
+}

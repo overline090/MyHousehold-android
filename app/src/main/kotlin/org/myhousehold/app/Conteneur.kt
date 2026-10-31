@@ -4,6 +4,8 @@ import android.content.Context
 import org.myhousehold.app.donnees.BaseLocale
 import org.myhousehold.app.donnees.DepotFoyer
 import org.myhousehold.app.donnees.DepotStock
+import org.myhousehold.app.donnees.FileDEnvoi
+import org.myhousehold.app.donnees.Synchronisation
 import org.myhousehold.app.donnees.LiaisonServeur
 import org.myhousehold.app.donnees.PreferencesApp
 import org.myhousehold.app.reseau.MisesAJour
@@ -18,10 +20,12 @@ import org.myhousehold.app.reseau.MisesAJour
  */
 class Conteneur(contexte: Context) {
     val base: BaseLocale = BaseLocale.obtenir(contexte)
-    val depot: DepotFoyer = DepotFoyer(base)
-    val stock: DepotStock = DepotStock(base)
+    val file: FileDEnvoi = FileDEnvoi(base)
+    val depot: DepotFoyer = DepotFoyer(base, file)
+    val stock: DepotStock = DepotStock(base, file)
     val preferences: PreferencesApp = PreferencesApp(contexte)
     val liaison: LiaisonServeur = LiaisonServeur(contexte, base)
+    val synchro: Synchronisation = Synchronisation(contexte, base, liaison, file)
     val misesAJour: MisesAJour = MisesAJour(contexte, liaison)
 }
 

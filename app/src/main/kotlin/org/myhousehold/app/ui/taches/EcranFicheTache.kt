@@ -1,5 +1,7 @@
 package org.myhousehold.app.ui.taches
 
+import org.myhousehold.app.conteneur
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -174,7 +176,8 @@ fun EcranFicheTache(
             ligne.tache.description?.takeIf { it.isNotBlank() }?.let { details ->
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     TitreDeSection("Détails")
-                    DetailsRiches(details, onCase = { rang, cochee -> modele.cocherCase(rang, cochee) })
+                    val reglages by LocalContext.current.conteneur.synchro.detection.collectAsStateWithLifecycle()
+                    DetailsRiches(details, reglages = reglages, onCase = { rang, cochee -> modele.cocherCase(rang, cochee) })
                 }
             }
 

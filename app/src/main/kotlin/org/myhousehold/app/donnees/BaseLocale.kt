@@ -38,6 +38,7 @@ abstract class BaseLocale : RoomDatabase() {
     abstract fun rendezVous(): RendezVousDao
     abstract fun mutations(): MutationDao
     abstract fun stock(): StockDao
+    abstract fun synchro(): SynchroDao
 
     companion object {
         /** v0.6 : les plugins du foyer, et le plugin Gestion de stock. */

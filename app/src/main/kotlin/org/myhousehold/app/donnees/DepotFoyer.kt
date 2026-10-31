@@ -67,7 +67,7 @@ data class OccurrenceAffichee(
 /** Jusqu'où l'on remonte pour dire si une tâche est en retard, et raconter ses dernières fois. */
 private const val JOURS_D_AVANCEMENT = 120
 
-class DepotFoyer(private val base: BaseLocale) {
+class DepotFoyer(private val base: BaseLocale, private val file: FileDEnvoi) {
 
     val foyer: Flow<Foyer?> = base.foyers().flux().map { it?.versDomaine() }
     val membres: Flow<List<Membre>> = base.membres().flux().map { liste -> liste.map { it.versDomaine() } }
@@ -236,23 +236,39 @@ class DepotFoyer(private val base: BaseLocale) {
         return moi.photo
     }
 
+    /** Son nom, son prénom, sa date de naissance : envoyés au serveur s'il y en a un. */
+    suspend fun envoyerMonProfil(prenom: String, nom: String, dateDeNaissance: String?) {
+        file.appel(
+            "PATCH", "/users/me",
+            org.json.JSONObject().put("firstName", prenom)
+                .apply { if (nom.isNotBlank()) put("lastName", nom) }
+                .put("birthDate", dateDeNaissance ?: org.json.JSONObject.NULL),
+        )
+    }
+
     // ── Rendez-vous ────────────────────────────────────────────────────
 
     suspend fun rendezVousParId(id: String): RendezVous? = base.rendezVous().parId(id)?.versDomaine()
 
     suspend fun enregistrerRendezVous(rendezVous: RendezVous) {
-        base.rendezVous().enregistrer(rendezVous.versEntite(maintenant().toEpochMilliseconds()))
+        val entite = rendezVous.versEntite(maintenant().toEpochMilliseconds())
+        base.rendezVous().enregistrer(entite)
+        if (!entite.importe) file.enregistrer("/appointments/${entite.id}", "/appointments", entite.id, entite.versServeur())
     }
 
     suspend fun supprimerRendezVous(id: String) {
+        val entite = base.rendezVous().parId(id)
         base.rendezVous().supprimer(id)
+        if (entite?.importe != true) file.appel("DELETE", "/appointments/$id")
     }
 
     // ── Tâches ─────────────────────────────────────────────────────────
 
     suspend fun enregistrer(tache: Tache) {
         val maintenant = maintenant()
-        base.taches().enregistrer(tache.versEntite(maintenant.toEpochMilliseconds()))
+        val entite = tache.versEntite(maintenant.toEpochMilliseconds())
+        base.taches().enregistrer(entite)
+        file.enregistrer("/tasks/${entite.id}", "/tasks", entite.id, entite.versServeur())
         // Les échéances à venir suivent la nouvelle règle ; le passé
         // reste tel qu'il a été vécu.
         base.occurrences().oublierLesSuivantes(tache.id, maintenant.toEpochMilliseconds())
@@ -263,20 +279,25 @@ class DepotFoyer(private val base: BaseLocale) {
     suspend fun changerDetails(tacheId: String, details: String?) {
         val entite = base.taches().parId(tacheId) ?: return
         base.taches().enregistrer(entite.copy(description = details, modifieeLe = maintenant().toEpochMilliseconds()))
+        file.appel("PATCH", "/tasks/$tacheId", org.json.JSONObject().put("description", details ?: org.json.JSONObject.NULL))
     }
 
     suspend fun supprimerTache(tacheId: String) {
         base.taches().supprimer(tacheId, maintenant().toEpochMilliseconds())
+        file.appel("DELETE", "/tasks/$tacheId")
     }
 
     suspend fun enregistrerGroupe(groupe: GroupeDeTaches) {
-        base.groupes().enregistrer(groupe.versEntite())
+        val entite = groupe.versEntite()
+        base.groupes().enregistrer(entite)
+        file.enregistrer("/task-groups/${entite.id}", "/task-groups", entite.id, entite.versServeur())
     }
 
     /** Les tâches du groupe sont détachées, jamais supprimées. */
     suspend fun supprimerGroupe(groupeId: String) {
         base.taches().detacherDuGroupe(groupeId)
         base.groupes().supprimer(groupeId)
+        file.appel("DELETE", "/task-groups/$groupeId")
     }
 
     // ── Faire, défaire ─────────────────────────────────────────────────
@@ -290,6 +311,10 @@ class DepotFoyer(private val base: BaseLocale) {
                 faiteParId = base.membres().monCompte()?.id,
                 modifieeLe = maintenant().toEpochMilliseconds(),
             ),
+        )
+        file.echeance(
+            occurrenceId, occurrence.tacheId, occurrence.jour, "complete",
+            org.json.JSONObject().put("completedAt", quand.toString()),
         )
     }
 
@@ -312,6 +337,7 @@ class DepotFoyer(private val base: BaseLocale) {
                 modifieeLe = maintenant().toEpochMilliseconds(),
             ),
         )
+        file.echeance(occurrenceId, occurrence.tacheId, occurrence.jour, "uncomplete", org.json.JSONObject())
     }
 
     suspend fun passerSonTour(occurrenceId: String, note: String?) {
@@ -323,6 +349,10 @@ class DepotFoyer(private val base: BaseLocale) {
                 modifieeLe = maintenant().toEpochMilliseconds(),
             ),
         )
+        file.echeance(
+            occurrenceId, occurrence.tacheId, occurrence.jour, "skip",
+            org.json.JSONObject().apply { note?.ifBlank { null }?.let { put("note", it) } },
+        )
     }
 
     /**
@@ -331,9 +361,15 @@ class DepotFoyer(private val base: BaseLocale) {
      * correction possible sans rien écraser.
      */
     suspend fun faireTacheDeFond(tacheId: String, quand: Instant = maintenant(), note: String? = null) {
+        val id = nouvelId()
+        file.appel(
+            "POST", "/tasks/$tacheId/done",
+            org.json.JSONObject().put("id", id).put("completedAt", quand.toString())
+                .apply { note?.ifBlank { null }?.let { put("note", it) } },
+        )
         base.occurrences().enregistrer(
             OccurrenceEntite(
-                id = nouvelId(),
+                id = id,
                 tacheId = tacheId,
                 jour = null,
                 echeance = null,

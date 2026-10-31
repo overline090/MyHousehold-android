@@ -54,14 +54,14 @@ class ModeleReglages(
     ) {
         viewModelScope.launch {
             val existant = base.membres().monCompte() ?: return@launch
-            base.membres().enregistrer(
-                existant.copy(
-                    prenom = prenom.trim().ifBlank { existant.prenom },
-                    nom = nom.trim(),
-                    dateDeNaissance = dateDeNaissance?.toString(),
-                    couleur = couleur,
-                ),
+            val nouveau = existant.copy(
+                prenom = prenom.trim().ifBlank { existant.prenom },
+                nom = nom.trim(),
+                dateDeNaissance = dateDeNaissance?.toString(),
+                couleur = couleur,
             )
+            base.membres().enregistrer(nouveau)
+            depot.envoyerMonProfil(nouveau.prenom, nouveau.nom, nouveau.dateDeNaissance)
         }
     }
 

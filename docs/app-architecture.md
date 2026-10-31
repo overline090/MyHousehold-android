@@ -6,8 +6,8 @@
 |---|---|
 | `core` — domaine en Kotlin pur : sortes de tâches, priorités, cinq formes de répétition, état d'une tâche de fond, tour de rôle | ✅ écrit et testé |
 | `app` — base locale Room, accueil, liste des tâches, formulaire | ✅ écrit |
-| Agenda, foyer, réglages, profil | · à écrire |
-| Connexion à un serveur, synchronisation, mises à jour hors magasin | · à écrire |
+| Agenda, foyer, réglages, profil, plugin Gestion de stock | ✅ écrit |
+| Connexion à un serveur, synchronisation, mises à jour hors magasin | ✅ écrit (voir « Synchronisation, telle qu'elle est écrite ») |
 
 Le SDK Android ne s'installe pas partout : c'est l'intégration continue
 (`.github/workflows/android.yml`) qui construit l'APK et fait tourner les tests. Le
@@ -83,6 +83,29 @@ Puis WorkManager envoie la file. Trois issues possibles :
 
 Un `DUPLICATE` est un **succès** : il signifie que la mutation était déjà passée. Le
 traiter comme une erreur ferait apparaître des alertes à chaque reprise de réseau.
+
+## Synchronisation, telle qu'elle est écrite
+
+La version écrite (`donnees/FileDEnvoi.kt`, `donnees/Synchronisation.kt`) s'appuie sur
+l'API REST existante plutôt que sur `/sync/delta` et `/sync/push`, qui restent à
+écrire côté serveur :
+
+- **Envoyer.** Chaque geste fait sur un foyer lié est écrit dans Room, puis mis dans
+  la file `mutation_en_attente` : un appel tel quel (`APPEL`), un objet à modifier ou
+  à créer avec l'identifiant du téléphone (`ENREGISTRER` : `PATCH`, puis `POST` si le
+  serveur répond 404), ou une échéance repérée par sa tâche et son jour (`ECHEANCE`),
+  car une échéance née hors ligne n'a pas l'identifiant du serveur. La file part dans
+  l'ordre ; un 2xx ou un 409 la vide, un autre 4xx sort le geste de la file (le
+  rejouer échouerait toujours), une coupure ou un 5xx arrête l'envoi jusqu'au passage
+  suivant. Les créations sont idempotentes côté serveur.
+- **Recevoir.** Une fois la file vide, l'état du serveur remplace celui du téléphone :
+  foyer et plugins activés, membres, groupes, tâches, échéances de 60 jours en
+  arrière à 60 jours en avant, rendez-vous, stock, règles de copie automatique.
+- **Quand.** À l'ouverture, une seconde et demie après un geste, toutes les cinq
+  minutes tant que l'app est ouverte, et à la demande depuis Serveur.
+- **Session.** Le jeton de renouvellement tourne à chaque échange et reste dans le
+  stockage privé de l'app ; s'il est refusé, Serveur propose « Se reconnecter », qui
+  retrouve le même foyer sans rien mettre de côté.
 
 ## Indicateur de synchronisation
 
