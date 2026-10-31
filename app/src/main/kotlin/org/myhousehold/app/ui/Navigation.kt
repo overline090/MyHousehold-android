@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -59,6 +60,11 @@ import org.myhousehold.app.ui.taches.ModeleFicheTache
 import org.myhousehold.app.ui.taches.EcranTaches
 import org.myhousehold.app.ui.taches.ModeleFormulaireTache
 import org.myhousehold.app.ui.taches.ModeleTaches
+import org.myhousehold.app.ui.stock.EcranArticle
+import org.myhousehold.app.ui.stock.EcranSortie
+import org.myhousehold.app.ui.stock.EcranStock
+import org.myhousehold.app.ui.stock.ModeleArticle
+import org.myhousehold.app.ui.stock.ModeleStock
 import org.myhousehold.core.SorteDeTache
 
 /**
@@ -86,6 +92,9 @@ private const val ROUTE_FICHE_COMPLETE = "$ROUTE_FICHE/{id}"
 private const val ROUTE_FORMULAIRE_COMPLETE = "$ROUTE_FORMULAIRE?id={id}&titre={titre}&sorte={sorte}"
 private const val ROUTE_RENDEZ_VOUS = "rendez-vous"
 private const val ROUTE_MISE_A_JOUR = "mise-a-jour"
+private const val ROUTE_SORTIE = "stock/sortie"
+private const val ROUTE_ARTICLE = "stock/article"
+private const val ROUTE_ARTICLE_COMPLETE = "$ROUTE_ARTICLE?id={id}&tableau={tableau}"
 private const val ROUTE_RENDEZ_VOUS_COMPLETE = "$ROUTE_RENDEZ_VOUS?id={id}&titre={titre}&jour={jour}"
 
 /** Un paramètre de route facultatif, de type texte. */
@@ -161,7 +170,7 @@ private fun FoyerInstalle() {
     // l'on change d'onglet par inadvertance.
     val barreVisible = destinationCourante != null &&
         !estSur(ROUTE_FORMULAIRE_COMPLETE) && !estSur(ROUTE_RENDEZ_VOUS_COMPLETE) && !estSur(ROUTE_FICHE_COMPLETE) &&
-        !estSur(ROUTE_CONNEXION)
+        !estSur(ROUTE_CONNEXION) && !estSur(ROUTE_SORTIE) && !estSur(ROUTE_ARTICLE_COMPLETE)
 
     ModalNavigationDrawer(
         drawerState = volet,
@@ -297,6 +306,36 @@ private fun FoyerInstalle() {
                         val modele: ModeleFoyer =
                             viewModel(factory = ModeleFoyer.fabrique(depot, conteneur.base))
                         EcranFoyer(modele = modele)
+                    }
+
+                    composable(EntreeDuVolet.STOCK.route) {
+                        val modele: ModeleStock = viewModel(factory = ModeleStock.fabrique(conteneur.stock, depot))
+                        EcranStock(
+                            modele = modele,
+                            onNouvelArticle = { tableau -> navigation.navigate("$ROUTE_ARTICLE?tableau=$tableau") },
+                            onOuvrirArticle = { id -> navigation.navigate("$ROUTE_ARTICLE?id=$id") },
+                            onDeclarerSortie = { navigation.navigate(ROUTE_SORTIE) },
+                        )
+                    }
+
+                    composable(ROUTE_SORTIE) {
+                        // Le même modèle que l'écran Stock : on y retrouve le tableau choisi.
+                        val parent = remember(it) { navigation.getBackStackEntry(EntreeDuVolet.STOCK.route) }
+                        val modele: ModeleStock =
+                            viewModel(viewModelStoreOwner = parent, factory = ModeleStock.fabrique(conteneur.stock, depot))
+                        EcranSortie(modele = modele, onFerme = { navigation.popBackStack() })
+                    }
+
+                    composable(
+                        route = ROUTE_ARTICLE_COMPLETE,
+                        arguments = listOf(facultatif("id"), facultatif("tableau")),
+                    ) { entreeArticle ->
+                        val id = entreeArticle.arguments?.getString("id")
+                        val modele: ModeleArticle = viewModel(
+                            key = "article-${id ?: "nouveau"}",
+                            factory = ModeleArticle.fabrique(conteneur.stock, id, entreeArticle.arguments?.getString("tableau")),
+                        )
+                        EcranArticle(modele = modele, onFerme = { navigation.popBackStack() })
                     }
 
                     composable(EntreeDuVolet.REGLAGES.route) {

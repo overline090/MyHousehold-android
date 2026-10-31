@@ -338,6 +338,25 @@ Un compte portant `MANAGE_SERVER` voit en plus la liste des comptes du serveur, 
 la possibilité d'en supprimer un. C'est le seul moyen de retirer un compte dont le
 titulaire n'est plus joignable. Le reste de l'administration est au navigateur.
 
+## 9. Stock *(plugin Gestion de stock)*
+
+Maquettes : `30-stock.html`, `31-stock-sortie.html`.
+
+Présent dans le volet seulement si le plugin est activé : par le téléphone lui-même
+tant qu'il est seul (Réglages › Plugins), par le serveur une fois lié (Administration ›
+Plugins, sur la page web).
+
+- **Les tableaux** en puces (garde-manger, salle de bain…) ; « + Tableau » en crée un,
+  un appui long en modifie un (nom, icône, couleur) ou le supprime avec ses articles.
+- **Les filtres** Tout, À racheter (sous le minimum), Bientôt périmé (à 15 jours).
+- **Chaque article** : son icône, son nom, sa péremption en clair (« Périme dans 9
+  jours ») ou son détail, et « − quantité + » avec le minimum dessous. Sous le minimum,
+  la quantité passe en orange. Un appui ouvre sa fiche : nom, icône, tableau, quantité,
+  minimum, péremption, lien pour racheter, détail.
+- **Déclarer une sortie** : on coche ce qui sort — consommé, utilisé, jeté — et
+  combien, dans un ou plusieurs tableaux ; l'écran prévient de ce qui passera sous son
+  minimum, puis tout est retiré d'un coup. Une quantité ne descend jamais sous zéro.
+
 ## Accessibilité
 
 - Toutes les cibles tactiles ≥ 48 dp.

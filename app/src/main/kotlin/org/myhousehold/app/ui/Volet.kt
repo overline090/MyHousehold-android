@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Dns
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.filled.Menu
@@ -39,6 +40,8 @@ enum class EntreeDuVolet(
     val icone: ImageVector,
 ) {
     FOYER("foyer", "Foyer", Icons.Outlined.People),
+    /** Plugin Gestion de stock : présent seulement s'il est activé. */
+    STOCK("stock", "Stock", Icons.Outlined.Inventory2),
     PROFIL("profil", "Mon profil", Icons.Outlined.AccountCircle),
     SERVEUR("serveur", "Serveur", Icons.Outlined.Dns),
     REGLAGES("reglages", "Réglages", Icons.Outlined.Settings),
@@ -87,7 +90,9 @@ fun ContenuDuVolet(
             HorizontalDivider()
             Spacer(Modifier.height(10.dp))
 
-            EntreeDuVolet.entries.filter { it != EntreeDuVolet.A_PROPOS }.forEach { entree ->
+            EntreeDuVolet.entries.filter {
+                it != EntreeDuVolet.A_PROPOS && (it != EntreeDuVolet.STOCK || foyer?.plugins?.contains("stock") == true)
+            }.forEach { entree ->
                 Entree(
                     entree = entree,
                     active = routeActive == entree.route,

@@ -32,6 +32,10 @@ import org.myhousehold.app.ui.commun.CarteFoyer
 import org.myhousehold.app.ui.commun.EnTete
 import org.myhousehold.app.ui.commun.PastilleDe
 import org.myhousehold.app.ui.commun.TitreDeSection
+import org.myhousehold.app.donnees.DepotStock
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.Switch
 
 @Composable
 fun EcranReglages(
@@ -44,6 +48,8 @@ fun EcranReglages(
     val apparence by modele.apparence.collectAsStateWithLifecycle()
     val miseAJour by LocalContext.current.conteneur.misesAJour.etat.collectAsStateWithLifecycle()
     var confirmationEffacement by remember { mutableStateOf(false) }
+    val stock = LocalContext.current.conteneur.stock
+    val portee = rememberCoroutineScope()
 
     Column(modifier = modifier.fillMaxSize()) {
         EnTete(titre = "Réglages")
@@ -104,6 +110,33 @@ fun EcranReglages(
                             } else {
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             },
+                        )
+                    }
+                }
+            }
+
+            item { TitreDeSection("Plugins") }
+            item {
+                val actif = etat.foyer?.plugins?.contains(DepotStock.PLUGIN) == true
+                val seul = etat.foyer?.local != false
+                CarteFoyer {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Gestion de stock", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                if (seul) {
+                                    "Des tableaux d’articles : quantité, minimum, péremption. Ajoute « Stock » au menu."
+                                } else {
+                                    "Se choisit sur le serveur, dans Administration › Plugins."
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Switch(
+                            checked = actif,
+                            enabled = seul,
+                            onCheckedChange = { oui -> portee.launch { stock.activer(DepotStock.PLUGIN, oui) } },
                         )
                     }
                 }

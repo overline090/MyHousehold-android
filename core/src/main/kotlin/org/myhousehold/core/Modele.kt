@@ -170,4 +170,6 @@ data class Foyer(
     val premierJourDeSemaine: Int = 1,
     /** Sans serveur, l'app est seule : rien ne se partage encore. */
     val local: Boolean = true,
+    /** Les plugins activés pour le foyer (« stock »…). */
+    val plugins: Set<String> = emptySet(),
 )

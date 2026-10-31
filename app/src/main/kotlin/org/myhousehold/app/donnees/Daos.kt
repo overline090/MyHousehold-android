@@ -242,3 +242,39 @@ interface MutationDao {
 
 /** Combien de tâches chacun a faites, sur une période. */
 data class Contribution(val membreId: String, val combien: Int)
+
+@Dao
+interface StockDao {
+    @Query("SELECT * FROM stock_tableau WHERE supprimeLe IS NULL ORDER BY position, nom")
+    fun tableaux(): Flow<List<StockTableauEntite>>
+
+    @Query("SELECT * FROM stock_article WHERE supprimeLe IS NULL ORDER BY position, nom")
+    fun articles(): Flow<List<StockArticleEntite>>
+
+    @Query("SELECT * FROM stock_article WHERE supprimeLe IS NULL ORDER BY position, nom")
+    suspend fun tousLesArticles(): List<StockArticleEntite>
+
+    @Query("SELECT * FROM stock_tableau WHERE supprimeLe IS NULL ORDER BY position, nom")
+    suspend fun tousLesTableaux(): List<StockTableauEntite>
+
+    @Query("SELECT * FROM stock_article WHERE id = :id")
+    suspend fun article(id: String): StockArticleEntite?
+
+    @Query("SELECT * FROM stock_tableau WHERE id = :id")
+    suspend fun tableau(id: String): StockTableauEntite?
+
+    @Upsert
+    suspend fun enregistrerTableau(tableau: StockTableauEntite)
+
+    @Upsert
+    suspend fun enregistrerArticle(article: StockArticleEntite)
+
+    @Upsert
+    suspend fun enregistrerArticles(articles: List<StockArticleEntite>)
+
+    @Query("UPDATE stock_article SET supprimeLe = :quand, modifieLe = :quand WHERE tableauId = :tableauId AND supprimeLe IS NULL")
+    suspend fun supprimerArticlesDu(tableauId: String, quand: Long)
+
+    @Query("UPDATE stock_article SET quantite = MAX(0, quantite + :delta), modifieLe = :quand WHERE id = :id")
+    suspend fun ajuster(id: String, delta: Int, quand: Long)
+}

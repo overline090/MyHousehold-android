@@ -4,7 +4,9 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import org.myhousehold.core.Droit
+import org.myhousehold.core.ArticleDeStock
 import org.myhousehold.core.Foyer
+import org.myhousehold.core.TableauDeStock
 import org.myhousehold.core.GroupeDeTaches
 import org.myhousehold.core.Membre
 import org.myhousehold.core.ModeAssignation
@@ -33,7 +35,31 @@ import kotlin.time.Duration.Companion.seconds
  */
 
 fun FoyerEntite.versDomaine(): Foyer =
-    Foyer(id = id, nom = nom, fuseau = fuseau, premierJourDeSemaine = premierJourDeSemaine, local = local)
+    Foyer(
+        id = id,
+        nom = nom,
+        fuseau = fuseau,
+        premierJourDeSemaine = premierJourDeSemaine,
+        local = local,
+        plugins = plugins.split(",").filter { it.isNotBlank() }.toSet(),
+    )
+
+fun StockTableauEntite.versDomaine(): TableauDeStock =
+    TableauDeStock(id = id, nom = nom, icone = icone, couleur = couleur, position = position)
+
+fun StockArticleEntite.versDomaine(): ArticleDeStock = ArticleDeStock(
+    id = id,
+    tableauId = tableauId,
+    nom = nom,
+    icone = icone,
+    couleur = couleur,
+    quantite = quantite,
+    minimum = minimum,
+    peremption = peremption?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
+    lien = lien,
+    detail = detail,
+    position = position,
+)
 
 fun MembreEntite.versDomaine(): Membre = Membre(
     id = id,

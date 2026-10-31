@@ -1,5 +1,6 @@
 package org.myhousehold.app.donnees
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -28,6 +29,9 @@ data class FoyerEntite(
     /** Vrai tant qu'aucun serveur n'est lié : l'app est seule. */
     val local: Boolean,
     val serveur: String? = null,
+    /** Les plugins activés, séparés par des virgules (« stock »). */
+    @ColumnInfo(defaultValue = "")
+    val plugins: String = "",
 )
 
 @Entity(tableName = "membre")
@@ -157,6 +161,48 @@ data class MutationEnAttenteEntite(
     val creeeLe: Long,
     val tentatives: Int = 0,
     val derniereErreur: String? = null,
+)
+
+/** Plugin Gestion de stock : un tableau (garde-manger, salle de bain…). */
+@Entity(tableName = "stock_tableau")
+data class StockTableauEntite(
+    @PrimaryKey val id: String,
+    val nom: String,
+    val icone: String? = null,
+    val couleur: String? = null,
+    val position: Int = 0,
+    val modifieLe: Long = 0,
+    val supprimeLe: Long? = null,
+)
+
+/** Un article d'un tableau : combien il en reste, et quand racheter. */
+@Entity(
+    tableName = "stock_article",
+    foreignKeys = [
+        ForeignKey(
+            entity = StockTableauEntite::class,
+            parentColumns = ["id"],
+            childColumns = ["tableauId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
+    indices = [Index("tableauId")],
+)
+data class StockArticleEntite(
+    @PrimaryKey val id: String,
+    val tableauId: String,
+    val nom: String,
+    val icone: String? = null,
+    val couleur: String? = null,
+    val quantite: Int = 0,
+    val minimum: Int? = null,
+    /** Jour local `AAAA-MM-JJ`. */
+    val peremption: String? = null,
+    val lien: String? = null,
+    val detail: String? = null,
+    val position: Int = 0,
+    val modifieLe: Long = 0,
+    val supprimeLe: Long? = null,
 )
 
 /** Room ne sait pas stocker une liste : on s'en tient à du texte. */
