@@ -47,6 +47,8 @@ coupée passerait sinon pour correcte.
 | `30-stock.html` | Plugin **Gestion de stock** : les tableaux et leurs articles, quantités à portée de pouce |
 | `31-stock-sortie.html` | Déclarer une sortie : un ou plusieurs articles d'un coup |
 | `32-tache-details.html` | Les détails d’une tâche : texte mis en forme, barre de mise en forme sur le clavier, téléphones, adresses et codes reconnus |
+| `33-taches-etat.html` | Les tâches disent où elles en sont — faite, à faire, en retard, manquée, pas commencée — et se valident d’un appui |
+| `34-tache-valider.html` | Une tâche ouverte : son état, « C’est fait » ou « Passer cette fois », les dernières fois et par qui |
 
 ## Ce que ces maquettes décident
 

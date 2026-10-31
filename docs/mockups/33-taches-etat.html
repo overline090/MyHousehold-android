@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Tâches — où en est chacune</title><link rel="stylesheet" href="app.css"><style>
+.etat{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;border-radius:999px;padding:3px 9px}
+.etat.fait{background:#dcfce7;color:#166534}.etat.afaire{background:#e6f4f1;color:#115e59}.etat.retard{background:#fef3e2;color:#9a3412}.etat.manquee{background:#fee2e2;color:#991b1b}.etat.bientot{background:var(--surface-douce,#f3f6f5);color:var(--gris);border:1px solid var(--trait)}
+.ronde{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--trait-net);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+.ronde.ok{background:#0f766e;border-color:#0f766e}.ronde.off{opacity:.35}
+.carte.faite h3{color:var(--gris);text-decoration:line-through}
+.histo{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--trait);font-size:14px}
+.histo:first-of-type{border-top:none}
+</style></head>
+<body>
+  <header class="entete">
+    <div class="ligne">
+      <span style="font-size:20px;color:var(--gris)">☰</span>
+      <div style="flex:1"><h1>Tâches</h1></div>
+    </div>
+    <div class="filtres" style="margin-top:12px">
+      <span class="actif">Tout</span><span>À faire</span><span>Faites</span><span>Récurrentes</span><span>De fond</span>
+    </div>
+  </header>
+
+  <!-- Chaque tâche dit où elle en est : faite, à faire, en retard,
+       manquée, ou pas encore commencée. Le rond la valide d'un appui. -->
+  <div class="corps">
+    <div class="pile">
+      <div class="carte ">
+        <div class="ligne" style="gap:12px">
+          <span class="ronde"></span>
+          <div style="flex:1;min-width:0">
+            <h3>Changer le fusible du garage</h3>
+            <p class="muet">Une seule fois — avant le 15 novembre</p>
+            <div style="margin-top:6px"><span class="etat retard">En retard de 2 jours</span></div>
+          </div>
+          <span class="etiquette urgente">Urgente</span>
+        </div>
+      </div>
+      <div class="carte faite">
+        <div class="ligne" style="gap:12px">
+          <span class="ronde ok">✓</span>
+          <div style="flex:1;min-width:0">
+            <h3>Vider le lave-vaisselle</h3>
+            <p class="muet">Tous les jours — n’importe qui</p>
+            <div style="margin-top:6px"><span class="etat fait">✓ Faite à 8 h 12 · Marie</span></div>
+          </div>
+          
+        </div>
+      </div>
+      <div class="carte ">
+        <div class="ligne" style="gap:12px">
+          <span class="ronde"></span>
+          <div style="flex:1;min-width:0">
+            <h3>Sortir les poubelles</h3>
+            <p class="muet">Lundi et jeudi à 19 h — tour de rôle</p>
+            <div style="margin-top:6px"><span class="etat afaire">À faire aujourd’hui, 19 h · Paul</span></div>
+          </div>
+          <span class="etiquette haute">Haute</span>
+        </div>
+      </div>
+      <div class="carte ">
+        <div class="ligne" style="gap:12px">
+          <span class="ronde off"></span>
+          <div style="flex:1;min-width:0">
+            <h3>Arroser le potager</h3>
+            <p class="muet">Tous les 3 jours, à partir du 3 novembre</p>
+            <div style="margin-top:6px"><span class="etat bientot">Commence mardi 3 novembre</span></div>
+          </div>
+          
+        </div>
+      </div>
+      <div class="carte ">
+        <div class="ligne" style="gap:12px">
+          <span class="ronde off"></span>
+          <div style="flex:1;min-width:0">
+            <h3>Nettoyer la hotte</h3>
+            <p class="muet">Le 1er du mois</p>
+            <div style="margin-top:6px"><span class="etat manquee">Manquée le 1er novembre</span> <span class="muet" style="font-size:12px">· prochaine le 1er déc.</span></div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+<nav class="nav">
+  <div class="N1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>Accueil</div>
+  <div class="N2 actif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Tâches</div>
+  <div class="N3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Agenda</div>
+  <div class="N4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="9" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 7a3 3 0 0 1 0 6M18 20a6 6 0 0 0-3-5.2"/></svg>Foyer</div>
+  <div class="N5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 14.5a1.6 1.6 0 0 0 .3 1.8l.1.1a1.8 1.8 0 1 1-2.5 2.5l-.1-.1a1.6 1.6 0 0 0-2.7 1.1v.3a1.8 1.8 0 1 1-3.6 0v-.2a1.6 1.6 0 0 0-2.7-1.2l-.1.1a1.8 1.8 0 1 1-2.5-2.5l.1-.1A1.6 1.6 0 0 0 4 14a1.8 1.8 0 0 1 0-3.6h.2A1.6 1.6 0 0 0 5.4 7.7l-.1-.1a1.8 1.8 0 1 1 2.5-2.5l.1.1a1.6 1.6 0 0 0 2.7-1.1V3.8a1.8 1.8 0 1 1 3.6 0V4a1.6 1.6 0 0 0 2.7 1.2l.1-.1a1.8 1.8 0 1 1 2.5 2.5l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.3a1.8 1.8 0 1 1 0 3.6h-.2a1.6 1.6 0 0 0-1.2 1z"/></svg>Réglages</div>
+</nav>
+</body></html>

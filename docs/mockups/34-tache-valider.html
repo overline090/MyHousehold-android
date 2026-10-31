@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Une tâche — la valider</title><link rel="stylesheet" href="app.css"><style>
+.etat{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;border-radius:999px;padding:3px 9px}
+.etat.fait{background:#dcfce7;color:#166534}.etat.afaire{background:#e6f4f1;color:#115e59}.etat.retard{background:#fef3e2;color:#9a3412}.etat.manquee{background:#fee2e2;color:#991b1b}.etat.bientot{background:var(--surface-douce,#f3f6f5);color:var(--gris);border:1px solid var(--trait)}
+.ronde{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--trait-net);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+.ronde.ok{background:#0f766e;border-color:#0f766e}.ronde.off{opacity:.35}
+.carte.faite h3{color:var(--gris);text-decoration:line-through}
+.histo{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--trait);font-size:14px}
+.histo:first-of-type{border-top:none}
+</style></head>
+<body>
+  <header class="entete">
+    <div class="ligne">
+      <span style="font-size:20px;color:var(--gris)">←</span>
+      <div style="flex:1"><h1 style="font-size:20px">Sortir les poubelles</h1></div>
+      <span style="font-size:15px;color:var(--accent,#0f766e);font-weight:600">Modifier</span>
+    </div>
+  </header>
+
+  <div class="corps" style="gap:14px">
+    <div class="ligne" style="gap:8px;flex-wrap:wrap"><span class="etiquette haute">Haute</span><span class="groupe"><i style="background:#0f766e"></i>Cuisine</span><span class="muet">Lundi et jeudi à 19 h — tour de rôle</span></div>
+
+    <!-- Où elle en est, en grand : c'est ce qu'on vient chercher. -->
+    <div class="encadre accent" style="display:flex;flex-direction:column;gap:10px">
+      <div class="ligne" style="gap:10px"><span class="etat afaire">À faire aujourd’hui, 19 h</span><span class="muet">· c’est le tour de Paul</span></div>
+      <div class="bouton primaire" style="text-align:center">✓ C’est fait</div>
+      <div class="ligne" style="justify-content:space-between"><span class="muet" style="font-size:13px">Pas aujourd’hui ?</span><span style="font-size:13px;font-weight:600;color:var(--accent,#0f766e)">Passer cette fois</span></div>
+    </div>
+
+    <div class="champ"><label>Détails</label>
+      <div class="texte-riche"><div>Sacs jaunes le <b>jeudi</b> seulement. Bac au bout de l’allée.</div></div>
+    </div>
+
+    <div class="champ"><label>Les dernières fois</label>
+      <div class="carte" style="padding:4px 14px">
+        <div class="histo"><span class="etat fait">✓ Faite</span><span style="flex:1">Lundi 26 oct. · 18 h 40</span><span class="muet">Marie</span></div>
+        <div class="histo"><span class="etat fait">✓ Faite</span><span style="flex:1">Jeudi 22 oct. · 21 h 05</span><span class="muet">Paul · en retard</span></div>
+        <div class="histo"><span class="etat manquee">Manquée</span><span style="flex:1">Lundi 19 oct.</span><span class="muet">Marie</span></div>
+        <div class="histo"><span class="etat bientot">Passée</span><span style="flex:1">Jeudi 15 oct.</span><span class="muet">Paul</span></div>
+      </div>
+    </div>
+
+    <div class="champ"><label>Les prochaines fois</label>
+      <p class="muet">Lundi 2 nov. — Marie · Jeudi 5 nov. — Paul</p>
+    </div>
+  </div>
+</body></html>
