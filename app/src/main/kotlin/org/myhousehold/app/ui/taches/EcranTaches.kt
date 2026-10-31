@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.myhousehold.app.donnees.TacheAffichee
@@ -39,6 +40,7 @@ import org.myhousehold.app.ui.commun.couleurDe
 import org.myhousehold.app.ui.commun.enClair
 import org.myhousehold.app.ui.commun.enClairApproximatif
 import org.myhousehold.app.ui.theme.couleurAlerte
+import org.myhousehold.core.Avancement
 import org.myhousehold.core.EtatDeFond
 import org.myhousehold.core.SorteDeTache
 
@@ -154,22 +156,34 @@ private fun LigneTache(
         couleurBordure = if (enRetard) couleurAlerte() else MaterialTheme.colorScheme.outline,
         modifier = Modifier.clickable { onOuvrir(ligne.tache.id) },
     ) {
+        val etatEnMots = ligne.etatEnMots()
+        val faite = ligne.avancement is Avancement.Faite
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
+            RondDeValidation(
+                faite = faite,
+                actif = ligne.validable,
+                libelle = if (faite) "Annuler : pas encore faite" else "C’est fait",
+                onClick = { modele.basculer(ligne) },
+            )
+            Column(modifier = Modifier.weight(1f).padding(start = 4.dp)) {
                 Text(
                     ligne.tache.titre,
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (ligne.tache.active) {
+                    color = if (ligne.tache.active && !faite) {
                         MaterialTheme.colorScheme.onSurface
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },
+                    textDecoration = if (faite) TextDecoration.LineThrough else null,
                 )
                 Text(
                     ligne.enClair(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (enRetard) couleurAlerte() else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (ligne.tache.sorte != SorteDeTache.DE_FOND) {
+                    etatEnMots?.let { (texte, ton) -> EtiquetteEtat(texte, ton, Modifier.padding(top = 6.dp)) }
+                }
                 ligne.groupe?.let { groupe ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

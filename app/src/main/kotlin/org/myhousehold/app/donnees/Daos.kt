@@ -102,6 +102,10 @@ interface OccurrenceDao {
     )
     fun fluxSurLaPeriode(du: String, au: String): Flow<List<OccurrenceEntite>>
 
+    /** Les échéances récentes ou à venir, et celles sans date (ponctuelles, de fond). */
+    @Query("SELECT * FROM occurrence WHERE jour IS NULL OR jour >= :du")
+    fun fluxRecentes(du: String): Flow<List<OccurrenceEntite>>
+
     @Query("SELECT * FROM occurrence WHERE tacheId = :tacheId ORDER BY faiteLe DESC, jour DESC")
     fun fluxDeLaTache(tacheId: String): Flow<List<OccurrenceEntite>>
 

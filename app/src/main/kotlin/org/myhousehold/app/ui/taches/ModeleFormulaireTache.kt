@@ -25,6 +25,8 @@ import org.myhousehold.core.Repetition
 import org.myhousehold.core.SorteDeTache
 import org.myhousehold.core.Tache
 import org.myhousehold.core.genererOccurrences
+import org.myhousehold.core.lireDetails
+import org.myhousehold.core.symbolesVersCases
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 
@@ -54,6 +56,8 @@ enum class FormeRepetition(val libelle: String) {
 data class EtatFormulaire(
     val id: String? = null,
     val titre: String = "",
+    /** Les détails, en HTML restreint. */
+    val description: String? = null,
     val sorte: SorteDeTache = SorteDeTache.RECURRENTE,
     val groupeId: String? = null,
     val priorite: Priorite = Priorite.NORMALE,
@@ -74,6 +78,8 @@ data class EtatFormulaire(
     val dateLimite: LocalDate? = null,
 
     val enregistree: Boolean = false,
+    /** La tâche à modifier est lue : ses détails peuvent aller dans l'éditeur. */
+    val chargee: Boolean = false,
 ) {
     val repetition: Repetition?
         get() = when (forme) {
@@ -136,7 +142,7 @@ class ModeleFormulaireTache(
                 depot.taches(Clock.System.todayIn(TimeZone.currentSystemDefault())).first()
                     .firstOrNull { it.tache.id == id }?.tache
             }
-            _etat.value = existante?.versFormulaire(groupes) ?: _etat.value.copy(groupes = groupes)
+            _etat.value = (existante?.versFormulaire(groupes) ?: _etat.value.copy(groupes = groupes)).copy(chargee = true)
         }
     }
 
@@ -144,13 +150,15 @@ class ModeleFormulaireTache(
         _etat.value = transformation(_etat.value)
     }
 
-    fun enregistrer() {
+    /** [details] : le HTML de l'éditeur, que l'écran tient dans son propre état. */
+    fun enregistrer(details: String? = _etat.value.description) {
         val etat = _etat.value
         if (!etat.enregistrable) return
 
         val tache = Tache(
             id = etat.id ?: DepotFoyer.nouvelId(),
             titre = etat.titre.trim(),
+            description = details?.let(::symbolesVersCases)?.takeIf { lireDetails(it).any { b -> b.texte.isNotBlank() } },
             sorte = etat.sorte,
             groupeId = etat.groupeId,
             priorite = etat.priorite,
@@ -185,6 +193,7 @@ private fun Tache.versFormulaire(groupes: List<GroupeDeTaches>): EtatFormulaire 
     val base = EtatFormulaire(
         id = id,
         titre = titre,
+        description = description,
         sorte = sorte,
         groupeId = groupeId,
         priorite = priorite,

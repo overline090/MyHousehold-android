@@ -53,7 +53,9 @@ import org.myhousehold.app.ui.reglages.EcranProfil
 import org.myhousehold.app.ui.reglages.EcranReglages
 import org.myhousehold.app.ui.reglages.ModeleReglages
 import org.myhousehold.app.ui.serveur.EcranServeur
+import org.myhousehold.app.ui.taches.EcranFicheTache
 import org.myhousehold.app.ui.taches.EcranFormulaireTache
+import org.myhousehold.app.ui.taches.ModeleFicheTache
 import org.myhousehold.app.ui.taches.EcranTaches
 import org.myhousehold.app.ui.taches.ModeleFormulaireTache
 import org.myhousehold.app.ui.taches.ModeleTaches
@@ -78,6 +80,9 @@ enum class Destination(
 }
 
 private const val ROUTE_FORMULAIRE = "tache"
+/** Une tâche ouverte : où elle en est, la valider, ses dernières fois. */
+private const val ROUTE_FICHE = "fiche-tache"
+private const val ROUTE_FICHE_COMPLETE = "$ROUTE_FICHE/{id}"
 private const val ROUTE_FORMULAIRE_COMPLETE = "$ROUTE_FORMULAIRE?id={id}&titre={titre}&sorte={sorte}"
 private const val ROUTE_RENDEZ_VOUS = "rendez-vous"
 private const val ROUTE_MISE_A_JOUR = "mise-a-jour"
@@ -155,7 +160,7 @@ private fun FoyerInstalle() {
     // La barre disparaît sur le formulaire : ce n'est pas un endroit où
     // l'on change d'onglet par inadvertance.
     val barreVisible = destinationCourante != null &&
-        !estSur(ROUTE_FORMULAIRE_COMPLETE) && !estSur(ROUTE_RENDEZ_VOUS_COMPLETE) &&
+        !estSur(ROUTE_FORMULAIRE_COMPLETE) && !estSur(ROUTE_RENDEZ_VOUS_COMPLETE) && !estSur(ROUTE_FICHE_COMPLETE) &&
         !estSur(ROUTE_CONNEXION)
 
     ModalNavigationDrawer(
@@ -200,7 +205,7 @@ private fun FoyerInstalle() {
                         val modele: ModeleAccueil = viewModel(factory = ModeleAccueil.fabrique(depot))
                         EcranAccueil(
                             modele = modele,
-                            onOuvrirTache = { id -> navigation.navigate("$ROUTE_FORMULAIRE?id=$id") },
+                            onOuvrirTache = { id -> navigation.navigate("$ROUTE_FICHE/$id") },
                             onVoirAgenda = { navigation.navigate(Destination.AGENDA.route) },
                             onMiseAJour = { navigation.navigate(ROUTE_MISE_A_JOUR) },
                             onPlusDOptions = { type, titre, jour ->
@@ -221,7 +226,23 @@ private fun FoyerInstalle() {
                         EcranTaches(
                             modele = modele,
                             onNouvelleTache = { navigation.navigate(ROUTE_FORMULAIRE) },
-                            onOuvrirTache = { id -> navigation.navigate("$ROUTE_FORMULAIRE?id=$id") },
+                            onOuvrirTache = { id -> navigation.navigate("$ROUTE_FICHE/$id") },
+                        )
+                    }
+
+                    composable(
+                        route = ROUTE_FICHE_COMPLETE,
+                        arguments = listOf(navArgument("id") { type = NavType.StringType }),
+                    ) { entree ->
+                        val id = entree.arguments?.getString("id").orEmpty()
+                        val modele: ModeleFicheTache = viewModel(
+                            key = "fiche-$id",
+                            factory = ModeleFicheTache.fabrique(depot, id),
+                        )
+                        EcranFicheTache(
+                            modele = modele,
+                            onFerme = { navigation.popBackStack() },
+                            onModifier = { tacheId -> navigation.navigate("$ROUTE_FORMULAIRE?id=$tacheId") },
                         )
                     }
 

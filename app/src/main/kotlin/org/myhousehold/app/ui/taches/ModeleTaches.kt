@@ -17,12 +17,16 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.myhousehold.app.donnees.DepotFoyer
 import org.myhousehold.app.donnees.TacheAffichee
+import org.myhousehold.core.Avancement
+import org.myhousehold.core.EtatDeFond
 import org.myhousehold.core.GroupeDeTaches
 import org.myhousehold.core.SorteDeTache
 
 /** Le même écran, cinq façons de le regarder. */
 enum class FiltreTaches(val libelle: String) {
     TOUT("Tout"),
+    A_FAIRE("À faire"),
+    FAITES("Faites"),
     RECURRENTES("Récurrentes"),
     DE_FOND("De fond"),
     PONCTUELLES("Ponctuelles"),
@@ -51,6 +55,10 @@ class ModeleTaches(private val depot: DepotFoyer) : ViewModel() {
             taches = taches.filter { affichee ->
                 when (filtreCourant) {
                     FiltreTaches.TOUT, FiltreTaches.GROUPES -> true
+                    FiltreTaches.A_FAIRE -> affichee.avancement is Avancement.AFaire ||
+                        affichee.avancement is Avancement.SansDate ||
+                        affichee.etatDeFond?.etat == EtatDeFond.EN_RETARD
+                    FiltreTaches.FAITES -> affichee.avancement is Avancement.Faite
                     FiltreTaches.RECURRENTES -> affichee.tache.sorte == SorteDeTache.RECURRENTE
                     FiltreTaches.DE_FOND -> affichee.tache.sorte == SorteDeTache.DE_FOND
                     FiltreTaches.PONCTUELLES -> affichee.tache.sorte == SorteDeTache.PONCTUELLE
@@ -66,6 +74,18 @@ class ModeleTaches(private val depot: DepotFoyer) : ViewModel() {
 
     fun faireTacheDeFond(tacheId: String) {
         viewModelScope.launch { depot.faireTacheDeFond(tacheId) }
+    }
+
+    /** Le rond de la liste : valider ce qui est à faire, ou annuler une validation faite par erreur. */
+    fun basculer(affichee: TacheAffichee) {
+        viewModelScope.launch {
+            when (val a = affichee.avancement) {
+                is Avancement.AFaire -> depot.cocher(a.occurrenceId)
+                is Avancement.SansDate -> depot.cocher(a.occurrenceId)
+                is Avancement.Faite -> depot.decocher(a.occurrenceId)
+                else -> if (affichee.tache.sorte == SorteDeTache.DE_FOND) depot.faireTacheDeFond(affichee.tache.id)
+            }
+        }
     }
 
     fun supprimer(tacheId: String) {

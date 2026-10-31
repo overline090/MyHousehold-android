@@ -116,6 +116,7 @@ dependencies {
 
     implementation(libs.okhttp)
     implementation(libs.zxing.android.embedded)
+    implementation(libs.rich.editor)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 

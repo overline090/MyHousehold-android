@@ -10,7 +10,11 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
+import org.myhousehold.core.Avancement
 import org.myhousehold.core.EtatOccurrence
+import org.myhousehold.core.FoisPassee
+import org.myhousehold.core.avancement
+import org.myhousehold.core.dernieresFois
 import org.myhousehold.core.EtatTacheDeFond
 import org.myhousehold.core.Foyer
 import org.myhousehold.core.GroupeDeTaches
@@ -31,6 +35,17 @@ data class TacheAffichee(
     val etatDeFond: EtatTacheDeFond?,
     val prochaineEcheance: LocalDate?,
     val prochainAssigne: Membre?,
+    /** Où en est une tâche datée aujourd'hui : à faire, faite, prochaine fois… */
+    val avancement: Avancement = Avancement.Rien,
+    /** Les membres du foyer, pour dire qui a fait et à qui c'est le tour. */
+    val membres: Map<String, Membre> = emptyMap(),
+)
+
+/** Une tâche ouverte : elle, ses échéances, et le foyer pour nommer les gens. */
+data class FicheDeTache(
+    val affichee: TacheAffichee,
+    val dernieresFois: List<FoisPassee>,
+    val prochaines: List<Occurrence>,
 )
 
 /** Une échéance, et la tâche dont elle vient. */
@@ -49,6 +64,9 @@ data class OccurrenceAffichee(
  * datés en base. Quand un serveur arrivera, il recevra tout cela tel
  * quel — c'est pour ça que la file des mutations existe déjà.
  */
+/** Jusqu'où l'on remonte pour dire si une tâche est en retard, et raconter ses dernières fois. */
+private const val JOURS_D_AVANCEMENT = 120
+
 class DepotFoyer(private val base: BaseLocale) {
 
     val foyer: Flow<Foyer?> = base.foyers().flux().map { it?.versDomaine() }
@@ -59,6 +77,40 @@ class DepotFoyer(private val base: BaseLocale) {
 
     /** Toutes les tâches, prêtes à afficher : groupe, état, prochaine fois. */
     fun taches(aujourdHui: LocalDate): Flow<List<TacheAffichee>> = combine(
+        tachesSansAvancement(aujourdHui),
+        base.occurrences().fluxRecentes(aujourdHui.minus(DatePeriod(days = JOURS_D_AVANCEMENT)).toString()),
+    ) { taches, occurrences ->
+        val parTache = occurrences.groupBy { it.tacheId }
+        taches.map { affichee ->
+            val tache = affichee.tache
+            affichee.copy(
+                avancement = avancement(
+                    tache.sorte,
+                    parTache[tache.id].orEmpty().map { it.versDomaine() },
+                    aujourdHui,
+                    tache.debutSerie,
+                ),
+            )
+        }
+    }
+
+    /** Une tâche, pour la fiche : son avancement, ses dernières et prochaines fois. */
+    fun fiche(tacheId: String, aujourdHui: LocalDate): Flow<FicheDeTache?> = combine(
+        taches(aujourdHui),
+        base.occurrences().fluxDeLaTache(tacheId),
+    ) { taches, occurrences ->
+        val affichee = taches.firstOrNull { it.tache.id == tacheId } ?: return@combine null
+        val liste = occurrences.map { it.versDomaine() }
+        FicheDeTache(
+            affichee = affichee,
+            dernieresFois = dernieresFois(liste, aujourdHui),
+            prochaines = liste.filter { o -> o.jour?.let { it > aujourdHui } == true && o.etat == EtatOccurrence.A_FAIRE }
+                .sortedBy { it.jour }
+                .take(3),
+        )
+    }
+
+    private fun tachesSansAvancement(aujourdHui: LocalDate): Flow<List<TacheAffichee>> = combine(
         base.taches().flux(),
         base.groupes().flux(),
         base.membres().flux(),
@@ -90,6 +142,7 @@ class DepotFoyer(private val base: BaseLocale) {
                     ?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
                 prochainAssigne = prochaine[tache.id]?.assigneId
                     ?.let { parMembre[it]?.versDomaine() },
+                membres = parMembre.mapValues { it.value.versDomaine() },
             )
         }
     }
@@ -204,6 +257,12 @@ class DepotFoyer(private val base: BaseLocale) {
         // reste tel qu'il a été vécu.
         base.occurrences().oublierLesSuivantes(tache.id, maintenant.toEpochMilliseconds())
         materialiserLaTache(tache, maintenant)
+    }
+
+    /** Changer seulement les détails — cocher une case — sans toucher aux échéances. */
+    suspend fun changerDetails(tacheId: String, details: String?) {
+        val entite = base.taches().parId(tacheId) ?: return
+        base.taches().enregistrer(entite.copy(description = details, modifieeLe = maintenant().toEpochMilliseconds()))
     }
 
     suspend fun supprimerTache(tacheId: String) {

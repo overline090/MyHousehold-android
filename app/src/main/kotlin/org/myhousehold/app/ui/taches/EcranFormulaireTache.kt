@@ -47,6 +47,9 @@ import org.myhousehold.app.ui.commun.enClairCourt
 import org.myhousehold.core.Priorite
 import org.myhousehold.core.Repetition
 import org.myhousehold.core.SorteDeTache
+import org.myhousehold.core.casesVersSymboles
+import com.mohamedrejeb.richeditor.model.rememberRichTextState
+import androidx.compose.runtime.saveable.rememberSaveable
 
 private val SORTES = listOf(
     SorteDeTache.RECURRENTE to "Récurrente",
@@ -77,6 +80,17 @@ fun EcranFormulaireTache(
 
     LaunchedEffect(etat.enregistree) {
         if (etat.enregistree) onFerme()
+    }
+
+    // Les détails vivent dans l'éditeur ; on y verse ceux de la tâche dès
+    // qu'elle est chargée, une seule fois.
+    val etatDetails = rememberRichTextState()
+    var detailsCharges by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(etat.chargee) {
+        if (etat.chargee && !detailsCharges) {
+            etat.description?.let { etatDetails.setHtml(casesVersSymboles(it)) }
+            detailsCharges = true
+        }
     }
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -180,10 +194,13 @@ fun EcranFormulaireTache(
                     }
                 }
             }
+
+            TitreDeSection("Détails")
+            EditeurDetails(etatDetails)
         }
 
         Button(
-            onClick = { modele.enregistrer() },
+            onClick = { modele.enregistrer(etatDetails.toHtml()) },
             enabled = etat.enregistrable,
             modifier = Modifier.fillMaxWidth().padding(20.dp),
         ) {
