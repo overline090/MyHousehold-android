@@ -111,6 +111,8 @@ l'écran filtre la même liste :
 | Filtre | Contenu |
 |---|---|
 | Tout | Les tâches actives, triées par priorité puis par échéance |
+| À faire | Ce qui est dû aujourd'hui ou en retard, et les ponctuelles pas encore faites |
+| Faites | Ce qui a été fait aujourd'hui (et les ponctuelles faites) |
 | Récurrentes | `SCHEDULED` — « chaque lundi à 19 h » |
 | De fond | `BACKGROUND` — voir la section suivante |
 | Ponctuelles | `ONE_OFF` — une seule fois, avec ou sans date limite |
@@ -121,8 +123,27 @@ Chaque ligne affiche son titre, son échéance en langage naturel (« chaque lun
 Une **priorité différente de normale** est marquée ; une priorité normale ne porte
 aucune étiquette, sinon tout est étiqueté et rien ne ressort.
 
-Un onglet « Historique » donne les occurrences passées, filtrables par membre et par
-période.
+Chaque ligne dit aussi **où en est la tâche** : faite (à quelle heure, par qui), à
+faire aujourd'hui (et pour qui), en retard de N jours, prochaine fois, ou « commence
+le… » pour une série qui démarre plus tard. Un **rond** la valide d'un appui ; un
+second appui annule une validation faite par erreur.
+
+### Une tâche ouverte
+
+Toucher une tâche ouvre sa fiche : son état en grand avec **C'est fait**, **Passer
+cette fois** (récurrentes) ou **Annuler : pas encore faite**, ses **détails**, **les
+dernières fois** (faite, passée ou manquée — une échéance restée à faire quand la
+suivante est arrivée —, quand, par qui, en retard ou non) et les prochaines fois.
+« Modifier » ouvre le formulaire.
+
+### Les détails
+
+Du texte mis en forme : gras, italique, souligné, barré, couleur et surligneur de la
+palette, listes à puces ou numérotées, cases à cocher (« ☐ » en tête d'un élément).
+À la lecture, les **téléphones** (appeler, copier), les **adresses** (ouvrir dans la
+carte, copier) et les **liens** se reconnaissent d'eux-mêmes ; les règles de copie
+automatique définies sur le serveur s'y ajouteront avec la synchronisation. Les
+détails s'échangent avec le serveur en HTML restreint, que le serveur nettoie.
 
 ### Priorités
 
