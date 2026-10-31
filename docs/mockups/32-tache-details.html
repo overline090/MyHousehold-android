@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Détails d’une tâche</title><link rel="stylesheet" href="app.css"></head>
+<body>
+  <header class="entete">
+    <div class="ligne">
+      <span style="font-size:20px;color:var(--gris)">←</span>
+      <div style="flex:1"><h1 style="font-size:20px">Changer le fusible</h1></div>
+    </div>
+  </header>
+
+  <div class="corps" style="gap:12px">
+    <div class="champ">
+      <label>Titre</label>
+      <div class="saisie">Changer le fusible</div>
+    </div>
+
+    <!-- Les détails : du texte mis en forme. Ce qui se reconnaît est
+         souligné : un appui appelle, ouvre la carte ou copie. -->
+    <div class="champ">
+      <label>Détails</label>
+      <div class="saisie" style="display:block;padding:10px 12px;border-color:#0f766e;border-width:2px">
+        <div class="texte-riche">
+          <div><b>Appeler l’électricien</b> <mark>avant samedi</mark> : <span class="detecte">06 12 34 56 78</span></div>
+          <div>Compteur : <span class="detecte">12 rue des Lilas, 69003 Lyon</span></div>
+          <div>Code du portail : <span class="detecte code">4821B ⧉</span></div>
+          <ul><li>Fusible <b style="color:#B91C1C">16 A</b> — tiroir de l’entrée</li><li><i>Prendre la lampe frontale</i>|</li></ul>
+        </div>
+      </div>
+      <div class="muet" style="font-size:12px">☎ 1 téléphone · ⌖ 1 adresse · ⧉ 1 code à copier</div>
+    </div>
+  </div>
+
+  <!-- La barre de mise en forme, posée sur le clavier. -->
+  <div style="margin-top:auto">
+    <div class="barre-format">
+      <span class="actif"><b>B</b></span><span><i style="font-family:serif">I</i></span><span><u>U</u></span><span><s>S</s></span>
+      <span>A<i class="trait" style="background:#B91C1C"></i></span>
+      <span>🖍<i class="trait" style="background:#FACC15"></i></span>
+      <span>•≡</span><span>1≡</span><span>☑</span><span style="color:var(--gris)">Tx</span>
+    </div>
+    <div class="clavier">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      <i style="grid-column:span 2"></i><i style="grid-column:span 6"></i><i style="grid-column:span 2"></i>
+    </div>
+  </div>
+</body></html>
