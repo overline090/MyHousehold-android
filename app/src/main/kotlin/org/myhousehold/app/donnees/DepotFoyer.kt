@@ -326,6 +326,8 @@ class DepotFoyer(private val base: BaseLocale, private val file: FileDEnvoi) {
         // occurrence n'était qu'un fait daté, qui disparaît avec lui.
         if (occurrence.jour == null) {
             base.occurrences().supprimer(occurrenceId)
+            // Sur le serveur : la saisie quitte le journal de la tâche de fond.
+            file.appel("DELETE", "/tasks/${occurrence.tacheId}/done/$occurrenceId")
             return
         }
 

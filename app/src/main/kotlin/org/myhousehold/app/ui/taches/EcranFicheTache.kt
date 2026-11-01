@@ -26,6 +26,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -59,6 +60,12 @@ import org.myhousehold.core.basculerCase
 class ModeleFicheTache(private val depot: DepotFoyer, tacheId: String) : ViewModel() {
     val fiche: StateFlow<FicheDeTache?> = depot.fiche(tacheId, Clock.System.todayIn(TimeZone.currentSystemDefault()))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    val moi: StateFlow<org.myhousehold.core.Membre?> = depot.moi
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Une saisie d'une tâche de fond faite par erreur, ou pas vraiment faite, quitte le journal. */
+    fun revoquer(occurrenceId: String) = viewModelScope.launch { depot.decocher(occurrenceId) }
 
     fun cEstFait() = viewModelScope.launch {
         val f = fiche.value ?: return@launch
@@ -103,7 +110,9 @@ fun EcranFicheTache(
     modifier: Modifier = Modifier,
 ) {
     val fiche by modele.fiche.collectAsStateWithLifecycle()
+    val moi by modele.moi.collectAsStateWithLifecycle()
     val aujourdHui = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    var aRevoquer by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
 
     Column(modifier = modifier.fillMaxSize()) {
         TopAppBar(
@@ -213,6 +222,31 @@ fun EcranFicheTache(
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
+                                // Chacun révoque ses saisies ; qui gère les tâches, celles de tous.
+                                val revocable = ligne.tache.sorte == SorteDeTache.DE_FOND &&
+                                    fois.etat == EtatOccurrence.FAITE &&
+                                    moi?.statut?.permet(org.myhousehold.core.Droit.FAIRE_LES_TACHES) != false &&
+                                    (moi?.statut?.permet(org.myhousehold.core.Droit.GERER_LES_TACHES) != false || fois.parId == moi?.id)
+                                if (revocable) {
+                                    val confirmer = aRevoquer == fois.occurrenceId
+                                    TextButton(
+                                        onClick = {
+                                            if (confirmer) {
+                                                modele.revoquer(fois.occurrenceId)
+                                                aRevoquer = null
+                                            } else {
+                                                aRevoquer = fois.occurrenceId
+                                            }
+                                        },
+                                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp),
+                                    ) {
+                                        Text(
+                                            if (confirmer) "Retirer pour de bon" else "Révoquer",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = if (confirmer) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

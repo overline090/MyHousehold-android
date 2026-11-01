@@ -249,6 +249,11 @@ Nécessaire ici, où l'on constate souvent après coup.
 Une tâche de fond sans délai imparti n'affiche ni barre ni couleur : elle ne fait que
 compter le temps écoulé.
 
+**Révoquer une saisie.** Dans la fiche d'une tâche de fond, chaque ligne des dernières
+fois porte « Révoquer », puis « Retirer pour de bon » : une saisie faite par erreur, ou
+pas vraiment faite, quitte le journal, et l'état repart de la précédente. Chacun
+révoque les siennes ; qui gère les tâches, celles de tous.
+
 ## 5. Agenda
 
 Vue mensuelle avec points de densité, plus la liste du jour sélectionné. Une vue

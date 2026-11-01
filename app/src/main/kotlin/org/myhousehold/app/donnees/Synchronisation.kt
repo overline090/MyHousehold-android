@@ -263,15 +263,36 @@ class Synchronisation(
             .filter { it.optString("taskId") in idsTaches }
             .map { occurrenceDepuis(it, maintenant) }
             .distinctBy { it.id } +
-            // Le serveur donne la dernière fois d'une tâche de fond, pas son journal : on la garde comme un fait daté.
-            taches.filter { it.optString("kind") == "BACKGROUND" && !it.isNull("lastDoneAt") }.map { t ->
-                OccurrenceEntite(
-                    id = "fond-" + t.getString("id"),
-                    tacheId = t.getString("id"),
-                    etat = EtatOccurrence.FAITE.name,
-                    faiteLe = Instant.parse(t.getString("lastDoneAt")).toEpochMilliseconds(),
-                    modifieeLe = maintenant,
-                )
+            // Le journal récent des tâches de fond, avec les identifiants du serveur :
+            // une saisie se révoque ensuite par son identifiant, même hors ligne.
+            taches.filter { it.optString("kind") == "BACKGROUND" }.flatMap { t ->
+                val journal = t.optJSONArray("recentDone")
+                if (journal != null) {
+                    journal.objets().map { e ->
+                        OccurrenceEntite(
+                            id = e.getString("id"),
+                            tacheId = t.getString("id"),
+                            etat = EtatOccurrence.FAITE.name,
+                            faiteLe = e.texte("completedAt")?.let { Instant.parse(it).toEpochMilliseconds() },
+                            faiteParId = e.texte("completedById"),
+                            note = e.texte("note"),
+                            modifieeLe = maintenant,
+                        )
+                    }
+                } else if (!t.isNull("lastDoneAt")) {
+                    // Serveur plus ancien : seule la dernière fois est connue.
+                    listOf(
+                        OccurrenceEntite(
+                            id = "fond-" + t.getString("id"),
+                            tacheId = t.getString("id"),
+                            etat = EtatOccurrence.FAITE.name,
+                            faiteLe = Instant.parse(t.getString("lastDoneAt")).toEpochMilliseconds(),
+                            modifieeLe = maintenant,
+                        ),
+                    )
+                } else {
+                    emptyList()
+                }
             }
         val idsTableaux = tableaux.map { it.getString("id") }.toSet()
 
