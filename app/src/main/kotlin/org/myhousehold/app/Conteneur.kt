@@ -8,7 +8,9 @@ import org.myhousehold.app.donnees.FileDEnvoi
 import org.myhousehold.app.donnees.Synchronisation
 import org.myhousehold.app.donnees.LiaisonServeur
 import org.myhousehold.app.donnees.PreferencesApp
+import org.myhousehold.app.rappels.Rappels
 import org.myhousehold.app.reseau.MisesAJour
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * Les dépendances de l'app, assemblées à la main.
@@ -27,6 +29,10 @@ class Conteneur(contexte: Context) {
     val liaison: LiaisonServeur = LiaisonServeur(contexte, base)
     val synchro: Synchronisation = Synchronisation(contexte, base, liaison, file)
     val misesAJour: MisesAJour = MisesAJour(contexte, liaison)
+    val rappels: Rappels = Rappels(contexte, base, preferences)
+
+    /** La tâche qu'une notification demande d'ouvrir ; l'écran la remet à `null`. */
+    val tacheDemandee = MutableStateFlow<String?>(null)
 }
 
 /** Le conteneur, depuis n'importe quel écran. */

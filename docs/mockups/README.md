@@ -49,6 +49,9 @@ coupée passerait sinon pour correcte.
 | `32-tache-details.html` | Les détails d’une tâche : texte mis en forme, barre de mise en forme sur le clavier, téléphones, adresses et codes reconnus |
 | `33-taches-etat.html` | Les tâches disent où elles en sont — faite, à faire, en retard, manquée, pas commencée — et se valident d’un appui |
 | `34-tache-valider.html` | Une tâche ouverte : son état, « C’est fait » ou « Passer cette fois », les dernières fois et par qui |
+| `35-rappels.html` | Réglages › Rappels de tâches : activer, les rappels réglés, tâches sans heure |
+| `36-rappel-ajout.html` | Ajouter un rappel : raccourcis, nombre et unité, exemple calculé |
+| `37-accueil-a-venir.html` | L'accueil avec la section « À venir », jusqu'à l'horizon réglé |
 
 ## Ce que ces maquettes décident
 

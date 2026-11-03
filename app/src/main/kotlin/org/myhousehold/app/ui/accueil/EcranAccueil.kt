@@ -83,7 +83,7 @@ fun EcranAccueil(
                 BandeauMiseAJour(version = version.version, onClick = onMiseAJour)
             }
 
-            if (!etat.chargement && etat.toutEstFait && etat.rendezVousDeLaSemaine.isEmpty()) {
+            if (!etat.chargement && etat.toutEstFait && etat.rendezVousDeLaSemaine.isEmpty() && etat.aVenir.isEmpty()) {
                 EtatVide(
                     titre = "Tout est fait",
                     explication = "Rien ne vous attend aujourd’hui. Les rendez-vous de la semaine " +
@@ -137,6 +137,31 @@ fun EcranAccueil(
                         onDecocher = { modele.decocher(ligne.occurrence.id) },
                         onOuvrir = { onOuvrirTache(ligne.tache.id) },
                     )
+                }
+
+                // Ce qui arrive après aujourd'hui, jusqu'à l'horizon réglé : on
+                // peut cocher d'avance.
+                if (etat.aVenir.isNotEmpty()) {
+                    item {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            TitreDeSection("À venir", modifier = Modifier.weight(1f))
+                            Text(
+                                if (etat.joursAVenir == 1) "1 jour" else "${etat.joursAVenir} jours",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    items(etat.aVenir, key = { "venir-" + it.occurrence.id }) { ligne ->
+                        LigneOccurrence(
+                            ligne = ligne,
+                            enRetard = false,
+                            avecLeJour = true,
+                            onCocher = { modele.cocher(ligne.occurrence.id) },
+                            onDecocher = { modele.decocher(ligne.occurrence.id) },
+                            onOuvrir = { onOuvrirTache(ligne.tache.id) },
+                        )
+                    }
                 }
 
                 if (etat.rendezVousDeLaSemaine.isNotEmpty()) {
@@ -209,6 +234,7 @@ private fun LigneOccurrence(
     onDecocher: () -> Unit,
     onOuvrir: () -> Unit,
     cochable: Boolean = true,
+    avecLeJour: Boolean = false,
 ) {
     val faite = ligne.occurrence.etat == EtatOccurrence.FAITE
 
@@ -241,7 +267,7 @@ private fun LigneOccurrence(
                         MaterialTheme.colorScheme.onSurface
                     },
                 )
-                val detail = ligne.enClair(enRetard)
+                val detail = ligne.enClair(enRetard, avecLeJour)
                 if (detail.isNotBlank()) {
                     Text(
                         text = detail,

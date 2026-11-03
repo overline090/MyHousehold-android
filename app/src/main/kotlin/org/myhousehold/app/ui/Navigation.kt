@@ -51,6 +51,7 @@ import org.myhousehold.app.ui.foyer.ModeleFoyer
 import org.myhousehold.app.ui.reglages.EcranAPropos
 import org.myhousehold.app.ui.reglages.EcranMiseAJour
 import org.myhousehold.app.ui.reglages.EcranProfil
+import org.myhousehold.app.ui.reglages.EcranRappels
 import org.myhousehold.app.ui.reglages.EcranReglages
 import org.myhousehold.app.ui.reglages.ModeleReglages
 import org.myhousehold.app.ui.serveur.EcranServeur
@@ -92,6 +93,7 @@ private const val ROUTE_FICHE_COMPLETE = "$ROUTE_FICHE/{id}"
 private const val ROUTE_FORMULAIRE_COMPLETE = "$ROUTE_FORMULAIRE?id={id}&titre={titre}&sorte={sorte}"
 private const val ROUTE_RENDEZ_VOUS = "rendez-vous"
 private const val ROUTE_MISE_A_JOUR = "mise-a-jour"
+private const val ROUTE_RAPPELS = "rappels"
 private const val ROUTE_SORTIE = "stock/sortie"
 private const val ROUTE_ARTICLE = "stock/article"
 private const val ROUTE_ARTICLE_COMPLETE = "$ROUTE_ARTICLE?id={id}&tableau={tableau}"
@@ -156,6 +158,17 @@ private fun FoyerInstalle() {
 
     fun estSur(route: String) = destinationCourante?.hierarchy?.any { it.route == route } == true
 
+    // Une notification de rappel touchée : on ouvre sa fiche.
+    val tacheDemandee by conteneur.tacheDemandee.collectAsStateWithLifecycle()
+    // Le graphe n'existe qu'une fois NavHost composé : on attend la première entrée.
+    val grapheEnPlace = entree != null
+    LaunchedEffect(tacheDemandee, grapheEnPlace) {
+        val id = tacheDemandee ?: return@LaunchedEffect
+        if (!grapheEnPlace) return@LaunchedEffect
+        conteneur.tacheDemandee.value = null
+        navigation.navigate("$ROUTE_FICHE/$id")
+    }
+
     // Onglets et entrées du volet partagent la même façon d'y aller : une
     // seule copie de chaque écran dans la pile, l'état retrouvé au retour.
     fun aller(route: String) {
@@ -211,7 +224,7 @@ private fun FoyerInstalle() {
                     modifier = Modifier.padding(marges),
                 ) {
                     composable(Destination.ACCUEIL.route) {
-                        val modele: ModeleAccueil = viewModel(factory = ModeleAccueil.fabrique(depot))
+                        val modele: ModeleAccueil = viewModel(factory = ModeleAccueil.fabrique(depot, conteneur.preferences))
                         EcranAccueil(
                             modele = modele,
                             onOuvrirTache = { id -> navigation.navigate("$ROUTE_FICHE/$id") },
@@ -345,7 +358,12 @@ private fun FoyerInstalle() {
                             modele = modele,
                             onOuvrirProfil = { navigation.navigate(EntreeDuVolet.PROFIL.route) },
                             onMiseAJour = { navigation.navigate(ROUTE_MISE_A_JOUR) },
+                            onRappels = { navigation.navigate(ROUTE_RAPPELS) },
                         )
+                    }
+
+                    composable(ROUTE_RAPPELS) {
+                        EcranRappels(onFerme = { navigation.popBackStack() })
                     }
 
                     composable(EntreeDuVolet.PROFIL.route) {

@@ -19,6 +19,7 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import org.myhousehold.app.donnees.DepotFoyer
 import org.myhousehold.app.donnees.OccurrenceAffichee
+import org.myhousehold.app.donnees.PreferencesApp
 import org.myhousehold.app.donnees.TacheAffichee
 import org.myhousehold.core.EtatDeFond
 import org.myhousehold.core.EtatOccurrence
@@ -40,6 +41,9 @@ data class EtatAccueil(
     val mesTachesDuJour: List<OccurrenceAffichee> = emptyList(),
     val pourLesAutres: List<OccurrenceAffichee> = emptyList(),
     val rendezVousDeLaSemaine: List<RendezVous> = emptyList(),
+    /** Mes tâches des prochains jours, jusqu'à l'horizon réglé ; vide si « Non ». */
+    val aVenir: List<OccurrenceAffichee> = emptyList(),
+    val joursAVenir: Int = 0,
     val aSurveiller: List<TacheAffichee> = emptyList(),
 ) {
     val toutEstFait: Boolean
@@ -47,26 +51,36 @@ data class EtatAccueil(
             mesTachesDuJour.none { it.occurrence.etat == EtatOccurrence.A_FAIRE }
 }
 
-class ModeleAccueil(private val depot: DepotFoyer) : ViewModel() {
+class ModeleAccueil(private val depot: DepotFoyer, preferences: PreferencesApp) : ViewModel() {
 
     private val aujourdHui: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
     private val finDeSemaine: LocalDate = aujourdHui.plus(DatePeriod(days = 7))
 
     val etat: StateFlow<EtatAccueil> = combine(
-        depot.occurrencesDe(aujourdHui.minusJours(JOURS_DE_RETARD), finDeSemaine),
+        // Jusqu'à l'horizon le plus lointain qu'on peut régler : changer de
+        // réglage ne relit pas la base.
+        depot.occurrencesDe(aujourdHui.minusJours(JOURS_DE_RETARD), aujourdHui.plus(DatePeriod(days = HORIZON_MAX))),
         depot.taches(aujourdHui),
         depot.moi,
         depot.rendezVous(
             aujourdHui.atStartOfDayIn(TimeZone.currentSystemDefault()),
             finDeSemaine.atStartOfDayIn(TimeZone.currentSystemDefault()),
         ),
-    ) { occurrences, taches, moi, rendezVous ->
+        preferences.joursAVenir,
+    ) { occurrences, taches, moi, rendezVous, joursAVenir ->
         val enRetard = occurrences.filter {
             it.occurrence.etat == EtatOccurrence.A_FAIRE &&
                 it.occurrence.jour != null && it.occurrence.jour!! < aujourdHui
         }
 
         val duJour = occurrences.filter { it.occurrence.jour == aujourdHui }
+        val horizon = aujourdHui.plus(DatePeriod(days = joursAVenir))
+        val aVenir = occurrences.filter { ligne ->
+            val jour = ligne.occurrence.jour
+            jour != null && jour > aujourdHui && jour <= horizon &&
+                ligne.occurrence.etat != EtatOccurrence.PASSEE &&
+                (ligne.occurrence.assigneId == null || ligne.occurrence.assigneId == moi?.id)
+        }.sortedWith(compareBy({ it.occurrence.jour }, { it.tache.heure }, { it.tache.titre }))
         val deFond = taches.filter { it.tache.sorte == SorteDeTache.DE_FOND }
 
         EtatAccueil(
@@ -83,6 +97,8 @@ class ModeleAccueil(private val depot: DepotFoyer) : ViewModel() {
                 it.occurrence.assigneId != null && it.occurrence.assigneId != moi?.id
             },
             rendezVousDeLaSemaine = rendezVous,
+            aVenir = aVenir,
+            joursAVenir = joursAVenir,
             aSurveiller = deFond.filter { it.etatDeFond?.etat == EtatDeFond.BIENTOT },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), EtatAccueil())
@@ -115,8 +131,11 @@ class ModeleAccueil(private val depot: DepotFoyer) : ViewModel() {
         /** Ce qui traîne depuis plus longtemps n'encombre pas l'accueil. */
         private const val JOURS_DE_RETARD = 30
 
-        fun fabrique(depot: DepotFoyer): ViewModelProvider.Factory = viewModelFactory {
-            initializer { ModeleAccueil(depot) }
+        /** Le plus lointain des horizons proposés dans les réglages. */
+        private const val HORIZON_MAX = 30
+
+        fun fabrique(depot: DepotFoyer, preferences: PreferencesApp): ViewModelProvider.Factory = viewModelFactory {
+            initializer { ModeleAccueil(depot, preferences) }
         }
     }
 }

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Nouveau rappel</title><link rel="stylesheet" href="app.css"></head>
+<body style="position:relative">
+  <header class="entete">
+    <div class="ligne">
+      <span style="font-size:20px;color:var(--gris)">←</span>
+      <h1 style="font-size:20px">Rappels de tâches</h1>
+    </div>
+  </header>
+  <div class="corps" style="gap:16px">
+    <div class="carte"><h3>Me rappeler mes tâches</h3></div>
+    <div class="section">
+      <h2>Quand</h2>
+      <div class="carte" style="padding:4px 14px">
+        <div class="reglage"><span style="flex:1">4 jours avant</span></div>
+        <div class="reglage"><span style="flex:1">2 h avant</span></div>
+      </div>
+    </div>
+  </div>
+
+<div style="position:absolute;inset:0;background:rgba(16,23,21,.45)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:22px 22px 0 0;padding:10px 20px 24px;display:flex;flex-direction:column;gap:14px">
+  <div style="width:36px;height:4px;border-radius:2px;background:var(--trait-net);margin:0 auto 4px"></div>
+  <h3 style="font-size:18px">Nouveau rappel</h3>
+  <!-- Les choix courants d'un geste ; le reste se saisit. -->
+  <div class="filtres" style="flex-wrap:wrap"><span>30 min</span><span>1 h</span><span>2 h</span><span class="actif">1 jour</span><span>1 semaine</span></div>
+  <div class="ligne" style="gap:10px;align-items:flex-end">
+    <div class="champ" style="flex:none;width:90px"><label>Combien</label><div class="saisie">1</div></div>
+    <div class="segment" style="flex:1"><span>minutes</span><span>heures</span><span class="actif">jours</span></div>
+  </div>
+  <div class="encadre douce" style="font-size:13px">Pour « Sortir les poubelles » de jeudi à 19 h 00, ce rappel arrive mercredi à 19 h 00.</div>
+  <div class="ligne" style="gap:10px">
+    <div class="bouton" style="flex:1">Annuler</div>
+    <div class="bouton primaire" style="flex:1">Ajouter</div>
+  </div>
+</div>
+</body></html>

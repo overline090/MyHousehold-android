@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Rappels</title><link rel="stylesheet" href="app.css">
+<style>
+  .bascule { flex:none; width:44px; height:26px; border-radius:13px; background:var(--accent); position:relative; }
+  .bascule::after { content:""; position:absolute; top:3px; right:3px; width:20px; height:20px; border-radius:50%; background:#fff; }
+  .retirer { flex:none; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--gris); font-size:18px; }
+</style></head>
+<body>
+  <header class="entete">
+    <div class="ligne">
+      <span style="font-size:20px;color:var(--gris)">←</span>
+      <h1 style="font-size:20px">Rappels de tâches</h1>
+    </div>
+  </header>
+
+  <div class="corps" style="gap:16px">
+    <!-- Réglage de ce téléphone : il ne part pas au serveur, chacun
+         choisit ses propres rappels. -->
+    <div class="carte">
+      <div class="ligne">
+        <div style="flex:1;min-width:0">
+          <h3>Me rappeler mes tâches</h3>
+          <p class="muet">Celles qui me sont confiées et celles ouvertes à tous, tant qu'elles ne sont pas faites.</p>
+        </div>
+        <span class="bascule"></span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Quand</h2>
+      <!-- Autant de rappels qu'on veut, chacun à son moment. -->
+      <div class="carte" style="padding:4px 14px">
+        <div class="reglage"><span style="flex:1">4 jours avant</span><span class="retirer">✕</span></div>
+        <div class="reglage"><span style="flex:1">2 h avant</span><span class="retirer">✕</span></div>
+      </div>
+      <div class="bouton">+ Ajouter un rappel</div>
+    </div>
+
+    <div class="section">
+      <h2>Tâches sans heure</h2>
+      <div class="carte" style="padding:4px 14px">
+        <div class="reglage"><span>Comptés depuis</span><span class="valeur">9 h 00 ›</span></div>
+      </div>
+      <p class="muet">« 2 h avant » une tâche du jour sans heure : le rappel arrive à 7 h 00.</p>
+    </div>
+
+    <div class="section">
+      <h2>Aperçu</h2>
+      <!-- Toucher la notification ouvre la tâche ; « C'est fait » la coche
+           sans ouvrir l'app. -->
+      <div class="carte" style="background:var(--surface-douce)">
+        <p class="muet">MyHousehold · maintenant</p>
+        <h3 style="margin-top:4px">Sortir les poubelles</h3>
+        <p style="font-size:14px">Dans 2 h · aujourd’hui à 19 h 00</p>
+        <p style="font-size:13px;font-weight:600;color:var(--accent);margin-top:8px">C’EST FAIT</p>
+      </div>
+    </div>
+  </div>
+</body></html>

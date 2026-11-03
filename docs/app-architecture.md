@@ -164,6 +164,24 @@ Deux variantes de build :
 L'interface de notification est abstraite derrière une seule interface, implémentée
 deux fois : aucun `if (variant)` dans le code métier.
 
+### Rappels de tâches
+
+Les rappels sont **locaux** : ils se calculent depuis la base du téléphone, avec ou
+sans serveur, et leurs réglages restent sur le téléphone (`PreferencesApp`). Le calcul
+est dans `core` (`Rappels.kt` : rappels prévus d'une liste d'échéances, testé).
+
+`rappels/Rappels.kt` ne pose **qu'une alarme à la fois**, celle du prochain rappel.
+Quand elle sonne, tout ce qui est dû part, la suivante est posée. Chaque passage
+recalcule depuis la base : une tâche faite, réassignée ou supprimée entre-temps ne
+sonne pas, et sa notification encore affichée s'en va. Un seul repère, « traité
+jusqu'à », garantit qu'un rappel ne part qu'une fois ; il ne remonte jamais de plus de
+six heures, pour qu'un téléphone resté éteint ne déverse pas des jours de rappels.
+
+L'alarme est reposée au démarrage de l'app, à chaque changement en base ou de réglage,
+au redémarrage du téléphone, au changement d'heure ou de fuseau, et après une mise à
+jour. Elle est exacte (`USE_EXACT_ALARM`) ; si Android la refuse, elle peut arriver
+quelques minutes en retard.
+
 ## Choix techniques et alternatives écartées
 
 | Choix | Pourquoi | Écarté |

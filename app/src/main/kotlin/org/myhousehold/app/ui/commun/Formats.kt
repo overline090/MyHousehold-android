@@ -93,9 +93,11 @@ fun Duration.enClairApproximatif(): String {
 fun Duration.enClairDelai(): String = "dans les ${enClairApproximatif()}"
 
 /** La ligne de détail d'une échéance, sous son titre. */
-fun OccurrenceAffichee.enClair(enRetard: Boolean): String {
+fun OccurrenceAffichee.enClair(enRetard: Boolean, avecLeJour: Boolean = false): String {
     val morceaux = mutableListOf<String>()
     groupe?.let { morceaux += it.nom }
+    // Hors du jour même, le jour vient d'abord : « demain », « jeudi 30 ».
+    if (avecLeJour) occurrence.jour?.let { morceaux += it.enClairCourt() }
 
     when {
         occurrence.etat == EtatOccurrence.FAITE -> {
@@ -116,7 +118,7 @@ fun OccurrenceAffichee.enClair(enRetard: Boolean): String {
         else -> tache.heure?.let { morceaux += it.enClair() }
     }
 
-    return morceaux.joinToString(" · ")
+    return morceaux.joinToString(" · ").replaceFirstChar { it.uppercase() }
 }
 
 /** La ligne de détail d'une tâche, en liste. */

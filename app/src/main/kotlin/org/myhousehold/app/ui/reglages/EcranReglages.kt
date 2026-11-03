@@ -36,12 +36,14 @@ import org.myhousehold.app.donnees.DepotStock
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.Switch
+import org.myhousehold.core.enClair
 
 @Composable
 fun EcranReglages(
     modele: ModeleReglages,
     onOuvrirProfil: () -> Unit,
     onMiseAJour: () -> Unit,
+    onRappels: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val etat by modele.etat.collectAsStateWithLifecycle()
@@ -50,6 +52,10 @@ fun EcranReglages(
     var confirmationEffacement by remember { mutableStateOf(false) }
     val stock = LocalContext.current.conteneur.stock
     val portee = rememberCoroutineScope()
+    val preferences = LocalContext.current.conteneur.preferences
+    val rappelsActifs by preferences.rappelsActifs.collectAsStateWithLifecycle()
+    val rappels by preferences.rappels.collectAsStateWithLifecycle()
+    val joursAVenir by preferences.joursAVenir.collectAsStateWithLifecycle()
 
     Column(modifier = modifier.fillMaxSize()) {
         EnTete(titre = "Réglages")
@@ -92,6 +98,46 @@ fun EcranReglages(
                             shape = SegmentedButtonDefaults.itemShape(index, APPARENCES.size),
                         ) {
                             Text(libelle)
+                        }
+                    }
+                }
+            }
+
+            item { TitreDeSection("Rappels et accueil") }
+            item {
+                CarteFoyer(modifier = Modifier.clickable(onClick = onRappels)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Rappels de tâches", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                        Text(
+                            if (!rappelsActifs || rappels.isEmpty()) {
+                                "Coupés"
+                            } else {
+                                rappels.joinToString(", ") { it.enClair().removeSuffix(" avant") } + " avant"
+                            },
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+            item {
+                // Jusqu'où l'accueil montre les tâches qui arrivent.
+                Text(
+                    "Tâches à venir sur l’accueil",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            item {
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    HORIZONS.forEachIndexed { index, (jours, libelle) ->
+                        SegmentedButton(
+                            selected = joursAVenir == jours,
+                            onClick = { preferences.choisirJoursAVenir(jours) },
+                            shape = SegmentedButtonDefaults.itemShape(index, HORIZONS.size),
+                            icon = {},
+                        ) {
+                            Text(libelle, maxLines = 1)
                         }
                     }
                 }
@@ -201,6 +247,8 @@ fun EcranReglages(
         )
     }
 }
+
+private val HORIZONS = listOf(0 to "Non", 3 to "3 j", 7 to "7 j", 14 to "14 j", 30 to "30 j")
 
 private val APPARENCES = listOf(
     Apparence.AUTOMATIQUE to "Automatique",

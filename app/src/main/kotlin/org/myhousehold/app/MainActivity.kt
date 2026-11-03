@@ -1,5 +1,6 @@
 package org.myhousehold.app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +17,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val preferences = conteneur.preferences
+        lireLaDemande(intent)
         setContent {
             val apparence by preferences.apparence.collectAsStateWithLifecycle()
             val sombre = when (apparence) {
@@ -27,5 +29,20 @@ class MainActivity : ComponentActivity() {
                 AppMyHousehold()
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        lireLaDemande(intent)
+    }
+
+    /** Une notification de rappel ouvre sa tâche. */
+    private fun lireLaDemande(intent: Intent?) {
+        intent?.getStringExtra(EXTRA_TACHE)?.let { conteneur.tacheDemandee.value = it }
+        intent?.removeExtra(EXTRA_TACHE)
+    }
+
+    companion object {
+        const val EXTRA_TACHE = "tache"
     }
 }

@@ -81,6 +81,7 @@ semaine ?*
 |---|---|---|
 | En retard | Tâches `MISSED`, tâches de fond `OVERDUE`, tâches ponctuelles dont la date limite est passée | il y en a |
 | Mes tâches du jour | Occurrences assignées à moi, échéance aujourd'hui | toujours |
+| À venir | Mes tâches (et celles ouvertes à tous) des prochains jours, jusqu'à l'horizon réglé dans Réglages : 3, 7 (défaut), 14 ou 30 jours, ou « Non ». Elles se cochent d'avance | il y en a, et l'horizon n'est pas « Non » |
 | Rendez-vous de la semaine | Les sept jours qui viennent, groupés par jour, aujourd'hui en premier | il y en a |
 | À faire par les autres | Repliable, replié par défaut | il y en a |
 | À surveiller | Tâches de fond `DUE_SOON` | il y en a |
@@ -319,7 +320,15 @@ foyer qui désigne un mauvais élève crée des conflits au lieu d'en résoudre.
 - **Mon profil** : photo, prénom, nom, date de naissance, langue. Le **statut** y est
   affiché, non modifiable : personne ne change son propre statut, et les statuts se
   configurent au navigateur.
-- Notifications : canaux, heures de silence, rappel par défaut.
+- **Rappels de tâches** (maquettes `35-rappels.html`, `36-rappel-ajout.html`) : propres
+  à ce téléphone, rien ne part au serveur. Coupés par défaut. Autant de rappels qu'on
+  veut, chacun « tant avant » l'échéance (1 minute à 30 jours : 4 jours avant, puis
+  2 h avant…). Ils visent mes tâches et celles ouvertes à tous, tant qu'elles ne sont
+  pas faites. Une tâche sans heure se compte depuis une heure réglable (9 h par
+  défaut). La notification ouvre la tâche ; son bouton « C'est fait » la coche sans
+  ouvrir l'app. Une tâche faite ailleurs retire sa notification.
+- **Tâches à venir sur l'accueil** : Non, 3, 7, 14 ou 30 jours (maquette
+  `37-accueil-a-venir.html`).
 - Synchronisation : état, dernière synchro, nombre de mutations en attente,
   « Synchroniser maintenant », et un bouton de diagnostic qui copie l'état technique
   (sans jeton) pour un rapport de bug.
