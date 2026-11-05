@@ -10,6 +10,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
@@ -175,6 +176,35 @@ class ApiServeur(
                 ReponseBrute(reponse.code, reponse.body?.string().orEmpty())
             }
         }
+
+    /** `PUT` d'un fichier en multipart, sous le champ `file`. */
+    suspend fun envoyerFichier(chemin: String, fichier: java.io.File, jeton: String): ReponseBrute =
+        withContext(Dispatchers.IO) {
+            val corps = okhttp3.MultipartBody.Builder()
+                .setType(okhttp3.MultipartBody.FORM)
+                .addFormDataPart("file", fichier.name, fichier.asRequestBody("image/jpeg".toMediaType()))
+                .build()
+            val requete = Request.Builder()
+                .url(adresse.url + "/api/v1" + chemin)
+                .header("Authorization", "Bearer $jeton")
+                .put(corps)
+                .build()
+            client.newCall(requete).execute().use { reponse ->
+                ReponseBrute(reponse.code, reponse.body?.string().orEmpty())
+            }
+        }
+
+    /** Les octets d'une ressource (une image) ; null si le serveur refuse. Rend aussi le statut. */
+    suspend fun telecharger(chemin: String, jeton: String): Pair<Int, ByteArray?> = withContext(Dispatchers.IO) {
+        val requete = Request.Builder()
+            .url(adresse.url + "/api/v1" + chemin)
+            .header("Authorization", "Bearer $jeton")
+            .get()
+            .build()
+        client.newCall(requete).execute().use { reponse ->
+            reponse.code to (if (reponse.isSuccessful) reponse.body?.bytes() else null)
+        }
+    }
 
     private suspend fun obtenir(chemin: String): JSONObject =
         appeler(Request.Builder().url(adresse.url + chemin).get().build())

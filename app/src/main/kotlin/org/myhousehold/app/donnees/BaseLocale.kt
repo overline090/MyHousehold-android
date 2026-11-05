@@ -25,7 +25,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         StockTableauEntite::class,
         StockArticleEntite::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 @TypeConverters(Convertisseurs::class)
@@ -61,6 +61,17 @@ abstract class BaseLocale : RoomDatabase() {
             }
         }
 
+        /** v0.8 : l'icône des groupes, les images importées du stock. */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `groupe` ADD COLUMN `icone` TEXT")
+                db.execSQL("ALTER TABLE `stock_tableau` ADD COLUMN `image` TEXT")
+                db.execSQL("ALTER TABLE `stock_tableau` ADD COLUMN `imageVersion` TEXT")
+                db.execSQL("ALTER TABLE `stock_article` ADD COLUMN `image` TEXT")
+                db.execSQL("ALTER TABLE `stock_article` ADD COLUMN `imageVersion` TEXT")
+            }
+        }
+
         @Volatile
         private var instance: BaseLocale? = null
 
@@ -76,7 +87,7 @@ abstract class BaseLocale : RoomDatabase() {
                     // foyer utilisé seul n'existent nulle part ailleurs.
                     // Une migration manquante doit casser au
                     // développement, pas effacer chez l'utilisateur.
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build()
                     .also { instance = it }
             }

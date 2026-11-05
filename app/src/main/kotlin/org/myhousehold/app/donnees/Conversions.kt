@@ -45,7 +45,7 @@ fun FoyerEntite.versDomaine(): Foyer =
     )
 
 fun StockTableauEntite.versDomaine(): TableauDeStock =
-    TableauDeStock(id = id, nom = nom, icone = icone, couleur = couleur, position = position)
+    TableauDeStock(id = id, nom = nom, icone = icone, couleur = couleur, position = position, image = image)
 
 fun StockArticleEntite.versDomaine(): ArticleDeStock = ArticleDeStock(
     id = id,
@@ -59,6 +59,7 @@ fun StockArticleEntite.versDomaine(): ArticleDeStock = ArticleDeStock(
     lien = lien,
     detail = detail,
     position = position,
+    image = image,
 )
 
 fun MembreEntite.versDomaine(): Membre = Membre(
@@ -78,10 +79,10 @@ fun MembreEntite.versDomaine(): Membre = Membre(
 )
 
 fun GroupeEntite.versDomaine(): GroupeDeTaches =
-    GroupeDeTaches(id = id, nom = nom, couleur = couleur, position = position)
+    GroupeDeTaches(id = id, nom = nom, couleur = couleur, position = position, icone = icone)
 
 fun GroupeDeTaches.versEntite(): GroupeEntite =
-    GroupeEntite(id = id, nom = nom, couleur = couleur, position = position)
+    GroupeEntite(id = id, nom = nom, couleur = couleur, position = position, icone = icone)
 
 fun TacheEntite.versDomaine(): Tache {
     val repetition = rrule?.let { repetitionDepuisRrule(it) }

@@ -367,9 +367,21 @@ Plugins, sur la page web).
   jours ») ou son détail, et « − quantité + » avec le minimum dessous. Sous le minimum,
   la quantité passe en orange. Un appui ouvre sa fiche : nom, icône, tableau, quantité,
   minimum, péremption, lien pour racheter, détail.
+- **L'image d'un tableau ou d'un article** (maquette `39-icone-perso.html`) : aucune,
+  une icône de la liste, « Perso » (un emoji ou une à deux lettres, posé sur la
+  couleur), ou une image importée de la galerie. Lié à un serveur, l'image importée y
+  part, et celles importées ailleurs arrivent sur le téléphone.
 - **Déclarer une sortie** : on coche ce qui sort — consommé, utilisé, jeté — et
   combien, dans un ou plusieurs tableaux ; l'écran prévient de ce qui passera sous son
   minimum, puis tout est retiré d'un coup. Une quantité ne descend jamais sous zéro.
+
+## Couleurs
+
+Maquette : `38-couleur-perso.html`. Chaque choix de couleur (profil, stock, couleur du
+texte des détails) propose sa palette et une pastille « + » : teinte, intensité,
+clarté, et le code `#RRGGBB` pour qui le connaît. Sur une couleur claire, ce qui
+s'écrit dessus passe à l'encre foncée. Les groupes de tâches montrent leur icône
+(choisie sur la page web) à côté de leur nom.
 
 ## Accessibilité
 

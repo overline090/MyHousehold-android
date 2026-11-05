@@ -100,7 +100,7 @@ fun EcranSortie(modele: ModeleStock, onFerme: () -> Unit, modifier: Modifier = M
                             enabled = article.quantite > 0,
                             onCheckedChange = { modele.cocher(article, it) },
                         )
-                        VignetteStock(article.icone, article.couleur)
+                        VignetteStock(article.icone, article.couleur, image = article.image)
                         Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
                             Text(article.nom, style = MaterialTheme.typography.titleMedium)
                             Text(

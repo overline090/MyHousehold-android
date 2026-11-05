@@ -17,7 +17,8 @@ import java.util.UUID
  *   l'identifiant du téléphone s'il n'existe pas encore (`POST`) ;
  * - `ECHEANCE` : agir sur une échéance repérée par sa tâche et son jour,
  *   car une échéance créée hors ligne n'a pas encore l'identifiant du
- *   serveur.
+ *   serveur ;
+ * - `IMAGE` : envoyer un fichier du téléphone (`PUT`, en multipart).
  */
 class FileDEnvoi(private val base: BaseLocale) {
 
@@ -47,6 +48,11 @@ class FileDEnvoi(private val base: BaseLocale) {
             ENREGISTRER,
             JSONObject().put("chemin", chemin).put("creation", creation).put("id", id).put("corps", corps),
         )
+    }
+
+    /** `PUT chemin` avec le fichier, sous le champ `file`. Un fichier disparu entre-temps n'est pas envoyé. */
+    suspend fun image(chemin: String, fichier: String) {
+        ajouter(IMAGE, JSONObject().put("chemin", chemin).put("fichier", fichier))
     }
 
     /** `action` : `complete`, `uncomplete` ou `skip`. */
@@ -85,5 +91,6 @@ class FileDEnvoi(private val base: BaseLocale) {
         const val APPEL = "APPEL"
         const val ENREGISTRER = "ENREGISTRER"
         const val ECHEANCE = "ECHEANCE"
+        const val IMAGE = "IMAGE"
     }
 }

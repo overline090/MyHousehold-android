@@ -44,18 +44,34 @@ class DepotStock(private val base: BaseLocale, private val file: FileDEnvoi) {
 
     suspend fun enregistrerTableau(t: TableauDeStock): String {
         val id = t.id.ifBlank { nouvelId() }
+        val ancien = base.stock().tableau(id)
         val position = if (t.id.isBlank()) base.stock().tousLesTableaux().size else t.position
         val entite = StockTableauEntite(
             id = id,
             nom = t.nom.trim(),
-            icone = t.icone,
+            // Une image importée remplace l'icône, comme sur le serveur.
+            icone = if (t.image != null) null else t.icone,
             couleur = t.couleur,
             position = position,
             modifieLe = maintenant(),
+            image = t.image,
+            imageVersion = if (t.image == ancien?.image) ancien?.imageVersion else null,
         )
         base.stock().enregistrerTableau(entite)
         file.enregistrer("/stock/boards/$id", "/stock/boards", id, entite.versServeur())
+        changerDImage("/stock/boards/$id/image", ancien?.image, ancien?.imageVersion, t.image)
         return id
+    }
+
+    /** L'image a changé : la nouvelle part au serveur, l'ancienne quitte le téléphone. */
+    private suspend fun changerDImage(chemin: String, ancienne: String?, ancienneVersion: String?, nouvelle: String?) {
+        if (nouvelle == ancienne) return
+        if (nouvelle != null) {
+            file.image(chemin, nouvelle)
+        } else if (ancienneVersion != null) {
+            file.appel("DELETE", chemin)
+        }
+        ancienne?.let { runCatching { java.io.File(it).delete() } }
     }
 
     /** Supprimer un tableau supprime ses articles, comme sur le serveur. */
@@ -71,11 +87,12 @@ class DepotStock(private val base: BaseLocale, private val file: FileDEnvoi) {
 
     suspend fun enregistrerArticle(a: ArticleDeStock): String {
         val id = a.id.ifBlank { nouvelId() }
+        val ancien = base.stock().article(id)
         val entite = StockArticleEntite(
             id = id,
             tableauId = a.tableauId,
             nom = a.nom.trim(),
-            icone = a.icone,
+            icone = if (a.image != null) null else a.icone,
             couleur = a.couleur,
             quantite = a.quantite.coerceAtLeast(0),
             minimum = a.minimum?.coerceAtLeast(0),
@@ -84,9 +101,12 @@ class DepotStock(private val base: BaseLocale, private val file: FileDEnvoi) {
             detail = a.detail?.trim()?.takeIf { it.isNotEmpty() },
             position = a.position,
             modifieLe = maintenant(),
+            image = a.image,
+            imageVersion = if (a.image == ancien?.image) ancien?.imageVersion else null,
         )
         base.stock().enregistrerArticle(entite)
         file.enregistrer("/stock/items/$id", "/stock/items", id, entite.versServeur())
+        changerDImage("/stock/items/$id/image", ancien?.image, ancien?.imageVersion, a.image)
         return id
     }
 

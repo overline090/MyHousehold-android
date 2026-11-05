@@ -75,6 +75,8 @@ data class GroupeDeTaches(
     val nom: String,
     val couleur: String = "#0F766E",
     val position: Int = 0,
+    /** Une icône de la liste, « texte: » et un emoji ou des lettres, ou null. */
+    val icone: String? = null,
 )
 
 /**

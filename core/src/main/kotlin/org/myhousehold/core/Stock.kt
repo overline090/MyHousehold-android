@@ -17,6 +17,8 @@ data class TableauDeStock(
     val icone: String? = null,
     val couleur: String? = null,
     val position: Int = 0,
+    /** Une image importée, gardée sur le téléphone : son chemin. */
+    val image: String? = null,
 )
 
 data class ArticleDeStock(
@@ -31,6 +33,8 @@ data class ArticleDeStock(
     val lien: String? = null,
     val detail: String? = null,
     val position: Int = 0,
+    /** Une image importée, gardée sur le téléphone : son chemin. */
+    val image: String? = null,
 ) {
     val aRacheter: Boolean get() = minimum != null && quantite < minimum
 
@@ -44,12 +48,6 @@ data class ArticleDeStock(
         const val JOURS_AVANT_PEREMPTION = 15
     }
 }
-
-/** Les icônes qu'on peut choisir — les mêmes noms que sur le serveur. */
-val ICONES_DE_STOCK = listOf(
-    "boite", "bocal", "flacon", "medicament", "ampoule", "panier",
-    "outil", "tasse", "pomme", "bouteille", "savon", "linge",
-)
 
 /** Les couleurs proposées pour une vignette. */
 val COULEURS_DE_STOCK = listOf(

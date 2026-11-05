@@ -47,6 +47,7 @@ import org.myhousehold.app.ui.commun.ChampDate
 import org.myhousehold.app.ui.commun.ChoixDePhoto
 import org.myhousehold.app.ui.commun.TitreDeSection
 import org.myhousehold.app.ui.commun.couleurDe
+import org.myhousehold.app.ui.commun.ChoixDeCouleur
 import org.myhousehold.app.ui.commun.enregistrerPhoto
 
 private val COULEURS = listOf(
@@ -145,29 +146,7 @@ fun EcranProfil(
             )
 
             TitreDeSection("Couleur")
-            Row(
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                COULEURS.forEach { choix ->
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(couleurDe(choix))
-                            .border(
-                                width = if (choix == couleur) 3.dp else 0.dp,
-                                color = if (choix == couleur) {
-                                    MaterialTheme.colorScheme.onSurface
-                                } else {
-                                    Color.Transparent
-                                },
-                                shape = CircleShape,
-                            )
-                            .clickable { couleur = choix },
-                    )
-                }
-            }
+            ChoixDeCouleur(couleur, COULEURS, onChoix = { couleur = it }, taille = 36)
 
             TitreDeSection("Statut")
             CarteFoyer {

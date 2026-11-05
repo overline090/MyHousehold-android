@@ -1,5 +1,9 @@
 package org.myhousehold.app.ui.stock
 
+import org.myhousehold.app.ui.commun.ChoixDIcone
+import org.myhousehold.app.ui.commun.SorteDIcone
+import org.myhousehold.core.COULEURS_DE_STOCK
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -69,7 +73,12 @@ fun EcranArticle(modele: ModeleArticle, onFerme: () -> Unit, modifier: Modifier 
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                VignetteStock(if (etat.avecIcone) etat.icone else null, if (etat.avecIcone) etat.couleur else null, taille = 48)
+                VignetteStock(
+                    etat.apparence.iconeFinale,
+                    etat.apparence.couleur.takeIf { etat.apparence.sorte != SorteDIcone.AUCUNE },
+                    taille = 48,
+                    image = etat.apparence.imageFinale,
+                )
                 OutlinedTextField(
                     value = etat.nom,
                     onValueChange = { v -> modele.modifier { it.copy(nom = v.take(80)) } },
@@ -80,18 +89,13 @@ fun EcranArticle(modele: ModeleArticle, onFerme: () -> Unit, modifier: Modifier 
                 )
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Une icône", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                Switch(checked = etat.avecIcone, onCheckedChange = { v -> modele.modifier { it.copy(avecIcone = v) } })
-            }
-            if (etat.avecIcone) {
-                ChoixIconeEtCouleur(
-                    icone = etat.icone,
-                    couleur = etat.couleur,
-                    onIcone = { v -> modele.modifier { it.copy(icone = v) } },
-                    onCouleur = { v -> modele.modifier { it.copy(couleur = v) } },
-                )
-            }
+            TitreDeSection("Image")
+            ChoixDIcone(
+                apparence = etat.apparence,
+                couleurs = COULEURS_DE_STOCK,
+                onChange = { v -> modele.modifier { it.copy(apparence = v) } },
+                avecImage = true,
+            )
 
             if (etat.tableaux.size > 1) {
                 TitreDeSection("Tableau")

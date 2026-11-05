@@ -237,12 +237,14 @@ class DepotFoyer(private val base: BaseLocale, private val file: FileDEnvoi) {
     }
 
     /** Son nom, son prénom, sa date de naissance : envoyés au serveur s'il y en a un. */
-    suspend fun envoyerMonProfil(prenom: String, nom: String, dateDeNaissance: String?) {
+    suspend fun envoyerMonProfil(prenom: String, nom: String, dateDeNaissance: String?, couleur: String? = null) {
         file.appel(
             "PATCH", "/users/me",
             org.json.JSONObject().put("firstName", prenom)
                 .apply { if (nom.isNotBlank()) put("lastName", nom) }
-                .put("birthDate", dateDeNaissance ?: org.json.JSONObject.NULL),
+                .put("birthDate", dateDeNaissance ?: org.json.JSONObject.NULL)
+                // Sans elle, la couleur choisie ici serait reprise par celle du serveur.
+                .apply { couleur?.let { put("avatarColor", it) } },
         )
     }
 

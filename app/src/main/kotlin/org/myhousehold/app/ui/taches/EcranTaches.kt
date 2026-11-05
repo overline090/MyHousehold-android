@@ -1,5 +1,7 @@
 package org.myhousehold.app.ui.taches
 
+import org.myhousehold.app.ui.commun.PastilleGroupe
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -129,7 +131,12 @@ private fun ListeParGroupe(
             val taches = etat.taches.filter { it.tache.groupeId == groupe.id }
             if (taches.isEmpty()) return@forEach
 
-            item(key = "titre-" + groupe.id) { TitreDeSection(groupe.nom) }
+            item(key = "titre-" + groupe.id) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PastilleGroupe(groupe, taille = 22.dp)
+                    TitreDeSection(groupe.nom)
+                }
+            }
             items(taches, key = { it.tache.id }) { ligne ->
                 LigneTache(ligne, modele, onOuvrirTache)
             }
@@ -189,12 +196,7 @@ private fun LigneTache(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(top = 4.dp),
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .padding(end = 6.dp)
-                                .size(8.dp)
-                                .background(couleurDe(groupe.couleur), CircleShape),
-                        )
+                        PastilleGroupe(groupe, modifier = Modifier.padding(end = 6.dp), taille = 16.dp)
                         Text(
                             groupe.nom,
                             style = MaterialTheme.typography.labelMedium,

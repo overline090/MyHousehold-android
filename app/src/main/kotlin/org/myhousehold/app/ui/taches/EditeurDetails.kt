@@ -53,7 +53,7 @@ import org.myhousehold.core.ReglagesDeDetection
 import org.myhousehold.core.SorteTrouvee
 import org.myhousehold.core.detecter
 
-/** Les couleurs de la palette : le serveur n'en accepte pas d'autres. */
+/** Les couleurs proposées pour le texte ; « + » en ouvre une autre. Le surligneur garde sa palette. */
 private val COULEURS = listOf(0xFF111827, 0xFFB91C1C, 0xFFB45309, 0xFF15803D, 0xFF1D4ED8, 0xFF7C3AED).map { Color(it) }
 private val SURLIGNEURS = listOf(0xFFFDE68A, 0xFFBBF7D0, 0xFFBFDBFE, 0xFFFBCFE8, 0xFFFED7AA, 0xFFE5E7EB).map { Color(it) }
 
@@ -91,7 +91,7 @@ fun EditeurDetails(etat: RichTextState, modifier: Modifier = Modifier) {
                 Outil(Icons.Default.FormatStrikethrough, "Barré", style.textDecoration?.contains(TextDecoration.LineThrough) == true) {
                     etat.toggleSpanStyle(SpanStyle(textDecoration = TextDecoration.LineThrough))
                 }
-                Palette(Icons.Default.FormatColorText, "Couleur du texte", COULEURS) { c ->
+                Palette(Icons.Default.FormatColorText, "Couleur du texte", COULEURS, avecPerso = true) { c ->
                     etat.removeSpanStyle(SpanStyle(color = style.color))
                     etat.addSpanStyle(SpanStyle(color = c))
                 }
@@ -148,8 +148,15 @@ private fun Outil(icone: ImageVector, libelle: String, actif: Boolean, onClick: 
 }
 
 @Composable
-private fun Palette(icone: ImageVector, libelle: String, couleurs: List<Color>, onChoix: (Color) -> Unit) {
+private fun Palette(
+    icone: ImageVector,
+    libelle: String,
+    couleurs: List<Color>,
+    avecPerso: Boolean = false,
+    onChoix: (Color) -> Unit,
+) {
     var ouverte by remember { mutableStateOf(false) }
+    var perso by remember { mutableStateOf(false) }
     Box {
         Outil(icone, libelle, false) { ouverte = true }
         DropdownMenu(expanded = ouverte, onDismissRequest = { ouverte = false }) {
@@ -175,8 +182,34 @@ private fun Palette(icone: ImageVector, libelle: String, couleurs: List<Color>, 
                         modifier = Modifier.size(30.dp),
                     ) {}
                 }
+                if (avecPerso) {
+                    Surface(
+                        onClick = {
+                            ouverte = false
+                            perso = true
+                        },
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+                        modifier = Modifier.size(30.dp),
+                    ) {
+                        Box(contentAlignment = androidx.compose.ui.Alignment.Center) {
+                            Text("+", color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
             }
             Box(modifier = Modifier.height(6.dp).width(1.dp))
         }
+    }
+    if (perso) {
+        org.myhousehold.app.ui.commun.FeuilleCouleurPerso(
+            depart = "#B91C1C",
+            onChoix = { code ->
+                perso = false
+                onChoix(org.myhousehold.app.ui.commun.couleurDe(code))
+            },
+            onFermer = { perso = false },
+        )
     }
 }

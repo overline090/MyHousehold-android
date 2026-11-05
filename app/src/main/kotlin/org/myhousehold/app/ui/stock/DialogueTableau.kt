@@ -1,6 +1,7 @@
 package org.myhousehold.app.ui.stock
 
-import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.myhousehold.app.ui.commun.ApparenceDIcone
+import org.myhousehold.app.ui.commun.ChoixDIcone
+import org.myhousehold.app.ui.commun.SorteDIcone
 import org.myhousehold.core.COULEURS_DE_STOCK
 import org.myhousehold.core.TableauDeStock
 
@@ -34,15 +38,25 @@ fun DialogueTableau(
     onFermer: () -> Unit,
 ) {
     var nom by remember { mutableStateOf(tableau?.nom.orEmpty()) }
-    var icone by remember { mutableStateOf(tableau?.icone ?: "panier") }
-    var couleur by remember { mutableStateOf(tableau?.couleur ?: COULEURS_DE_STOCK.first()) }
+    var apparence by remember {
+        mutableStateOf(
+            if (tableau == null) {
+                ApparenceDIcone(SorteDIcone.ICONE, "panier", couleur = COULEURS_DE_STOCK.first())
+            } else {
+                ApparenceDIcone.lire(tableau.icone, tableau.couleur, tableau.image, "panier", COULEURS_DE_STOCK.first())
+            },
+        )
+    }
     var confirmer by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onFermer,
         title = { Text(if (tableau == null) "Nouveau tableau" else "Modifier le tableau") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+            ) {
                 OutlinedTextField(
                     value = nom,
                     onValueChange = { nom = it.take(60) },
@@ -51,7 +65,7 @@ fun DialogueTableau(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                ChoixIconeEtCouleur(icone, couleur, onIcone = { icone = it }, onCouleur = { couleur = it })
+                ChoixDIcone(apparence, COULEURS_DE_STOCK, onChange = { apparence = it }, avecImage = true)
                 if (tableau != null) {
                     Text(
                         if (confirmer) {
@@ -67,10 +81,15 @@ fun DialogueTableau(
         },
         confirmButton = {
             TextButton(
-                enabled = nom.isNotBlank(),
+                enabled = nom.isNotBlank() && apparence.valide,
                 onClick = {
                     onEnregistrer(
-                        (tableau ?: TableauDeStock(id = "", nom = "")).copy(nom = nom.trim(), icone = icone, couleur = couleur),
+                        (tableau ?: TableauDeStock(id = "", nom = "")).copy(
+                            nom = nom.trim(),
+                            icone = apparence.iconeFinale,
+                            couleur = apparence.couleur,
+                            image = apparence.imageFinale,
+                        ),
                     )
                     onFermer()
                 },
@@ -95,47 +114,4 @@ fun DialogueTableau(
             }
         },
     )
-}
-
-/** La grille des icônes, puis les couleurs. */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun ChoixIconeEtCouleur(
-    icone: String?,
-    couleur: String,
-    onIcone: (String) -> Unit,
-    onCouleur: (String) -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            ICONES_STOCK.keys.forEach { cle ->
-                CaseChoix(choisie = icone == cle, description = cle, onClick = { onIcone(cle) }) {
-                    VignetteStock(cle, if (icone == cle) couleur else "#94A3B8", taille = 34)
-                }
-            }
-        }
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            COULEURS_DE_STOCK.forEach { c ->
-                CaseChoix(choisie = couleur == c, description = c, onClick = { onCouleur(c) }) {
-                    VignetteStock(null, c, taille = 28)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CaseChoix(choisie: Boolean, description: String, onClick: () -> Unit, contenu: @Composable () -> Unit) {
-    androidx.compose.foundation.layout.Box(
-        modifier = Modifier
-            .then(
-                if (choisie) {
-                    Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
-                } else {
-                    Modifier
-                },
-            )
-            .padding(3.dp)
-            .clickable(onClickLabel = description, onClick = onClick),
-    ) { contenu() }
 }

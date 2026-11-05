@@ -56,6 +56,7 @@ data class GroupeEntite(
     val nom: String,
     val couleur: String,
     val position: Int,
+    val icone: String? = null,
 )
 
 @Entity(
@@ -173,6 +174,10 @@ data class StockTableauEntite(
     val position: Int = 0,
     val modifieLe: Long = 0,
     val supprimeLe: Long? = null,
+    /** Image importée : son fichier sur le téléphone. */
+    val image: String? = null,
+    /** La version de l'image sur le serveur (`imageVersion`) ; null si elle n'y est pas encore. */
+    val imageVersion: String? = null,
 )
 
 /** Un article d'un tableau : combien il en reste, et quand racheter. */
@@ -203,6 +208,10 @@ data class StockArticleEntite(
     val position: Int = 0,
     val modifieLe: Long = 0,
     val supprimeLe: Long? = null,
+    /** Image importée : son fichier sur le téléphone. */
+    val image: String? = null,
+    /** La version de l'image sur le serveur (`imageVersion`) ; null si elle n'y est pas encore. */
+    val imageVersion: String? = null,
 )
 
 /** Room ne sait pas stocker une liste : on s'en tient à du texte. */

@@ -58,7 +58,7 @@ data class EtatSynchro(
  * minutes tant que l'app est ouverte.
  */
 class Synchronisation(
-    contexte: Context,
+    private val contexte: Context,
     private val base: BaseLocale,
     private val liaison: LiaisonServeur,
     private val file: FileDEnvoi,
@@ -215,7 +215,68 @@ class Synchronisation(
                     ?: return direct
                 appeler(api, "POST", "/occurrences/${trouvee.getString("id")}/$action", corps)
             }
+            FileDEnvoi.IMAGE -> {
+                val fichier = java.io.File(m.getString("fichier"))
+                // L'image a été remplacée ou retirée depuis : rien à envoyer.
+                if (!fichier.exists()) return ReponseBrute(200, "")
+                val chemin = m.getString("chemin")
+                var reponse = api.envoyerFichier(chemin, fichier, jeton(api))
+                if (reponse.statut == 401) reponse = api.envoyerFichier(chemin, fichier, jeton(api, forcer = true))
+                // Le serveur rend sa version : inutile de retélécharger l'image qu'on vient d'envoyer.
+                if (reponse.reussie) retenirVersion(chemin, reponse.objet().texte("imageVersion"))
+                reponse
+            }
             else -> ReponseBrute(400, "")
+        }
+    }
+
+    private suspend fun retenirVersion(chemin: String, version: String?) {
+        val id = chemin.split('/').getOrNull(3) ?: return
+        when {
+            chemin.startsWith("/stock/boards/") ->
+                base.stock().tableau(id)?.let { base.stock().enregistrerTableau(it.copy(imageVersion = version)) }
+            chemin.startsWith("/stock/items/") ->
+                base.stock().article(id)?.let { base.stock().enregistrerArticle(it.copy(imageVersion = version)) }
+        }
+    }
+
+    /**
+     * Les images du stock : on garde le fichier du téléphone tant que la
+     * version du serveur n'a pas changé, on télécharge sinon. Rend, par
+     * identifiant, le fichier et sa version.
+     */
+    private suspend fun images(
+        api: ApiServeur,
+        objets: List<JSONObject>,
+        connues: Map<String, Pair<String?, String?>>,
+        dossier: String,
+    ): Map<String, Pair<String?, String?>> = objets.associate { o ->
+        val id = o.getString("id")
+        val version = o.texte("imageVersion")
+        val (fichier, ancienne) = connues[id] ?: (null to null)
+        val resultat: Pair<String?, String?> = when {
+            !o.optBoolean("hasImage") || version == null -> null to null
+            fichier != null && ancienne == version && java.io.File(fichier).exists() -> fichier to version
+            else -> {
+                val (statut, octets) = api.telecharger("/stock/$dossier/$id/image", jeton(api))
+                if (statut == 401) throw SessionPerdue()
+                if (octets == null) {
+                    fichier to ancienne
+                } else {
+                    val cible = java.io.File(java.io.File(contexte.filesDir, "stock").apply { mkdirs() }, "$id-$version.webp")
+                    cible.writeBytes(octets)
+                    cible.absolutePath to version
+                }
+            }
+        }
+        id to resultat
+    }
+
+    /** Les images que plus rien ne désigne quittent le téléphone. */
+    private suspend fun oublierLesImagesOrphelines() {
+        val gardees = (base.stock().tousLesTableaux().mapNotNull { it.image } + base.stock().tousLesArticles().mapNotNull { it.image }).toSet()
+        java.io.File(contexte.filesDir, "stock").listFiles()?.forEach { f ->
+            if (f.absolutePath !in gardees) runCatching { f.delete() }
         }
     }
 
@@ -295,6 +356,8 @@ class Synchronisation(
                 }
             }
         val idsTableaux = tableaux.map { it.getString("id") }.toSet()
+        val imagesTableaux = images(api, tableaux, base.stock().tousLesTableaux().associate { it.id to (it.image to it.imageVersion) }, "boards")
+        val imagesArticles = images(api, articles, base.stock().tousLesArticles().associate { it.id to (it.image to it.imageVersion) }, "items")
 
         base.withTransaction {
             // Un geste fait pendant la lecture : on ne l'écrase pas, le prochain passage l'enverra d'abord.
@@ -337,7 +400,13 @@ class Synchronisation(
             s.viderGroupes()
             s.groupes(
                 groupes.map { g ->
-                    GroupeEntite(id = g.getString("id"), nom = g.optString("name"), couleur = g.optString("color", "#0F766E"), position = g.optInt("position"))
+                    GroupeEntite(
+                        id = g.getString("id"),
+                        nom = g.optString("name"),
+                        couleur = g.optString("color", "#0F766E"),
+                        position = g.optInt("position"),
+                        icone = g.texte("icon"),
+                    )
                 },
             )
             s.taches(entitesTaches)
@@ -357,6 +426,8 @@ class Synchronisation(
                         couleur = t.texte("color"),
                         position = t.optInt("position"),
                         modifieLe = maintenant,
+                        image = imagesTableaux[t.getString("id")]?.first,
+                        imageVersion = imagesTableaux[t.getString("id")]?.second,
                     )
                 },
             )
@@ -375,10 +446,14 @@ class Synchronisation(
                         detail = a.texte("detail"),
                         position = a.optInt("position"),
                         modifieLe = maintenant,
+                        image = imagesArticles[a.getString("id")]?.first,
+                        imageVersion = imagesArticles[a.getString("id")]?.second,
                     )
                 },
             )
         }
+
+        if (base.synchro().premiere() == null) oublierLesImagesOrphelines()
 
         val detection = foyerJson.optJSONObject("detection")?.toString()
         stockage.edit().putString(CLE_DETECTION, detection).apply()

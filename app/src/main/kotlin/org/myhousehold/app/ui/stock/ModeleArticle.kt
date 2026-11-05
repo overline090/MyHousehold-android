@@ -14,6 +14,8 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.myhousehold.app.donnees.DepotStock
 import org.myhousehold.core.ArticleDeStock
+import org.myhousehold.app.ui.commun.ApparenceDIcone
+import org.myhousehold.app.ui.commun.SorteDIcone
 import org.myhousehold.core.COULEURS_DE_STOCK
 import org.myhousehold.core.TableauDeStock
 
@@ -23,9 +25,7 @@ data class EtatArticle(
     val tableaux: List<TableauDeStock> = emptyList(),
     val tableauId: String = "",
     val nom: String = "",
-    val avecIcone: Boolean = true,
-    val icone: String = "boite",
-    val couleur: String = COULEURS_DE_STOCK.first(),
+    val apparence: ApparenceDIcone = ApparenceDIcone(SorteDIcone.ICONE, "boite", couleur = COULEURS_DE_STOCK.first()),
     val quantite: Int = 1,
     val avecMinimum: Boolean = false,
     val minimum: Int = 1,
@@ -35,7 +35,7 @@ data class EtatArticle(
     val position: Int = 0,
     val enregistre: Boolean = false,
 ) {
-    val valide: Boolean get() = nom.isNotBlank() && tableauId.isNotBlank()
+    val valide: Boolean get() = nom.isNotBlank() && tableauId.isNotBlank() && apparence.valide
 }
 
 /** Nouvel article d'un tableau, ou un article à modifier. */
@@ -61,9 +61,7 @@ class ModeleArticle(
                         tableaux = tableaux,
                         tableauId = a.tableauId,
                         nom = a.nom,
-                        avecIcone = a.icone != null,
-                        icone = a.icone ?: "boite",
-                        couleur = a.couleur ?: COULEURS_DE_STOCK.first(),
+                        apparence = ApparenceDIcone.lire(a.icone, a.couleur, a.image, "boite", COULEURS_DE_STOCK.first()),
                         quantite = a.quantite,
                         avecMinimum = a.minimum != null,
                         minimum = a.minimum ?: 1,
@@ -88,8 +86,9 @@ class ModeleArticle(
                     id = e.id.orEmpty(),
                     tableauId = e.tableauId,
                     nom = e.nom,
-                    icone = if (e.avecIcone) e.icone else null,
-                    couleur = if (e.avecIcone) e.couleur else null,
+                    icone = e.apparence.iconeFinale,
+                    couleur = e.apparence.couleur.takeIf { e.apparence.sorte != SorteDIcone.AUCUNE },
+                    image = e.apparence.imageFinale,
                     quantite = e.quantite,
                     minimum = if (e.avecMinimum) e.minimum else null,
                     peremption = e.peremption,

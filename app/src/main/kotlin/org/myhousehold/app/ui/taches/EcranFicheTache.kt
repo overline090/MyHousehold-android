@@ -142,7 +142,15 @@ fun EcranFicheTache(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 EtiquettePriorite(ligne.tache.priorite)
-                ligne.groupe?.let { Text("● ${it.nom}", style = MaterialTheme.typography.labelLarge) }
+                ligne.groupe?.let { g ->
+                    androidx.compose.foundation.layout.Row(
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        org.myhousehold.app.ui.commun.PastilleGroupe(g, taille = 18.dp)
+                        Text(g.nom, style = MaterialTheme.typography.labelLarge)
+                    }
+                }
                 Text(ligne.enClair(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 

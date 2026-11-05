@@ -61,7 +61,7 @@ class ModeleReglages(
                 couleur = couleur,
             )
             base.membres().enregistrer(nouveau)
-            depot.envoyerMonProfil(nouveau.prenom, nouveau.nom, nouveau.dateDeNaissance)
+            depot.envoyerMonProfil(nouveau.prenom, nouveau.nom, nouveau.dateDeNaissance, nouveau.couleur)
         }
     }
 

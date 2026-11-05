@@ -199,7 +199,7 @@ fun PucesDeTableaux(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(start = 5.dp, end = 16.dp, top = 5.dp, bottom = 5.dp),
                 ) {
-                    VignetteStock(t.icone, t.couleur ?: "#0F766E", taille = 30)
+                    VignetteStock(t.icone, t.couleur ?: "#0F766E", taille = 30, image = t.image)
                     Text(
                         t.nom + (compteurs[t.id]?.takeIf { it > 0 }?.let { " · $it" } ?: ""),
                         style = MaterialTheme.typography.titleSmall,
@@ -225,7 +225,7 @@ private fun LigneArticle(
     val sousTitre = article.peremption?.let { peremptionEnClair(it, etat.aujourdHui) }
     CarteFoyer(modifier = Modifier.clickable(onClick = onOuvrir)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            VignetteStock(article.icone, article.couleur)
+            VignetteStock(article.icone, article.couleur, image = article.image)
             Column(modifier = Modifier.weight(1f).padding(start = 14.dp)) {
                 Text(article.nom, style = MaterialTheme.typography.titleMedium)
                 when {
