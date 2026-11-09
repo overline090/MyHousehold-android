@@ -16,8 +16,8 @@ android {
         // de date qu'on utilise sans acrobaties.
         minSdk = 26
         targetSdk = 35
-        versionCode = 7
-        versionName = "0.7.0"
+        versionCode = 8
+        versionName = "0.8.0"
     }
 
     // Une seule clé pour toute la vie de l'app : Android refuse une mise
