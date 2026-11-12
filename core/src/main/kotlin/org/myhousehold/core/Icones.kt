@@ -10,6 +10,7 @@ val ICONES = listOf(
     "boite", "bocal", "flacon", "medicament", "ampoule", "panier",
     "outil", "tasse", "pomme", "bouteille", "savon", "linge",
     "maison", "lit", "plante", "voiture",
+    "pilule", "pansement", "thermometre",
 )
 
 /** Une icône personnalisée : « texte: » suivi d'un emoji ou d'une à deux lettres. */

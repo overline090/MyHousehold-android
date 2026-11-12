@@ -54,6 +54,8 @@ coupée passerait sinon pour correcte.
 | `37-accueil-a-venir.html` | L'accueil avec la section « À venir », jusqu'à l'horizon réglé |
 | `38-couleur-perso.html` | La pastille « + » : une couleur personnalisée en teinte, intensité, clarté et code |
 | `39-icone-perso.html` | L'icône « Perso » d'un tableau : un emoji ou une à deux lettres sur la couleur |
+| `40-stock-groupes.html` | Le stock rangé par groupe (Pharmacie › Groupe A, Groupe B), « Retirer » sur chaque carte |
+| `41-stock-retrait.html` | « Retirer » : combien, et une note facultative |
 
 ## Ce que ces maquettes décident
 

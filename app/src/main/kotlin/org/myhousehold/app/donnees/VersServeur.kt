@@ -74,8 +74,15 @@ fun StockTableauEntite.versServeur(): JSONObject = JSONObject()
     .apply { couleur?.let { put("color", it) } }
     .put("position", position.coerceIn(0, 999))
 
+fun StockGroupeEntite.versServeur(): JSONObject = JSONObject()
+    .put("boardId", tableauId)
+    .put("name", nom)
+    .put("color", couleur)
+    .put("position", position.coerceIn(0, 999))
+
 fun StockArticleEntite.versServeur(): JSONObject = JSONObject()
     .put("boardId", tableauId)
+    .put("groupId", groupeId.ouNul())
     .put("name", nom)
     .put("icon", icone.ouNul())
     .apply { couleur?.let { put("color", it) } }

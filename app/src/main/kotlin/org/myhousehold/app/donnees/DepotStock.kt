@@ -4,6 +4,8 @@ import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.myhousehold.core.ArticleDeStock
+import org.myhousehold.core.GroupeDeStock
+import org.myhousehold.core.MouvementDeStock
 import org.myhousehold.core.Sortie
 import org.myhousehold.core.TableauDeStock
 import java.util.UUID
@@ -28,6 +30,11 @@ class DepotStock(private val base: BaseLocale, private val file: FileDEnvoi) {
 
     val tableaux: Flow<List<TableauDeStock>> = base.stock().tableaux().map { l -> l.map { it.versDomaine() } }
     val articles: Flow<List<ArticleDeStock>> = base.stock().articles().map { l -> l.map { it.versDomaine() } }
+    val groupes: Flow<List<GroupeDeStock>> = base.stock().groupes().map { l -> l.map { it.versDomaine() } }
+
+    /** L'historique d'un article : ce qui est entré et sorti, et pourquoi. */
+    fun mouvements(articleId: String): Flow<List<MouvementDeStock>> =
+        base.stock().mouvements(articleId).map { l -> l.map { it.versDomaine() } }
 
     /** Seul un foyer sans serveur choisit ses plugins ici. */
     suspend fun activer(plugin: String, oui: Boolean) {
@@ -80,6 +87,7 @@ class DepotStock(private val base: BaseLocale, private val file: FileDEnvoi) {
         val quand = maintenant()
         base.withTransaction {
             base.stock().supprimerArticlesDu(id, quand)
+            base.stock().supprimerGroupesDu(id, quand)
             base.stock().enregistrerTableau(t.copy(supprimeLe = quand, modifieLe = quand))
         }
         file.appel("DELETE", "/stock/boards/$id")
@@ -91,6 +99,8 @@ class DepotStock(private val base: BaseLocale, private val file: FileDEnvoi) {
         val entite = StockArticleEntite(
             id = id,
             tableauId = a.tableauId,
+            // Un groupe d'un autre tableau ne vaut pas : l'article passe sans groupe.
+            groupeId = a.groupeId?.takeIf { g -> base.stock().groupe(g)?.let { it.tableauId == a.tableauId && it.supprimeLe == null } == true },
             nom = a.nom.trim(),
             icone = if (a.image != null) null else a.icone,
             couleur = a.couleur,
@@ -117,26 +127,69 @@ class DepotStock(private val base: BaseLocale, private val file: FileDEnvoi) {
         file.appel("DELETE", "/stock/items/$id")
     }
 
-    /** « + » et « − » : jamais sous zéro. */
+    /** « + » et « − » : jamais sous zéro, et l'historique le garde. */
     suspend fun ajuster(id: String, delta: Int) {
-        base.stock().ajuster(id, delta, maintenant())
+        val avant = base.stock().article(id)?.quantite ?: return
+        val reel = (avant + delta).coerceAtLeast(0) - avant
+        base.withTransaction {
+            base.stock().ajuster(id, delta, maintenant())
+            if (reel != 0) {
+                base.stock().ajouterMouvements(listOf(StockMouvementEntite(nouvelId(), id, reel, null, maintenant())))
+            }
+        }
         file.appel("POST", "/stock/items/$id/adjust", JSONObject().put("delta", delta))
     }
 
-    /** Déclarer une sortie : tout part d'un coup. */
-    suspend fun sortie(sortie: Sortie) {
+    // ── Groupes ────────────────────────────────────────────────────────
+
+    suspend fun enregistrerGroupe(g: GroupeDeStock): String {
+        val id = g.id.ifBlank { nouvelId() }
+        val entite = StockGroupeEntite(
+            id = id,
+            tableauId = g.tableauId,
+            nom = g.nom.trim(),
+            couleur = g.couleur,
+            position = g.position,
+            modifieLe = maintenant(),
+        )
+        base.stock().enregistrerGroupe(entite)
+        file.enregistrer("/stock/groups/$id", "/stock/groups", id, entite.versServeur())
+        return id
+    }
+
+    /** Supprimer un groupe garde ses articles : ils passent « Sans groupe ». */
+    suspend fun supprimerGroupe(id: String) {
+        val g = base.stock().groupe(id) ?: return
         val quand = maintenant()
         base.withTransaction {
+            base.stock().detacherDuGroupe(id, quand)
+            base.stock().enregistrerGroupe(g.copy(supprimeLe = quand, modifieLe = quand))
+        }
+        file.appel("DELETE", "/stock/groups/$id")
+    }
+
+    /** Déclarer une sortie — un article ou plusieurs —, avec sa note : tout part d'un coup. */
+    suspend fun sortie(sortie: Sortie) {
+        val quand = maintenant()
+        val note = sortie.note?.trim()?.takeIf { it.isNotEmpty() }
+        base.withTransaction {
             val stock = base.stock().tousLesArticles()
-            val nouvelles = sortie.appliquer(stock.map { it.versDomaine() }).associate { it.id to it.quantite }
+            val domaine = stock.map { it.versDomaine() }
+            val retraits = sortie.retraits(domaine)
+            val nouvelles = sortie.appliquer(domaine).associate { it.id to it.quantite }
             base.stock().enregistrerArticles(
                 stock.filter { it.id in nouvelles }.map { it.copy(quantite = nouvelles.getValue(it.id), modifieLe = quand) },
+            )
+            base.stock().ajouterMouvements(
+                retraits.map { (id, q) -> StockMouvementEntite(nouvelId(), id, -q, note, quand) },
             )
         }
         val lignes = sortie.lignes.filter { it.value > 0 }
         file.appel(
             "POST", "/stock/out",
-            JSONObject().put("items", JSONArray(lignes.map { (id, q) -> JSONObject().put("id", id).put("quantity", q) })),
+            JSONObject()
+                .put("items", JSONArray(lignes.map { (id, q) -> JSONObject().put("id", id).put("quantity", q) }))
+                .apply { note?.let { put("note", it) } },
         )
     }
 

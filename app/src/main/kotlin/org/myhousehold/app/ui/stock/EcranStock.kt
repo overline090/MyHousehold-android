@@ -1,6 +1,8 @@
 package org.myhousehold.app.ui.stock
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -20,8 +22,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Outbox
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.myhousehold.app.ui.commun.CarteFoyer
+import org.myhousehold.app.ui.commun.couleurDe
 import org.myhousehold.app.ui.commun.EnTete
 import org.myhousehold.app.ui.commun.EtatVide
 import org.myhousehold.app.ui.theme.couleurAlerte
@@ -51,7 +59,9 @@ import org.myhousehold.core.peremptionEnClair
 
 /**
  * Le plugin Gestion de stock : les tableaux en haut, les articles du
- * tableau choisi dessous, « − » et « + » à portée de pouce.
+ * tableau choisi dessous, rangés par groupe. Chaque carte a « Retirer » :
+ * une sortie en un geste, avec une note. Ajouter du stock se fait dans la
+ * fiche de l'article.
  */
 @Composable
 fun EcranStock(
@@ -64,13 +74,18 @@ fun EcranStock(
     val etat by modele.etat.collectAsStateWithLifecycle()
     var tableauEnEdition by remember { mutableStateOf<TableauDeStock?>(null) }
     var nouveauTableau by remember { mutableStateOf(false) }
+    var aRetirer by remember { mutableStateOf<ArticleDeStock?>(null) }
+    var gestionGroupes by remember { mutableStateOf(false) }
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             EnTete(titre = "Stock") {
                 val choisi = etat.choisi
                 if (etat.peutGerer && choisi != null) {
-                    OutlinedButton(onClick = { onNouvelArticle(choisi) }) { Text("+ Article") }
+                    // Un « + » seul : son nom n'est que pour les lecteurs d'écran.
+                    FilledIconButton(onClick = { onNouvelArticle(choisi) }, modifier = Modifier.size(44.dp)) {
+                        Icon(Icons.Default.Add, contentDescription = "Nouvel article")
+                    }
                 }
             }
 
@@ -104,13 +119,16 @@ fun EcranStock(
                         label = { Text("${f.libelle} · ${etat.combien(f)}") },
                     )
                 }
+                if (etat.peutGerer && etat.choisi != null) {
+                    AssistChip(onClick = { gestionGroupes = true }, label = { Text("Groupes") })
+                }
             }
 
             if (etat.visibles.isEmpty()) {
                 EtatVide(
                     titre = if (etat.duTableau.isEmpty()) "Tableau vide" else "Rien ici",
                     explication = if (etat.duTableau.isEmpty()) {
-                        "Ajoutez un article avec « + Article »."
+                        "Ajoutez un article avec « + »."
                     } else {
                         "Aucun article de ce tableau dans ce filtre."
                     },
@@ -122,13 +140,20 @@ fun EcranStock(
                 contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 110.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                items(etat.visibles, key = { it.id }) { article ->
-                    LigneArticle(
-                        article = article,
-                        etat = etat,
-                        onOuvrir = { onOuvrirArticle(article.id) },
-                        onAjuster = { delta -> modele.ajuster(article, delta) },
-                    )
+                etat.sections.forEach { (groupe, articles) ->
+                    if (etat.groupesDuTableau.isNotEmpty()) {
+                        item(key = "groupe-" + (groupe?.id ?: "sans")) {
+                            TitreDeGroupe(groupe?.nom ?: "Sans groupe", groupe?.couleur ?: "#C9D3D0")
+                        }
+                    }
+                    items(articles, key = { it.id }) { article ->
+                        LigneArticle(
+                            article = article,
+                            etat = etat,
+                            onOuvrir = { onOuvrirArticle(article.id) },
+                            onRetirer = { aRetirer = article },
+                        )
+                    }
                 }
             }
         }
@@ -141,6 +166,28 @@ fun EcranStock(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
+            )
+        }
+    }
+
+    aRetirer?.let { article ->
+        FeuilleRetrait(
+            article = article,
+            onRetirer = { combien, note -> modele.retirer(article, combien, note) },
+            onFermer = { aRetirer = null },
+        )
+    }
+
+    if (gestionGroupes) {
+        etat.tableaux.firstOrNull { it.id == etat.choisi }?.let { tableau ->
+            DialogueGroupes(
+                tableau = tableau,
+                groupes = etat.groupesDuTableau,
+                articles = etat.duTableau,
+                onEnregistrer = modele::enregistrerGroupe,
+                onSupprimer = modele::supprimerGroupe,
+                onDeplacer = modele::deplacerGroupe,
+                onFermer = { gestionGroupes = false },
             )
         }
     }
@@ -215,12 +262,28 @@ fun PucesDeTableaux(
     }
 }
 
+/** Le titre d'un groupe dans la liste : son point de couleur, son nom. */
+@Composable
+private fun TitreDeGroupe(nom: String, couleur: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 6.dp)) {
+        Box(Modifier.size(9.dp).clip(CircleShape).background(couleurDe(couleur)))
+        Text(
+            nom.uppercase(),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 8.dp),
+        )
+    }
+}
+
+/** Une carte : l'article, sa quantité, et « Retirer ». */
 @Composable
 private fun LigneArticle(
     article: ArticleDeStock,
     etat: EtatStock,
     onOuvrir: () -> Unit,
-    onAjuster: (Int) -> Unit,
+    onRetirer: () -> Unit,
 ) {
     val sousTitre = article.peremption?.let { peremptionEnClair(it, etat.aujourdHui) }
     CarteFoyer(modifier = Modifier.clickable(onClick = onOuvrir)) {
@@ -242,16 +305,22 @@ private fun LigneArticle(
                     )
                 }
             }
-            Compteur(
-                valeur = article.quantite,
-                nom = article.nom,
-                enAlerte = article.aRacheter,
-                actif = etat.peutFaire,
-                moinsPossible = article.quantite > 0,
-                plusPossible = true,
-                sousLeChiffre = article.minimum?.let { "min $it" },
-                onAjuster = onAjuster,
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(horizontal = 10.dp)) {
+                Text(
+                    article.quantite.toString(),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (article.aRacheter) couleurAlerte() else MaterialTheme.colorScheme.onSurface,
+                )
+                article.minimum?.let {
+                    Text("min $it", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            if (etat.peutFaire) {
+                OutlinedIconButton(onClick = onRetirer, enabled = article.quantite > 0, modifier = Modifier.size(44.dp)) {
+                    Icon(Icons.Outlined.Download, contentDescription = "Retirer : ${article.nom}", tint = MaterialTheme.colorScheme.primary)
+                }
+            }
         }
     }
 }

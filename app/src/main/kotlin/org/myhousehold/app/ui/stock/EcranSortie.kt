@@ -18,6 +18,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -123,6 +124,18 @@ fun EcranSortie(modele: ModeleStock, onFerme: () -> Unit, modifier: Modifier = M
                         }
                     }
                 }
+            }
+            item {
+                // Pour qui, pourquoi : gardé dans l'historique de chaque article.
+                val note by modele.noteDeSortie.collectAsStateWithLifecycle()
+                OutlinedTextField(
+                    value = note,
+                    onValueChange = { modele.noteDeSortie.value = it.take(300) },
+                    label = { Text("Note (facultative)") },
+                    placeholder = { Text("Pour qui, pourquoi") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                )
             }
             if (sousLeMinimum.isNotEmpty()) {
                 item {

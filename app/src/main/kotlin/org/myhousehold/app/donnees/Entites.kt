@@ -196,6 +196,8 @@ data class StockTableauEntite(
 data class StockArticleEntite(
     @PrimaryKey val id: String,
     val tableauId: String,
+    /** Un groupe du même tableau ; null : « Sans groupe ». */
+    val groupeId: String? = null,
     val nom: String,
     val icone: String? = null,
     val couleur: String? = null,
@@ -223,3 +225,27 @@ class Convertisseurs {
     fun texteVersListe(texte: String?): List<String> =
         texte?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
 }
+
+/** Un groupe d'articles dans un tableau : la pharmacie, groupe A, groupe B. */
+@Entity(tableName = "stock_groupe")
+data class StockGroupeEntite(
+    @PrimaryKey val id: String,
+    val tableauId: String,
+    val nom: String,
+    val couleur: String = "#0F766E",
+    val position: Int = 0,
+    val modifieLe: Long = 0,
+    val supprimeLe: Long? = null,
+)
+
+/** Ce qui est entré ou sorti d'un article, et pourquoi : l'historique de sa fiche. */
+@Entity(tableName = "stock_mouvement", indices = [Index("articleId")])
+data class StockMouvementEntite(
+    @PrimaryKey val id: String,
+    val articleId: String,
+    val delta: Int,
+    val note: String? = null,
+    val quand: Long,
+    /** Le prénom de qui l'a fait, tel que le serveur l'a donné ; null sur ce téléphone seul. */
+    val auteur: String? = null,
+)

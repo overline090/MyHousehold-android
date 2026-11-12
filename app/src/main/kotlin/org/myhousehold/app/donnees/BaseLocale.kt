@@ -24,8 +24,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         MutationEnAttenteEntite::class,
         StockTableauEntite::class,
         StockArticleEntite::class,
+        StockGroupeEntite::class,
+        StockMouvementEntite::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 @TypeConverters(Convertisseurs::class)
@@ -72,6 +74,23 @@ abstract class BaseLocale : RoomDatabase() {
             }
         }
 
+        /** v0.9 : les groupes du stock, et l'historique de ce qui entre et sort. */
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `stock_article` ADD COLUMN `groupeId` TEXT")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `stock_groupe` (`id` TEXT NOT NULL, `tableauId` TEXT NOT NULL, " +
+                        "`nom` TEXT NOT NULL, `couleur` TEXT NOT NULL, `position` INTEGER NOT NULL, " +
+                        "`modifieLe` INTEGER NOT NULL, `supprimeLe` INTEGER, PRIMARY KEY(`id`))",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `stock_mouvement` (`id` TEXT NOT NULL, `articleId` TEXT NOT NULL, " +
+                        "`delta` INTEGER NOT NULL, `note` TEXT, `quand` INTEGER NOT NULL, `auteur` TEXT, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_stock_mouvement_articleId` ON `stock_mouvement` (`articleId`)")
+            }
+        }
+
         @Volatile
         private var instance: BaseLocale? = null
 
@@ -87,7 +106,7 @@ abstract class BaseLocale : RoomDatabase() {
                     // foyer utilisé seul n'existent nulle part ailleurs.
                     // Une migration manquante doit casser au
                     // développement, pas effacer chez l'utilisateur.
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .build()
                     .also { instance = it }
             }

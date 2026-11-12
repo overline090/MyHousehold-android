@@ -7,6 +7,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -17,6 +20,8 @@ import org.myhousehold.core.ArticleDeStock
 import org.myhousehold.app.ui.commun.ApparenceDIcone
 import org.myhousehold.app.ui.commun.SorteDIcone
 import org.myhousehold.core.COULEURS_DE_STOCK
+import org.myhousehold.core.GroupeDeStock
+import org.myhousehold.core.MouvementDeStock
 import org.myhousehold.core.TableauDeStock
 
 data class EtatArticle(
@@ -24,6 +29,8 @@ data class EtatArticle(
     val id: String? = null,
     val tableaux: List<TableauDeStock> = emptyList(),
     val tableauId: String = "",
+    val groupes: List<GroupeDeStock> = emptyList(),
+    val groupeId: String? = null,
     val nom: String = "",
     val apparence: ApparenceDIcone = ApparenceDIcone(SorteDIcone.ICONE, "boite", couleur = COULEURS_DE_STOCK.first()),
     val quantite: Int = 1,
@@ -36,6 +43,7 @@ data class EtatArticle(
     val enregistre: Boolean = false,
 ) {
     val valide: Boolean get() = nom.isNotBlank() && tableauId.isNotBlank() && apparence.valide
+    val groupesDuTableau: List<GroupeDeStock> get() = groupes.filter { it.tableauId == tableauId }.sortedBy { it.position }
 }
 
 /** Nouvel article d'un tableau, ou un article à modifier. */
@@ -47,19 +55,27 @@ class ModeleArticle(
     private val _etat = MutableStateFlow(EtatArticle(tableauId = tableauId.orEmpty()))
     val etat: StateFlow<EtatArticle> = _etat.asStateFlow()
 
+    /** Ce qui est entré et sorti de l'article, et pourquoi. */
+    val historique: StateFlow<List<MouvementDeStock>> =
+        (articleId?.let { stock.mouvements(it) } ?: flowOf(emptyList()))
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     init {
         viewModelScope.launch {
             val tableaux = stock.tableaux.first()
+            val groupes = stock.groupes.first()
             val a = articleId?.let { stock.article(it) }
             _etat.update { e ->
                 if (a == null) {
-                    e.copy(chargee = true, tableaux = tableaux, tableauId = e.tableauId.ifBlank { tableaux.firstOrNull()?.id.orEmpty() })
+                    e.copy(chargee = true, tableaux = tableaux, groupes = groupes, tableauId = e.tableauId.ifBlank { tableaux.firstOrNull()?.id.orEmpty() })
                 } else {
                     e.copy(
                         chargee = true,
                         id = a.id,
                         tableaux = tableaux,
+                        groupes = groupes,
                         tableauId = a.tableauId,
+                        groupeId = a.groupeId,
                         nom = a.nom,
                         apparence = ApparenceDIcone.lire(a.icone, a.couleur, a.image, "boite", COULEURS_DE_STOCK.first()),
                         quantite = a.quantite,
@@ -85,6 +101,7 @@ class ModeleArticle(
                 ArticleDeStock(
                     id = e.id.orEmpty(),
                     tableauId = e.tableauId,
+                    groupeId = e.groupeId?.takeIf { g -> e.groupesDuTableau.any { it.id == g } },
                     nom = e.nom,
                     icone = e.apparence.iconeFinale,
                     couleur = e.apparence.couleur.takeIf { e.apparence.sorte != SorteDIcone.AUCUNE },

@@ -1,5 +1,14 @@
 package org.myhousehold.app.ui.stock
 
+import org.myhousehold.app.ui.commun.enClair
+import org.myhousehold.app.ui.commun.enClairCourt
+import org.myhousehold.app.ui.commun.dansLaZone
+import org.myhousehold.app.ui.theme.couleurSucces
+import org.myhousehold.app.ui.theme.couleurAlerte
+import org.myhousehold.app.ui.commun.CarteFoyer
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import org.myhousehold.app.ui.commun.ChoixDIcone
 import org.myhousehold.app.ui.commun.SorteDIcone
 import org.myhousehold.core.COULEURS_DE_STOCK
@@ -43,7 +52,7 @@ import org.myhousehold.app.ui.commun.ChampDate
 import org.myhousehold.app.ui.commun.TitreDeSection
 
 /** La fiche d'un article : icône, nom, tableau, quantité et minimum, péremption, lien, détail. */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun EcranArticle(modele: ModeleArticle, onFerme: () -> Unit, modifier: Modifier = Modifier) {
     val etat by modele.etat.collectAsStateWithLifecycle()
@@ -110,6 +119,24 @@ fun EcranArticle(modele: ModeleArticle, onFerme: () -> Unit, modifier: Modifier 
                 }
             }
 
+            if (etat.groupesDuTableau.isNotEmpty()) {
+                TitreDeSection("Groupe")
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = etat.groupeId == null,
+                        onClick = { modele.modifier { it.copy(groupeId = null) } },
+                        label = { Text("Sans groupe") },
+                    )
+                    etat.groupesDuTableau.forEach { g ->
+                        FilterChip(
+                            selected = etat.groupeId == g.id,
+                            onClick = { modele.modifier { it.copy(groupeId = g.id) } },
+                            label = { Text(g.nom) },
+                        )
+                    }
+                }
+            }
+
             TitreDeSection("Quantité actuelle")
             Compteur(
                 valeur = etat.quantite,
@@ -169,6 +196,32 @@ fun EcranArticle(modele: ModeleArticle, onFerme: () -> Unit, modifier: Modifier 
                 minLines = 2,
                 modifier = Modifier.fillMaxWidth(),
             )
+
+            val historique by modele.historique.collectAsStateWithLifecycle()
+            if (historique.isNotEmpty()) {
+                TitreDeSection("Dernières entrées et sorties")
+                CarteFoyer {
+                    historique.forEachIndexed { i, m ->
+                        if (i > 0) HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
+                        Row(verticalAlignment = Alignment.Top) {
+                            Text(
+                                if (m.delta > 0) "+${m.delta}" else m.delta.toString(),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = if (m.delta < 0) couleurAlerte() else couleurSucces(),
+                                modifier = Modifier.width(44.dp),
+                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                m.note?.let { Text("« $it »", style = MaterialTheme.typography.bodyMedium) }
+                                Text(
+                                    listOfNotNull(m.auteur, "${m.quand.dansLaZone().date.enClairCourt()} à ${m.quand.dansLaZone().time.enClair()}").joinToString(" · "),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         Row(

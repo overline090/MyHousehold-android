@@ -312,6 +312,13 @@ class Synchronisation(
         val avecStock = DepotStock.PLUGIN in plugins
         val tableaux = if (avecStock) lire(api, "/stock/boards").liste().objets() else emptyList()
         val articles = if (avecStock) lire(api, "/stock/items").liste().objets() else emptyList()
+        val groupesDeStock = if (avecStock) lire(api, "/stock/groups").liste().objets() else emptyList()
+        // Un serveur plus ancien n'a pas l'historique : on s'en passe.
+        val mouvements = if (avecStock) {
+            appeler(api, "GET", "/stock/movements").takeIf { it.reussie }?.liste()?.objets().orEmpty()
+        } else {
+            emptyList()
+        }
 
         val ancienFoyer = base.foyers().courant() ?: return
         val ancienMoi = base.membres().monCompte()
@@ -415,7 +422,9 @@ class Synchronisation(
             s.viderRendezVous()
             s.rendezVous(rendezVous.map { rendezVousDepuis(it, maintenant) }.distinctBy { it.id })
 
+            s.viderMouvements()
             s.viderArticles()
+            s.viderGroupesDeStock()
             s.viderTableaux()
             s.tableaux(
                 tableaux.map { t ->
@@ -436,6 +445,7 @@ class Synchronisation(
                     StockArticleEntite(
                         id = a.getString("id"),
                         tableauId = a.getString("boardId"),
+                        groupeId = a.texte("groupId"),
                         nom = a.optString("name"),
                         icone = a.texte("icon"),
                         couleur = a.texte("color"),
@@ -448,6 +458,30 @@ class Synchronisation(
                         modifieLe = maintenant,
                         image = imagesArticles[a.getString("id")]?.first,
                         imageVersion = imagesArticles[a.getString("id")]?.second,
+                    )
+                },
+            )
+            s.groupesDeStock(
+                groupesDeStock.filter { it.optString("boardId") in idsTableaux }.map { g ->
+                    StockGroupeEntite(
+                        id = g.getString("id"),
+                        tableauId = g.getString("boardId"),
+                        nom = g.optString("name"),
+                        couleur = g.optString("color", "#0F766E"),
+                        position = g.optInt("position"),
+                        modifieLe = maintenant,
+                    )
+                },
+            )
+            s.mouvements(
+                mouvements.map { m ->
+                    StockMouvementEntite(
+                        id = m.getString("id"),
+                        articleId = m.getString("itemId"),
+                        delta = m.optInt("delta"),
+                        note = m.texte("note"),
+                        quand = Instant.parse(m.getString("createdAt")).toEpochMilliseconds(),
+                        auteur = m.optJSONObject("actor")?.texte("firstName"),
                     )
                 },
             )

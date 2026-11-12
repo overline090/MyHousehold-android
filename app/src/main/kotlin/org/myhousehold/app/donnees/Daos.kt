@@ -260,6 +260,27 @@ interface StockDao {
     @Query("SELECT * FROM stock_article WHERE id = :id")
     suspend fun article(id: String): StockArticleEntite?
 
+    @Query("SELECT * FROM stock_groupe WHERE supprimeLe IS NULL ORDER BY position, nom")
+    fun groupes(): Flow<List<StockGroupeEntite>>
+
+    @Query("SELECT * FROM stock_groupe WHERE id = :id")
+    suspend fun groupe(id: String): StockGroupeEntite?
+
+    @Upsert
+    suspend fun enregistrerGroupe(groupe: StockGroupeEntite)
+
+    @Query("UPDATE stock_article SET groupeId = NULL, modifieLe = :quand WHERE groupeId = :groupeId")
+    suspend fun detacherDuGroupe(groupeId: String, quand: Long)
+
+    @Query("UPDATE stock_groupe SET supprimeLe = :quand, modifieLe = :quand WHERE tableauId = :tableauId AND supprimeLe IS NULL")
+    suspend fun supprimerGroupesDu(tableauId: String, quand: Long)
+
+    @Query("SELECT * FROM stock_mouvement WHERE articleId = :articleId ORDER BY quand DESC LIMIT 30")
+    fun mouvements(articleId: String): Flow<List<StockMouvementEntite>>
+
+    @Insert
+    suspend fun ajouterMouvements(mouvements: List<StockMouvementEntite>)
+
     @Query("SELECT * FROM stock_tableau WHERE id = :id")
     suspend fun tableau(id: String): StockTableauEntite?
 
@@ -302,6 +323,18 @@ interface SynchroDao {
 
     @Query("DELETE FROM stock_tableau")
     suspend fun viderTableaux()
+
+    @Query("DELETE FROM stock_groupe")
+    suspend fun viderGroupesDeStock()
+
+    @Query("DELETE FROM stock_mouvement")
+    suspend fun viderMouvements()
+
+    @Upsert
+    suspend fun groupesDeStock(groupes: List<StockGroupeEntite>)
+
+    @Upsert
+    suspend fun mouvements(mouvements: List<StockMouvementEntite>)
 
     @Upsert
     suspend fun groupes(groupes: List<GroupeEntite>)

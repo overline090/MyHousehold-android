@@ -21,9 +21,30 @@ data class TableauDeStock(
     val image: String? = null,
 )
 
+/** Un groupe d'articles dans un tableau : la pharmacie, groupe A, groupe B. */
+data class GroupeDeStock(
+    val id: String,
+    val tableauId: String,
+    val nom: String,
+    val couleur: String = "#0F766E",
+    val position: Int = 0,
+)
+
+/** Ce qui est entré (delta > 0) ou sorti (delta < 0) d'un article, et pourquoi. */
+data class MouvementDeStock(
+    val id: String,
+    val articleId: String,
+    val delta: Int,
+    val note: String?,
+    val quand: kotlinx.datetime.Instant,
+    val auteur: String?,
+)
+
 data class ArticleDeStock(
     val id: String,
     val tableauId: String,
+    /** Un groupe du même tableau ; null : « Sans groupe ». */
+    val groupeId: String? = null,
     val nom: String,
     val icone: String? = null,
     val couleur: String? = null,
@@ -81,7 +102,7 @@ fun peremptionEnClair(jour: LocalDate, aujourdHui: LocalDate): PeremptionEnClair
  * descend jamais sous zéro, et l'on dit d'avance ce qui passera sous son
  * minimum.
  */
-data class Sortie(val lignes: Map<String, Int>) {
+data class Sortie(val lignes: Map<String, Int>, val note: String? = null) {
     val articles: Int get() = lignes.count { it.value > 0 }
     val unites: Int get() = lignes.values.filter { it > 0 }.sum()
 
@@ -91,6 +112,12 @@ data class Sortie(val lignes: Map<String, Int>) {
             val pris = lignes[a.id] ?: 0
             pris > 0 && a.minimum != null && !a.aRacheter && a.quantite - pris < a.minimum
         }
+
+    /** Ce qui sortira vraiment de chaque article : jamais plus qu'il n'y en a. */
+    fun retraits(stock: List<ArticleDeStock>): Map<String, Int> =
+        stock.mapNotNull { a -> lignes[a.id]?.takeIf { it > 0 }?.let { a.id to minOf(it, a.quantite) } }
+            .filter { it.second > 0 }
+            .toMap()
 
     /** Les nouvelles quantités, pour les seuls articles touchés. */
     fun appliquer(stock: List<ArticleDeStock>): List<ArticleDeStock> =
@@ -105,4 +132,17 @@ fun enumerer(noms: List<String>): String = when (noms.size) {
     0 -> ""
     1 -> noms[0]
     else -> noms.dropLast(1).joinToString(", ") + " et " + noms.last()
+}
+
+/**
+ * Les articles d'un tableau rangés par groupe, dans l'ordre des groupes,
+ * puis « Sans groupe » ; les sections vides disparaissent. Sans aucun
+ * groupe, une seule section, sans titre (groupe null).
+ */
+fun parGroupe(articles: List<ArticleDeStock>, groupes: List<GroupeDeStock>): List<Pair<GroupeDeStock?, List<ArticleDeStock>>> {
+    if (groupes.isEmpty()) return if (articles.isEmpty()) emptyList() else listOf(null to articles)
+    val connus = groupes.map { it.id }.toSet()
+    return (groupes.sortedBy { it.position }.map { g -> g to articles.filter { it.groupeId == g.id } } +
+        listOf(null to articles.filter { it.groupeId == null || it.groupeId !in connus }))
+        .filter { it.second.isNotEmpty() }
 }

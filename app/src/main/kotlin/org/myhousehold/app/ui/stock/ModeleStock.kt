@@ -18,6 +18,8 @@ import kotlinx.datetime.todayIn
 import org.myhousehold.app.donnees.DepotFoyer
 import org.myhousehold.app.donnees.DepotStock
 import org.myhousehold.core.ArticleDeStock
+import org.myhousehold.core.GroupeDeStock
+import org.myhousehold.core.parGroupe
 import org.myhousehold.core.Droit
 import org.myhousehold.core.Sortie
 import org.myhousehold.core.TableauDeStock
@@ -32,6 +34,7 @@ data class EtatStock(
     val chargement: Boolean = true,
     val tableaux: List<TableauDeStock> = emptyList(),
     val articles: List<ArticleDeStock> = emptyList(),
+    val groupes: List<GroupeDeStock> = emptyList(),
     val choisi: String? = null,
     val filtre: FiltreStock = FiltreStock.TOUT,
     val aujourdHui: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
@@ -47,6 +50,11 @@ data class EtatStock(
                 FiltreStock.BIENTOT_PERIME -> it.bientotPerime(aujourdHui)
             }
         }
+
+    val groupesDuTableau: List<GroupeDeStock> get() = groupes.filter { it.tableauId == choisi }.sortedBy { it.position }
+
+    /** Les articles visibles, par groupe du tableau, puis « Sans groupe ». */
+    val sections: List<Pair<GroupeDeStock?, List<ArticleDeStock>>> get() = parGroupe(visibles, groupesDuTableau)
 
     fun combien(f: FiltreStock): Int = duTableau.count {
         when (f) {
@@ -69,17 +77,23 @@ class ModeleStock(private val stock: DepotStock, depot: DepotFoyer) : ViewModel(
     private val _sortie = MutableStateFlow<Map<String, Int>>(emptyMap())
     val sortie: StateFlow<Map<String, Int>> = _sortie
 
+    /** La note de la sortie en cours : pour qui, pourquoi. */
+    val noteDeSortie = MutableStateFlow("")
+
+    private val tableauxEtGroupes = combine(stock.tableaux, stock.groupes) { t, g -> t to g }
+
     val etat: StateFlow<EtatStock> = combine(
-        stock.tableaux,
+        tableauxEtGroupes,
         stock.articles,
         choisi,
         filtre,
         depot.moi,
-    ) { tableaux, articles, choix, f, moi ->
+    ) { (tableaux, groupes), articles, choix, f, moi ->
         EtatStock(
             chargement = false,
             tableaux = tableaux,
             articles = articles,
+            groupes = groupes,
             choisi = choix?.takeIf { id -> tableaux.any { it.id == id } } ?: tableaux.firstOrNull()?.id,
             filtre = f,
             peutGerer = moi?.statut?.permet(Droit.GERER_LES_TACHES) ?: true,
@@ -107,10 +121,41 @@ class ModeleStock(private val stock: DepotStock, depot: DepotFoyer) : ViewModel(
         viewModelScope.launch { stock.supprimerTableau(id) }
     }
 
+    // ── Groupes ────────────────────────────────────────────────────────
+
+    fun enregistrerGroupe(groupe: GroupeDeStock) {
+        viewModelScope.launch { stock.enregistrerGroupe(groupe) }
+    }
+
+    fun supprimerGroupe(id: String) {
+        viewModelScope.launch { stock.supprimerGroupe(id) }
+    }
+
+    /** Monter ou descendre un groupe : toutes les positions sont réécrites. */
+    fun deplacerGroupe(groupe: GroupeDeStock, sens: Int) {
+        val liste = etat.value.groupesDuTableau.toMutableList()
+        val i = liste.indexOfFirst { it.id == groupe.id }
+        val j = i + sens
+        if (i < 0 || j !in liste.indices) return
+        liste.add(j, liste.removeAt(i))
+        viewModelScope.launch {
+            liste.forEachIndexed { k, g -> if (g.position != k) stock.enregistrerGroupe(g.copy(position = k)) }
+        }
+    }
+
+    // ── Retirer un article ────────────────────────────────────────────
+
+    /** « Retirer » sur une carte : combien, et une note facultative. */
+    fun retirer(article: ArticleDeStock, combien: Int, note: String) {
+        if (combien <= 0) return
+        viewModelScope.launch { stock.sortie(Sortie(mapOf(article.id to combien), note)) }
+    }
+
     // ── Déclarer une sortie ───────────────────────────────────────────
 
     fun commencerSortie() {
         _sortie.value = emptyMap()
+        noteDeSortie.value = ""
     }
 
     fun cocher(article: ArticleDeStock, oui: Boolean) {
@@ -127,11 +172,12 @@ class ModeleStock(private val stock: DepotStock, depot: DepotFoyer) : ViewModel(
     }
 
     fun validerSortie(onFait: () -> Unit) {
-        val s = Sortie(_sortie.value)
+        val s = Sortie(_sortie.value, noteDeSortie.value)
         if (s.articles == 0) return
         viewModelScope.launch {
             stock.sortie(s)
             _sortie.value = emptyMap()
+            noteDeSortie.value = ""
             onFait()
         }
     }

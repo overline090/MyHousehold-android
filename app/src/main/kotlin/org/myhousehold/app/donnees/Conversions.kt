@@ -5,6 +5,8 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import org.myhousehold.core.Droit
 import org.myhousehold.core.ArticleDeStock
+import org.myhousehold.core.GroupeDeStock
+import org.myhousehold.core.MouvementDeStock
 import org.myhousehold.core.Foyer
 import org.myhousehold.core.TableauDeStock
 import org.myhousehold.core.GroupeDeTaches
@@ -47,9 +49,22 @@ fun FoyerEntite.versDomaine(): Foyer =
 fun StockTableauEntite.versDomaine(): TableauDeStock =
     TableauDeStock(id = id, nom = nom, icone = icone, couleur = couleur, position = position, image = image)
 
+fun StockGroupeEntite.versDomaine(): GroupeDeStock =
+    GroupeDeStock(id = id, tableauId = tableauId, nom = nom, couleur = couleur, position = position)
+
+fun StockMouvementEntite.versDomaine(): MouvementDeStock = MouvementDeStock(
+    id = id,
+    articleId = articleId,
+    delta = delta,
+    note = note,
+    quand = Instant.fromEpochMilliseconds(quand),
+    auteur = auteur,
+)
+
 fun StockArticleEntite.versDomaine(): ArticleDeStock = ArticleDeStock(
     id = id,
     tableauId = tableauId,
+    groupeId = groupeId,
     nom = nom,
     icone = icone,
     couleur = couleur,
