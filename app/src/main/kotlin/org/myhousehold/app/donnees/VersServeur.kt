@@ -19,7 +19,6 @@ fun TacheEntite.versServeur(): JSONObject {
         .put("title", titre)
         .put("description", description.ouNul())
         .put("groupId", groupeId.ouNul())
-    .put("barcode", codeBarres.ouNul())
         .put("priority", priorite.coerceIn(-3, 3))
         .put(
             "kind",
@@ -84,6 +83,7 @@ fun StockGroupeEntite.versServeur(): JSONObject = JSONObject()
 fun StockArticleEntite.versServeur(): JSONObject = JSONObject()
     .put("boardId", tableauId)
     .put("groupId", groupeId.ouNul())
+    .put("barcode", codeBarres.ouNul())
     .put("name", nom)
     .put("icon", icone.ouNul())
     .apply { couleur?.let { put("color", it) } }
