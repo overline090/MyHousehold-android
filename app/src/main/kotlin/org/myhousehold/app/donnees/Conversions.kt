@@ -65,6 +65,7 @@ fun StockArticleEntite.versDomaine(): ArticleDeStock = ArticleDeStock(
     id = id,
     tableauId = tableauId,
     groupeId = groupeId,
+    codeBarres = codeBarres,
     nom = nom,
     icone = icone,
     couleur = couleur,

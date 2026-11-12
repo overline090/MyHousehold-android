@@ -446,6 +446,7 @@ class Synchronisation(
                         id = a.getString("id"),
                         tableauId = a.getString("boardId"),
                         groupeId = a.texte("groupId"),
+                        codeBarres = a.texte("barcode"),
                         nom = a.optString("name"),
                         icone = a.texte("icon"),
                         couleur = a.texte("color"),

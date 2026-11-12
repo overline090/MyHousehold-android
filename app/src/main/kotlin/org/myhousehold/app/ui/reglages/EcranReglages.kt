@@ -188,6 +188,26 @@ fun EcranReglages(
                 }
             }
 
+            if (etat.foyer?.plugins?.contains(DepotStock.PLUGIN) == true) {
+                item {
+                    val retirerEnScannant by preferences.retirerEnScannant.collectAsStateWithLifecycle()
+                    CarteFoyer {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Retirer en scannant", style = MaterialTheme.typography.bodyLarge)
+                                Text(
+                                    "Ajoute un bouton de scan au Stock : un code-barres ou un QR ouvre « Retirer » pour son article, " +
+                                        "ou se lie à un article, ou en crée un.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Switch(checked = retirerEnScannant, onCheckedChange = preferences::choisirRetirerEnScannant)
+                        }
+                    }
+                }
+            }
+
             item { TitreDeSection("Ce foyer") }
             item {
                 CarteFoyer {

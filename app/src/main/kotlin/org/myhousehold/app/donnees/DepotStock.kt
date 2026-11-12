@@ -45,6 +45,16 @@ class DepotStock(private val base: BaseLocale, private val file: FileDEnvoi) {
         base.foyers().enregistrer(foyer.copy(plugins = actuels.sorted().joinToString(",")))
     }
 
+    /** L'article qui porte ce code, s'il y en a un. */
+    suspend fun articleParCode(code: String): ArticleDeStock? =
+        base.stock().tousLesArticles().firstOrNull { it.codeBarres == code.trim() }?.versDomaine()
+
+    /** Lier un code scanné à un article existant. */
+    suspend fun lierCode(articleId: String, code: String) {
+        val a = article(articleId) ?: return
+        enregistrerArticle(a.copy(codeBarres = code.trim()))
+    }
+
     suspend fun article(id: String): ArticleDeStock? = base.stock().article(id)?.takeIf { it.supprimeLe == null }?.versDomaine()
 
     suspend fun tableau(id: String): TableauDeStock? = base.stock().tableau(id)?.takeIf { it.supprimeLe == null }?.versDomaine()
@@ -102,6 +112,7 @@ class DepotStock(private val base: BaseLocale, private val file: FileDEnvoi) {
             // Un groupe d'un autre tableau ne vaut pas : l'article passe sans groupe.
             groupeId = a.groupeId?.takeIf { g -> base.stock().groupe(g)?.let { it.tableauId == a.tableauId && it.supprimeLe == null } == true },
             nom = a.nom.trim(),
+            codeBarres = a.codeBarres?.trim()?.takeIf { it.isNotEmpty() },
             icone = if (a.image != null) null else a.icone,
             couleur = a.couleur,
             quantite = a.quantite.coerceAtLeast(0),

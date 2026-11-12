@@ -198,6 +198,8 @@ data class StockArticleEntite(
     val tableauId: String,
     /** Un groupe du même tableau ; null : « Sans groupe ». */
     val groupeId: String? = null,
+    /** Code-barres ou contenu du QR code. */
+    val codeBarres: String? = null,
     val nom: String,
     val icone: String? = null,
     val couleur: String? = null,

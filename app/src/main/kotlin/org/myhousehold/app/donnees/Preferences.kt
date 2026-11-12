@@ -76,6 +76,17 @@ class PreferencesApp(contexte: Context) {
         get() = stockage.getLong(CLE_RAPPELS_TRAITES, 0L)
         set(valeur) = stockage.edit().putLong(CLE_RAPPELS_TRAITES, valeur).apply()
 
+    // ── Stock ──────────────────────────────────────────────────────────
+
+    private val _retirerEnScannant = MutableStateFlow(stockage.getBoolean(CLE_RETIRER_EN_SCANNANT, false))
+    /** Le bouton de scan du Stock : un code-barres ou un QR ouvre « Retirer ». Coupé par défaut. */
+    val retirerEnScannant: StateFlow<Boolean> = _retirerEnScannant.asStateFlow()
+
+    fun choisirRetirerEnScannant(oui: Boolean) {
+        stockage.edit().putBoolean(CLE_RETIRER_EN_SCANNANT, oui).apply()
+        _retirerEnScannant.value = oui
+    }
+
     // ── Accueil ────────────────────────────────────────────────────────
 
     private val _joursAVenir = MutableStateFlow(stockage.getInt(CLE_JOURS_A_VENIR, 7))
@@ -94,5 +105,6 @@ class PreferencesApp(contexte: Context) {
         const val CLE_HEURE_SANS_HEURE = "rappels_heure_sans_heure"
         const val CLE_RAPPELS_TRAITES = "rappels_traites_jusqua"
         const val CLE_JOURS_A_VENIR = "accueil_jours_a_venir"
+        const val CLE_RETIRER_EN_SCANNANT = "stock_retirer_en_scannant"
     }
 }

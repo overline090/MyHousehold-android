@@ -143,6 +143,11 @@ class ModeleStock(private val stock: DepotStock, depot: DepotFoyer) : ViewModel(
         }
     }
 
+    /** Un code scanné, inconnu, lié à un article existant. */
+    fun lierCode(article: ArticleDeStock, code: String) {
+        viewModelScope.launch { stock.lierCode(article.id, code) }
+    }
+
     // ── Retirer un article ────────────────────────────────────────────
 
     /** « Retirer » sur une carte : combien, et une note facultative. */

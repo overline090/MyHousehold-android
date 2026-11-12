@@ -96,7 +96,7 @@ private const val ROUTE_MISE_A_JOUR = "mise-a-jour"
 private const val ROUTE_RAPPELS = "rappels"
 private const val ROUTE_SORTIE = "stock/sortie"
 private const val ROUTE_ARTICLE = "stock/article"
-private const val ROUTE_ARTICLE_COMPLETE = "$ROUTE_ARTICLE?id={id}&tableau={tableau}"
+private const val ROUTE_ARTICLE_COMPLETE = "$ROUTE_ARTICLE?id={id}&tableau={tableau}&code={code}"
 private const val ROUTE_RENDEZ_VOUS_COMPLETE = "$ROUTE_RENDEZ_VOUS?id={id}&titre={titre}&jour={jour}"
 
 /** Un paramètre de route facultatif, de type texte. */
@@ -325,7 +325,9 @@ private fun FoyerInstalle() {
                         val modele: ModeleStock = viewModel(factory = ModeleStock.fabrique(conteneur.stock, depot))
                         EcranStock(
                             modele = modele,
-                            onNouvelArticle = { tableau -> navigation.navigate("$ROUTE_ARTICLE?tableau=$tableau") },
+                            onNouvelArticle = { tableau, code ->
+                                navigation.navigate("$ROUTE_ARTICLE?tableau=$tableau" + (code?.let { "&code=" + android.net.Uri.encode(it) } ?: ""))
+                            },
                             onOuvrirArticle = { id -> navigation.navigate("$ROUTE_ARTICLE?id=$id") },
                             onDeclarerSortie = { navigation.navigate(ROUTE_SORTIE) },
                         )
@@ -341,12 +343,17 @@ private fun FoyerInstalle() {
 
                     composable(
                         route = ROUTE_ARTICLE_COMPLETE,
-                        arguments = listOf(facultatif("id"), facultatif("tableau")),
+                        arguments = listOf(facultatif("id"), facultatif("tableau"), facultatif("code")),
                     ) { entreeArticle ->
                         val id = entreeArticle.arguments?.getString("id")
                         val modele: ModeleArticle = viewModel(
                             key = "article-${id ?: "nouveau"}",
-                            factory = ModeleArticle.fabrique(conteneur.stock, id, entreeArticle.arguments?.getString("tableau")),
+                            factory = ModeleArticle.fabrique(
+                                conteneur.stock,
+                                id,
+                                entreeArticle.arguments?.getString("tableau"),
+                                entreeArticle.arguments?.getString("code"),
+                            ),
                         )
                         EcranArticle(modele = modele, onFerme = { navigation.popBackStack() })
                     }

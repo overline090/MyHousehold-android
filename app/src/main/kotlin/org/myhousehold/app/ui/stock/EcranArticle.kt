@@ -1,5 +1,8 @@
 package org.myhousehold.app.ui.stock
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import org.myhousehold.app.ui.commun.enClair
 import org.myhousehold.app.ui.commun.enClairCourt
 import org.myhousehold.app.ui.commun.dansLaZone
@@ -117,6 +120,37 @@ fun EcranArticle(modele: ModeleArticle, onFerme: () -> Unit, modifier: Modifier 
                         )
                     }
                 }
+            }
+
+            // Un code-barres ou un QR code : se saisit, ou se scanne.
+            var scanner by remember { mutableStateOf(false) }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = etat.codeBarres,
+                    onValueChange = { v -> modele.modifier { it.copy(codeBarres = v.take(200), erreurCode = null) } },
+                    label = { Text("Code-barres ou QR code") },
+                    placeholder = { Text("Facultatif") },
+                    singleLine = true,
+                    isError = etat.erreurCode != null,
+                    supportingText = {
+                        Text(etat.erreurCode ?: "Scanné dans le Stock, il ouvre « Retirer » pour cet article.")
+                    },
+                    modifier = Modifier.weight(1f),
+                )
+                OutlinedIconButton(onClick = { scanner = true }, modifier = Modifier.padding(start = 10.dp, bottom = 18.dp).size(52.dp)) {
+                    Icon(Icons.Outlined.QrCodeScanner, contentDescription = "Scanner le code", tint = MaterialTheme.colorScheme.primary)
+                }
+            }
+            if (scanner) {
+                ScanneurDeCode(
+                    titre = "Scanner le code",
+                    consigne = "Visez le code-barres ou le QR code de l’article.",
+                    onLu = { code ->
+                        scanner = false
+                        modele.modifier { it.copy(codeBarres = code, erreurCode = null) }
+                    },
+                    onFermer = { scanner = false },
+                )
             }
 
             if (etat.groupesDuTableau.isNotEmpty()) {

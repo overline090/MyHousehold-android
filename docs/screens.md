@@ -374,6 +374,12 @@ Plugins, sur la page web).
   là qu'on en ajoute), minimum, péremption, lien pour racheter, détail, et les
   dernières entrées et sorties avec leurs notes.
 - **Les icônes** sont tracées comme sur le web, avec les mêmes dessins.
+- **Code-barres ou QR code** (maquettes `42-stock-scan.html`, `43-stock-scan-camera.html`,
+  `44-article-code.html`) : chaque article peut en porter un, saisi ou scanné dans sa
+  fiche. Avec « Retirer en scannant » activé (Réglages › Plugins, propre au téléphone),
+  un bouton de scan — juste l'icône — rejoint le « + » du Stock : un code connu ouvre
+  « Retirer » (1, et une note) ; un code inconnu se lie à un article existant ou crée
+  un nouvel article qui le porte. Un code ne désigne qu'un article.
 - **L'image d'un tableau ou d'un article** (maquette `39-icone-perso.html`) : aucune,
   une icône de la liste, « Perso » (un emoji ou une à deux lettres, posé sur la
   couleur), ou une image importée de la galerie. Lié à un serveur, l'image importée y

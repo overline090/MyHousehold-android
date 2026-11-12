@@ -1,5 +1,11 @@
 package org.myhousehold.app.ui.stock
 
+import org.myhousehold.app.conteneur
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
@@ -66,7 +72,7 @@ import org.myhousehold.core.peremptionEnClair
 @Composable
 fun EcranStock(
     modele: ModeleStock,
-    onNouvelArticle: (tableauId: String) -> Unit,
+    onNouvelArticle: (tableauId: String, code: String?) -> Unit,
     onOuvrirArticle: (String) -> Unit,
     onDeclarerSortie: () -> Unit,
     modifier: Modifier = Modifier,
@@ -75,15 +81,26 @@ fun EcranStock(
     var tableauEnEdition by remember { mutableStateOf<TableauDeStock?>(null) }
     var nouveauTableau by remember { mutableStateOf(false) }
     var aRetirer by remember { mutableStateOf<ArticleDeStock?>(null) }
+    var scanner by remember { mutableStateOf(false) }
+    var codeInconnu by remember { mutableStateOf<String?>(null) }
+    var codeALier by remember { mutableStateOf<String?>(null) }
+    val retirerEnScannant by LocalContext.current.conteneur.preferences.retirerEnScannant.collectAsStateWithLifecycle()
     var gestionGroupes by remember { mutableStateOf(false) }
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             EnTete(titre = "Stock") {
                 val choisi = etat.choisi
+                // Un bouton, juste l'icône : retirer, lier un code, ou créer un article à partir de lui.
+                if (retirerEnScannant && etat.peutFaire && etat.articles.isNotEmpty() || retirerEnScannant && etat.peutGerer) {
+                    OutlinedIconButton(onClick = { scanner = true }, modifier = Modifier.size(44.dp)) {
+                        Icon(Icons.Outlined.QrCodeScanner, contentDescription = "Scanner un code", tint = MaterialTheme.colorScheme.primary)
+                    }
+                    Spacer(Modifier.width(10.dp))
+                }
                 if (etat.peutGerer && choisi != null) {
                     // Un « + » seul : son nom n'est que pour les lecteurs d'écran.
-                    FilledIconButton(onClick = { onNouvelArticle(choisi) }, modifier = Modifier.size(44.dp)) {
+                    FilledIconButton(onClick = { onNouvelArticle(choisi, null) }, modifier = Modifier.size(44.dp)) {
                         Icon(Icons.Default.Add, contentDescription = "Nouvel article")
                     }
                 }
@@ -168,6 +185,84 @@ fun EcranStock(
                 modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
             )
         }
+    }
+
+    if (scanner) {
+        ScanneurDeCode(
+            titre = "Scanner un code",
+            consigne = "Visez le code-barres ou le QR code de l’article.",
+            onLu = { code ->
+                scanner = false
+                val article = etat.articles.firstOrNull { it.codeBarres == code }
+                if (article != null && etat.peutFaire) aRetirer = article else if (article == null) codeInconnu = code
+            },
+            onFermer = { scanner = false },
+        )
+    }
+
+    codeInconnu?.let { code ->
+        AlertDialog(
+            onDismissRequest = { codeInconnu = null },
+            title = { Text("Code inconnu") },
+            text = { Text("Aucun article n’a le code $code.") },
+            confirmButton = {
+                if (etat.peutGerer) {
+                    TextButton(onClick = {
+                        codeInconnu = null
+                        (etat.choisi ?: etat.tableaux.firstOrNull()?.id)?.let { onNouvelArticle(it, code) }
+                    }) { Text("Nouvel article") }
+                }
+            },
+            dismissButton = {
+                Row {
+                    if (etat.peutGerer && etat.articles.isNotEmpty()) {
+                        TextButton(onClick = {
+                            codeInconnu = null
+                            codeALier = code
+                        }) { Text("Lier à un article") }
+                    }
+                    TextButton(onClick = {
+                        codeInconnu = null
+                        scanner = true
+                    }) { Text("Rescanner") }
+                }
+            },
+        )
+    }
+
+    codeALier?.let { code ->
+        AlertDialog(
+            onDismissRequest = { codeALier = null },
+            title = { Text("Lier le code à…") },
+            text = {
+                LazyColumn {
+                    items(etat.articles.sortedBy { it.nom }, key = { it.id }) { a ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    modele.lierCode(a, code)
+                                    codeALier = null
+                                }
+                                .padding(vertical = 8.dp),
+                        ) {
+                            VignetteStock(a.icone, a.couleur, image = a.image, taille = 32)
+                            Column(modifier = Modifier.padding(start = 12.dp)) {
+                                Text(a.nom, style = MaterialTheme.typography.bodyLarge)
+                                val tableau = etat.tableaux.firstOrNull { it.id == a.tableauId }?.nom
+                                Text(
+                                    listOfNotNull(tableau, a.codeBarres?.let { "a déjà un code" }).joinToString(" · "),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { codeALier = null }) { Text("Annuler") } },
+        )
     }
 
     aRetirer?.let { article ->

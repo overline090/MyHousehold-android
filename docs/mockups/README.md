@@ -56,6 +56,9 @@ coupée passerait sinon pour correcte.
 | `39-icone-perso.html` | L'icône « Perso » d'un tableau : un emoji ou une à deux lettres sur la couleur |
 | `40-stock-groupes.html` | Le stock rangé par groupe (Pharmacie › Groupe A, Groupe B), « Retirer » sur chaque carte |
 | `41-stock-retrait.html` | « Retirer » : combien, et une note facultative |
+| `42-stock-scan.html` | Le Stock avec le bouton de scan (option « Retirer en scannant ») |
+| `43-stock-scan-camera.html` | La caméra : un code inconnu se lie à un article, ou crée un article |
+| `44-article-code.html` | Le code-barres ou QR d'un article, et l'option dans Réglages › Plugins |
 
 ## Ce que ces maquettes décident
 

@@ -19,6 +19,7 @@ fun TacheEntite.versServeur(): JSONObject {
         .put("title", titre)
         .put("description", description.ouNul())
         .put("groupId", groupeId.ouNul())
+    .put("barcode", codeBarres.ouNul())
         .put("priority", priorite.coerceIn(-3, 3))
         .put(
             "kind",

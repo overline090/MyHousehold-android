@@ -1,5 +1,6 @@
 package org.myhousehold.app.ui.demarrage
 
+import org.myhousehold.app.ui.commun.VueCamera
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -80,6 +81,7 @@ fun EcranScanner(
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0B0F0E))) {
         if (autorisee) {
             VueCamera(
+                formats = listOf(BarcodeFormat.QR_CODE),
                 onLu = { texte ->
                     val reconnu = onLu(texte)
                     etranger = !reconnu
@@ -134,42 +136,4 @@ fun EcranScanner(
             }
         }
     }
-}
-
-@Composable
-private fun VueCamera(onLu: (String) -> Boolean) {
-    val contexte = LocalContext.current
-    val cycleDeVie = LocalLifecycleOwner.current.lifecycle
-    val vue = remember {
-        BarcodeView(contexte).apply {
-            decoderFactory = DefaultDecoderFactory(listOf(BarcodeFormat.QR_CODE))
-        }
-    }
-
-    DisposableEffect(cycleDeVie, vue) {
-        // Lecture en continu : un QR code étranger ne doit pas arrêter le
-        // scan. On s'arrête au premier QR code reconnu.
-        val rappel = BarcodeCallback { resultat ->
-            val texte = resultat.text ?: return@BarcodeCallback
-            if (onLu(texte)) vue.pause()
-        }
-        vue.decodeContinuous(rappel)
-
-        val observateur = LifecycleEventObserver { _, evenement ->
-            when (evenement) {
-                Lifecycle.Event.ON_RESUME -> vue.resume()
-                Lifecycle.Event.ON_PAUSE -> vue.pause()
-                else -> Unit
-            }
-        }
-        cycleDeVie.addObserver(observateur)
-        if (cycleDeVie.currentState.isAtLeast(Lifecycle.State.RESUMED)) vue.resume()
-
-        onDispose {
-            cycleDeVie.removeObserver(observateur)
-            vue.pause()
-        }
-    }
-
-    AndroidView(factory = { vue }, modifier = Modifier.fillMaxSize())
 }

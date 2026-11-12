@@ -27,7 +27,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         StockGroupeEntite::class,
         StockMouvementEntite::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 @TypeConverters(Convertisseurs::class)
@@ -91,6 +91,13 @@ abstract class BaseLocale : RoomDatabase() {
             }
         }
 
+        /** v0.9 : un code-barres ou un QR code par article. */
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `stock_article` ADD COLUMN `codeBarres` TEXT")
+            }
+        }
+
         @Volatile
         private var instance: BaseLocale? = null
 
@@ -106,7 +113,7 @@ abstract class BaseLocale : RoomDatabase() {
                     // foyer utilisé seul n'existent nulle part ailleurs.
                     // Une migration manquante doit casser au
                     // développement, pas effacer chez l'utilisateur.
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build()
                     .also { instance = it }
             }

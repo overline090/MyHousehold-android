@@ -31,6 +31,9 @@ data class EtatArticle(
     val tableauId: String = "",
     val groupes: List<GroupeDeStock> = emptyList(),
     val groupeId: String? = null,
+    val codeBarres: String = "",
+    /** « Ce code est déjà celui de… » : affiché sous le champ. */
+    val erreurCode: String? = null,
     val nom: String = "",
     val apparence: ApparenceDIcone = ApparenceDIcone(SorteDIcone.ICONE, "boite", couleur = COULEURS_DE_STOCK.first()),
     val quantite: Int = 1,
@@ -51,8 +54,9 @@ class ModeleArticle(
     private val stock: DepotStock,
     private val articleId: String?,
     tableauId: String?,
+    codeInitial: String? = null,
 ) : ViewModel() {
-    private val _etat = MutableStateFlow(EtatArticle(tableauId = tableauId.orEmpty()))
+    private val _etat = MutableStateFlow(EtatArticle(tableauId = tableauId.orEmpty(), codeBarres = codeInitial.orEmpty()))
     val etat: StateFlow<EtatArticle> = _etat.asStateFlow()
 
     /** Ce qui est entré et sorti de l'article, et pourquoi. */
@@ -76,6 +80,7 @@ class ModeleArticle(
                         groupes = groupes,
                         tableauId = a.tableauId,
                         groupeId = a.groupeId,
+                        codeBarres = a.codeBarres.orEmpty(),
                         nom = a.nom,
                         apparence = ApparenceDIcone.lire(a.icone, a.couleur, a.image, "boite", COULEURS_DE_STOCK.first()),
                         quantite = a.quantite,
@@ -97,11 +102,19 @@ class ModeleArticle(
         val e = _etat.value
         if (!e.valide) return
         viewModelScope.launch {
+            // Un code ne désigne qu'un article : scanné, il doit ouvrir le bon.
+            val code = e.codeBarres.trim()
+            val autre = code.takeIf { it.isNotEmpty() }?.let { stock.articleParCode(it) }?.takeIf { it.id != e.id }
+            if (autre != null) {
+                _etat.update { it.copy(erreurCode = "Ce code est déjà celui de « ${autre.nom} ».") }
+                return@launch
+            }
             stock.enregistrerArticle(
                 ArticleDeStock(
                     id = e.id.orEmpty(),
                     tableauId = e.tableauId,
                     groupeId = e.groupeId?.takeIf { g -> e.groupesDuTableau.any { it.id == g } },
+                    codeBarres = code.takeIf { it.isNotEmpty() },
                     nom = e.nom,
                     icone = e.apparence.iconeFinale,
                     couleur = e.apparence.couleur.takeIf { e.apparence.sorte != SorteDIcone.AUCUNE },
@@ -127,7 +140,7 @@ class ModeleArticle(
     }
 
     companion object {
-        fun fabrique(stock: DepotStock, articleId: String?, tableauId: String?): ViewModelProvider.Factory =
-            viewModelFactory { initializer { ModeleArticle(stock, articleId, tableauId) } }
+        fun fabrique(stock: DepotStock, articleId: String?, tableauId: String?, code: String? = null): ViewModelProvider.Factory =
+            viewModelFactory { initializer { ModeleArticle(stock, articleId, tableauId, code) } }
     }
 }
